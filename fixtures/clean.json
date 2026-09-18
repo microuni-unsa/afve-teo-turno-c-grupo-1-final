@@ -1,0 +1,10 @@
+{
+  "description": "Coherent baseline: disjoint permit/deny coverage, every rule solely decisive somewhere.",
+  "expect": { "ids": [1, 2, 3], "status": "Accepted" },
+  "rules": [
+    "Permit where subject.role == medic && action.name == read",
+    "Deny where action.name == write && resource.sensitivity >= 4 && subject.clearance <= 2",
+    "Permit where environment.emergency == true && action.name == read"
+  ],
+  "schema": "schema-v1.json"
+}

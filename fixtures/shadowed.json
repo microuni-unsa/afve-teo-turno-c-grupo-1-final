@@ -1,0 +1,9 @@
+{
+  "description": "Narrow cardio permit fully covered by the broad medic permit.",
+  "expect": { "failedProperty": "P3", "ruleIds": [2, 1], "status": "Rejected" },
+  "rules": [
+    "Permit where subject.role == medic",
+    "Permit where subject.role == medic && subject.dept == cardio"
+  ],
+  "schema": "schema-v1.json"
+}

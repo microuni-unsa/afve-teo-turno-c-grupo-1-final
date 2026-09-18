@@ -1,0 +1,6 @@
+{
+  "description": "Clearance above max and below 2 is unsatisfiable.",
+  "expect": { "failedProperty": "P2", "ruleIds": [1], "status": "Rejected" },
+  "rules": ["Permit where subject.clearance > 5 && subject.clearance < 2"],
+  "schema": "schema-v1.json"
+}

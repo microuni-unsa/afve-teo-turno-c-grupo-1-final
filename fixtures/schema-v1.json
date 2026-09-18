@@ -1,0 +1,48 @@
+[
+  {
+    "family": "subject",
+    "name": "role",
+    "type": "Enum",
+    "values": ["medic", "nurse", "admin"]
+  },
+  {
+    "family": "subject",
+    "name": "dept",
+    "type": "Enum",
+    "values": ["cardio", "radio", "er"]
+  },
+  {
+    "family": "subject",
+    "name": "clearance",
+    "type": "BoundedInt",
+    "lo": 1,
+    "hi": 5
+  },
+  {
+    "family": "resource",
+    "name": "type",
+    "type": "Enum",
+    "values": ["record", "lab", "prescription"]
+  },
+  {
+    "family": "resource",
+    "name": "sensitivity",
+    "type": "BoundedInt",
+    "lo": 1,
+    "hi": 5
+  },
+  {
+    "family": "action",
+    "name": "name",
+    "type": "Enum",
+    "values": ["read", "write"]
+  },
+  {
+    "family": "environment",
+    "name": "hour",
+    "type": "BoundedInt",
+    "lo": 0,
+    "hi": 23
+  },
+  { "family": "environment", "name": "emergency", "type": "Bool" }
+]

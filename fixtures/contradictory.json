@@ -1,0 +1,9 @@
+{
+  "description": "Permit and Deny with identical targets overlap on every medic read.",
+  "expect": { "failedProperty": "P1", "ruleIds": [1, 2], "status": "Rejected" },
+  "rules": [
+    "Permit where subject.role == medic && action.name == read",
+    "Deny where subject.role == medic && action.name == read"
+  ],
+  "schema": "schema-v1.json"
+}

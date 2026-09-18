@@ -1,0 +1,40 @@
+{
+  "name": "@grupo1/abac-verifier",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "dafny/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun run build:dafny && bun run build:ts",
+    "build:dafny": "dafny build --target js dafny/Schema.dfy dafny/Syntax.dfy dafny/Eval.dfy dafny/Coherence.dfy dafny/Transition.dfy --output dist/verifier.js --no-verify && rm -f dist/verifier-js.dtr && mv dist/verifier.js dist/verifier.cjs && printf '\\n// Appended by build:dafny: expose file-local Dafny modules to the TS wrappers.\\nmodule.exports = { _dafny, Schema, Syntax, Eval, Coherence, Transition };\\n' >> dist/verifier.cjs",
+    "build:ts": "tsc -p tsconfig.build.json",
+    "check": "biome check",
+    "test": "bun test --timeout 120000"
+  },
+  "dependencies": {
+    "bignumber.js": "^11.1.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.1",
+    "typescript": "^5.9.3"
+  },
+  "imports": {
+    "#src/*.js": {
+      "types": "./src/*.ts",
+      "bun": "./src/*.ts",
+      "default": "./dist/*.js"
+    },
+    "#src/*": {
+      "types": "./src/*",
+      "bun": "./src/*",
+      "default": "./dist/*"
+    }
+  }
+}

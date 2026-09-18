@@ -1,0 +1,9 @@
+{
+  "description": "PIP-grounded scenario: emergency override permit vs after-hours deny.",
+  "expect": { "failedProperty": "P1", "ruleIds": [1, 2], "status": "Rejected" },
+  "rules": [
+    "Permit where environment.emergency == true",
+    "Deny where environment.hour >= 18"
+  ],
+  "schema": "schema-v1.json"
+}

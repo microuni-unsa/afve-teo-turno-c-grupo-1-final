@@ -1,0 +1,24 @@
+name: verify
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v18
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+      - uses: oven-sh/setup-bun@v2
+      - name: Toolchain versions
+        run: nix develop --command sh -c 'dafny --version && bun --version'
+      - name: Dafny verify
+        run: nix develop --command dafny verify dafny/Schema.dfy dafny/Syntax.dfy dafny/Eval.dfy dafny/Coherence.dfy dafny/Transition.dfy dafny/BoundedCheck.dfy
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bunx tsc --noEmit
+      - name: Build
+        run: bun run build
+      - name: Pack check
+        run: bun pm pack
