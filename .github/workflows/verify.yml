@@ -19,6 +19,6 @@ jobs:
       - name: Typecheck
         run: bunx tsc --noEmit
       - name: Build
-        run: bun run build
+        run: nix develop --command bun run build
       - name: Pack check
         run: bun pm pack
