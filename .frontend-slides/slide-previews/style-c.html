@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de Coherencia ABAC - Swiss Modern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stage-bg: #E5E7EB;
+            --slide-bg: #FFFFFF;
+            --text-black: #0F172A;
+            --text-muted: #64748B;
+            --swiss-red: #E11D48;
+            --border-crisp: #0F172A;
+            --border-subtle: #E2E8F0;
+            --panel-gray: #F8FAFC;
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           =========================================== */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+            font-family: var(--font-display);
+            color: var(--text-black);
+        }
+
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        @media print {
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* ===========================================
+           STYLE C: SWISS MODERN / ACADEMIC CLEAN
+           =========================================== */
+        .slide-swiss {
+            position: relative;
+            background: var(--slide-bg);
+            padding: 80px 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .swiss-top {
+            display: grid;
+            grid-template-columns: 240px 1fr auto;
+            align-items: center;
+            border-bottom: 2px solid var(--border-crisp);
+            padding-bottom: 24px;
+        }
+
+        .swiss-tag {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--swiss-red);
+        }
+
+        .swiss-subtag {
+            font-size: 15px;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .swiss-num {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .swiss-content {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 80px;
+            align-items: center;
+            margin: auto 0;
+        }
+
+        .title-swiss {
+            font-size: 92px;
+            font-weight: 800;
+            line-height: 1.02;
+            letter-spacing: -0.04em;
+            color: var(--text-black);
+            margin-bottom: 32px;
+        }
+
+        .title-swiss span {
+            color: var(--swiss-red);
+        }
+
+        .subtitle-swiss {
+            font-size: 30px;
+            line-height: 1.45;
+            color: #334155;
+            font-weight: 400;
+            max-width: 900px;
+        }
+
+        .subtitle-swiss strong {
+            font-weight: 700;
+            color: var(--text-black);
+        }
+
+        .swiss-spec-panel {
+            background: var(--panel-gray);
+            border-left: 4px solid var(--swiss-red);
+            padding: 40px;
+            border-radius: 4px;
+        }
+
+        .panel-label {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--swiss-red);
+            margin-bottom: 20px;
+        }
+
+        .panel-row {
+            margin-bottom: 18px;
+        }
+
+        .panel-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .panel-row .k {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .panel-row .v {
+            font-family: var(--font-mono);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-black);
+        }
+
+        .swiss-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 24px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide.active .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.35s; }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+            <section class="slide slide-swiss active">
+                <div class="swiss-top reveal delay-1">
+                    <div class="swiss-tag">AFVE 2026-B</div>
+                    <div class="swiss-subtag">Turno C · Grupo 1 · Proyecto Final</div>
+                    <div class="swiss-num">01 / 06</div>
+                </div>
+
+                <div class="swiss-content">
+                    <div>
+                        <h1 class="title-swiss reveal delay-2">Verificador de Coherencia <span>ABAC</span></h1>
+                        <p class="subtitle-swiss reveal delay-3">
+                            Estudio de <strong>Tipos de Datos</strong>, <strong>Estructuras Compuestas</strong> e <strong>Invariantes Formales</strong> para control de acceso basado en atributos.
+                        </p>
+                    </div>
+
+                    <div class="swiss-spec-panel reveal delay-3">
+                        <div class="panel-label">ESPECIFICACIÓN DEL PROYECTO</div>
+                        <div class="panel-row">
+                            <div class="k">Paquete npm</div>
+                            <div class="v">@grupo1/abac-verifier</div>
+                        </div>
+                        <div class="panel-row">
+                            <div class="k">Motor Formal</div>
+                            <div class="v">Dafny 4 (SMT / Z3)</div>
+                        </div>
+                        <div class="panel-row">
+                            <div class="k">Propiedades Clave</div>
+                            <div class="v">Consistencia · No-sombreamiento</div>
+                        </div>
+                        <div class="panel-row">
+                            <div class="k">Garantía Central</div>
+                            <div class="v">Invariante Inductivo de Estado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="swiss-bottom reveal delay-3">
+                    <div>ARQUITECTURA DE SOFTWARE FORMALMENTE VERIFICADO</div>
+                    <div>UNIVERSIDAD NACIONAL DE COLOMBIA / AFVE</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function setupStageScale() {
+            const stage = document.getElementById('deckStage');
+            const scale = () => {
+                const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                const x = (window.innerWidth - 1920 * factor) / 2;
+                const y = (window.innerHeight - 1080 * factor) / 2;
+                stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+            };
+            window.addEventListener('resize', scale);
+            scale();
+        }
+        setupStageScale();
+    </script>
+</body>
+</html>

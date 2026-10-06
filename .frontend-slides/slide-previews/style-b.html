@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de Coherencia ABAC - Cobalt Grid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stage-bg: #111422;
+            --slide-bg: #F0EBDE;
+            --paper-2: #E6E0CE;
+            --ink: #1F2BE0;
+            --ink-soft: #5560E5;
+            --ink-dim: rgba(31, 43, 224, 0.12);
+            --ink-line: rgba(31, 43, 224, 0.28);
+            --text-dark: #1F2BE0;
+            --font-serif: 'Newsreader', serif;
+            --font-sans: 'Hanken Grotesk', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           =========================================== */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+        }
+
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        @media print {
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* ===========================================
+           STYLE B: COBALT GRID TITLE SLIDE
+           =========================================== */
+        .slide-cobalt {
+            position: relative;
+            background: var(--slide-bg);
+            padding: 72px 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 10% Graph Paper Grid */
+        .slide-cobalt::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(31, 43, 224, 0.09) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(31, 43, 224, 0.09) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        /* Top & Bottom Hairline Frames */
+        .slide-cobalt::after {
+            content: "";
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            top: 48px;
+            height: 1.5px;
+            background: var(--ink);
+            pointer-events: none;
+        }
+
+        .bottom-hairline {
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            bottom: 48px;
+            height: 1.5px;
+            background: var(--ink);
+            pointer-events: none;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink);
+            z-index: 2;
+            padding-top: 12px;
+        }
+
+        .header-tag {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-bullet {
+            width: 8px;
+            height: 8px;
+            background: var(--ink);
+        }
+
+        .hero-block {
+            z-index: 2;
+            max-width: 1500px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 60px;
+            align-items: end;
+        }
+
+        .kicker {
+            font-family: var(--font-mono);
+            font-size: 16px;
+            color: var(--ink-soft);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .title-serif {
+            font-family: var(--font-serif);
+            font-size: 96px;
+            font-weight: 400;
+            line-height: 1.02;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin-bottom: 32px;
+        }
+
+        .subtitle-desc {
+            font-family: var(--font-sans);
+            font-size: 28px;
+            line-height: 1.45;
+            color: rgba(31, 43, 224, 0.85);
+            max-width: 1050px;
+        }
+
+        .subtitle-desc strong {
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        /* Decorative pixel glitch card */
+        .risograph-card {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 32px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .risograph-card .card-title {
+            font-weight: 700;
+            border-bottom: 1.5px solid var(--ink);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .spec-item span:first-child {
+            color: var(--ink-soft);
+        }
+
+        .footer-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--ink);
+            z-index: 2;
+            padding-bottom: 12px;
+        }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide.active .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.25s; }
+        .delay-3 { transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+            <section class="slide slide-cobalt active">
+                <div class="header-meta reveal delay-1">
+                    <div class="header-tag">
+                        <span class="header-bullet"></span>
+                        AFVE · TURNO C · GRUPO 1
+                    </div>
+                    <div>DOC-REF // 2026-B.FINAL</div>
+                </div>
+
+                <div class="hero-block">
+                    <div>
+                        <div class="kicker reveal delay-1">ESPECIFICACIÓN FORMAL // AFVE</div>
+                        <h1 class="title-serif reveal delay-2">Verificador de Coherencia ABAC</h1>
+                        <p class="subtitle-desc reveal delay-3">
+                            Catálogo sistemático de <strong>Tipos de Datos</strong>, <strong>Estructuras Compuestas</strong> y propiedades <strong>Invariantes</strong> formalizadas en Dafny.
+                        </p>
+                    </div>
+
+                    <div class="risograph-card reveal delay-3">
+                        <div class="card-title">PAQUETE TÉCNICO</div>
+                        <div class="spec-item">
+                            <span>Módulo:</span>
+                            <span>@grupo1/abac-verifier</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Motor:</span>
+                            <span>Dafny 4.x SMT</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Consumo:</span>
+                            <span>TypeScript FFI</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Garantía:</span>
+                            <span>P1 · P2 · P3 · P4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-meta reveal delay-3">
+                    <div>ESPECIFICACIÓN FORMAL & MODEL CHECKING</div>
+                    <div>SLIDE [ 01 / 06 ]</div>
+                </div>
+
+                <div class="bottom-hairline"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function setupStageScale() {
+            const stage = document.getElementById('deckStage');
+            const scale = () => {
+                const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                const x = (window.innerWidth - 1920 * factor) / 2;
+                const y = (window.innerHeight - 1080 * factor) / 2;
+                stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+            };
+            window.addEventListener('resize', scale);
+            scale();
+        }
+        setupStageScale();
+    </script>
+</body>
+</html>
