@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de Coherencia ABAC - Presentación Final Grupo 1</title>
+
+    <!-- Google Fonts: Newsreader (Serif), Hanken Grotesk (Sans), DM Mono (Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           1. CSS CUSTOM PROPERTIES (COBALT GRID THEME)
+           =========================================== */
+        :root {
+            --stage-bg: #141724;
+            --slide-bg: #F0EBDE;
+            --paper: #F0EBDE;
+            --paper-2: #E6E0CE;
+            --ink: #1F2BE0;
+            --ink-soft: #5560E5;
+            --ink-dim: rgba(31, 43, 224, 0.08);
+            --ink-faint: rgba(31, 43, 224, 0.18);
+            --ink-line: rgba(31, 43, 224, 0.32);
+            --grid-line: rgba(31, 43, 224, 0.10);
+
+            --font-serif: 'Newsreader', Georgia, serif;
+            --font-sans: 'Hanken Grotesk', -apple-system, sans-serif;
+            --font-mono: 'DM Mono', monospace;
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.65s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           =========================================== */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+            font-family: var(--font-sans);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        /* Permanent Graph-Paper Grid (Cobalt Grid signature) */
+        .deck-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 38px 38px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: transparent;
+            z-index: 2;
+            padding: 70px 100px;
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 3;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Hairline framing rules on each slide */
+        .hairline-top {
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            top: 48px;
+            height: 1.5px;
+            background: var(--ink);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hairline-bottom {
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            bottom: 48px;
+            height: 1.5px;
+            background: var(--ink);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Persistent Chrome Elements */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 16px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink);
+            padding-top: 4px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .slide-header .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .slide-header .square-tag {
+            width: 8px;
+            height: 8px;
+            background: var(--ink);
+            display: inline-block;
+        }
+
+        .slide-header .meta-tag {
+            color: var(--ink-soft);
+        }
+
+        .slide-footer {
+            position: absolute;
+            left: 100px;
+            right: 100px;
+            bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            color: var(--ink);
+            letter-spacing: 0.06em;
+            z-index: 10;
+        }
+
+        .slide-footer .hint {
+            opacity: 0.55;
+            font-size: 13.5px;
+        }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal,
+        .slide.active .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.08s; }
+        .delay-2 { transition-delay: 0.18s; }
+        .delay-3 { transition-delay: 0.28s; }
+        .delay-4 { transition-delay: 0.38s; }
+        .delay-5 { transition-delay: 0.48s; }
+
+        /* ===========================================
+           TYPOGRAPHY & UTILITIES
+           =========================================== */
+        .kicker {
+            font-family: var(--font-mono);
+            font-size: 17px;
+            color: var(--ink-soft);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .kicker::after {
+            content: "";
+            display: inline-block;
+            width: 50px;
+            height: 1.5px;
+            background: var(--ink-line);
+        }
+
+        .slide-title {
+            font-family: var(--font-serif);
+            font-size: 68px;
+            font-weight: 400;
+            line-height: 1.04;
+            letter-spacing: -0.025em;
+            color: var(--ink);
+            margin-bottom: 16px;
+        }
+
+        .slide-lede {
+            font-size: 26px;
+            line-height: 1.48;
+            color: var(--ink);
+            opacity: 0.92;
+            max-width: 1450px;
+            margin-bottom: 34px;
+            font-weight: 400;
+        }
+
+        .slide-lede strong {
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        /* ===========================================
+           DECK CONTROLS & EDIT UI
+           =========================================== */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 18px;
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            border-radius: 4px;
+            z-index: 1000;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .ctrl-btn {
+            background: transparent;
+            border: 1px solid var(--ink-line);
+            color: var(--ink);
+            padding: 4px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .counter-badge {
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: 0.05em;
+        }
+
+        .edit-badge {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            color: var(--ink);
+            padding: 6px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            border-radius: 3px;
+        }
+
+        .edit-mode .edit-badge {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Print media */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            html, body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: var(--paper) !important;
+            }
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: var(--paper) !important;
+            }
+            .deck-stage {
+                position: static;
+                width: 1920px;
+                height: auto;
+                transform: none !important;
+                background: var(--paper) !important;
+            }
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+                background: var(--paper) !important;
+                background-image:
+                    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px) !important;
+                background-size: 38px 38px !important;
+            }
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+            @page {
+                size: 1920px 1080px;
+                margin: 0;
+            }
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+            .deck-controls, .edit-badge {
+                display: none !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* ===========================================
+           SLIDE 1: PORTADA (COVER)
+           =========================================== */
+        .cover-container {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 70px;
+            align-items: center;
+            height: calc(1080px - 220px);
+            margin-top: 10px;
+        }
+
+        .cover-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cover-headline {
+            font-family: var(--font-serif);
+            font-size: 96px;
+            font-weight: 400;
+            line-height: 0.96;
+            letter-spacing: -0.035em;
+            color: var(--ink);
+            margin-bottom: 30px;
+        }
+
+        .cover-desc {
+            font-family: var(--font-sans);
+            font-size: 29px;
+            line-height: 1.48;
+            color: var(--ink);
+            max-width: 1150px;
+            margin-bottom: 40px;
+        }
+
+        .cover-meta-grid {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            border-top: 1.5px solid var(--ink);
+            padding-top: 28px;
+        }
+
+        .cover-meta-item {
+            font-family: var(--font-mono);
+        }
+
+        .cover-meta-item .label {
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+            font-size: 13.5px;
+        }
+
+        .cover-meta-item .val {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .risograph-panel {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 38px;
+            position: relative;
+        }
+
+        .panel-header-tag {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid var(--ink);
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .qr-deco {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            width: 76px;
+            height: 76px;
+            margin-bottom: 24px;
+            background: var(--paper);
+            padding: 5px;
+            border: 1.5px solid var(--ink);
+        }
+
+        .qr-cell {
+            background: var(--grid-line);
+        }
+        .qr-cell.on {
+            background: var(--ink);
+        }
+
+        .spec-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-family: var(--font-mono);
+            font-size: 14.5px;
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--ink-faint);
+            padding-bottom: 10px;
+        }
+
+        .spec-row span:first-child {
+            color: var(--ink-soft);
+        }
+
+        .spec-row span:last-child {
+            font-weight: 600;
+        }
+
+        /* ===========================================
+           SLIDE 2: TIPOS DE DATOS PRIMITIVOS
+           =========================================== */
+        .tri-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 36px;
+            margin-top: 6px;
+        }
+
+        .card-box {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 36px 34px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 560px;
+            position: relative;
+        }
+
+        .card-num {
+            font-family: var(--font-serif);
+            font-size: 56px;
+            line-height: 1;
+            color: var(--ink);
+            margin-bottom: 14px;
+        }
+
+        .card-name {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--ink);
+            margin-bottom: 14px;
+        }
+
+        .card-desc {
+            font-size: 19.5px;
+            line-height: 1.55;
+            color: var(--ink);
+            margin-bottom: 22px;
+            flex-grow: 1;
+        }
+
+        .card-example {
+            background: var(--paper);
+            border: 1px solid var(--ink-line);
+            padding: 20px 22px;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--ink);
+        }
+
+        .card-example .code-comment {
+            color: var(--ink-soft);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+        }
+
+        .bottom-banner {
+            margin-top: 32px;
+            border-top: 1.5px solid var(--ink);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 16px;
+            letter-spacing: 0.04em;
+        }
+
+        /* ===========================================
+           SLIDE 3: TIPOS DE DATOS COMPUESTOS
+           =========================================== */
+        .quad-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 6px;
+        }
+
+        .quad-box {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 28px 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px;
+            align-items: center;
+            min-height: 255px;
+        }
+
+        .quad-title {
+            font-family: var(--font-serif);
+            font-size: 30px;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }
+
+        .quad-text {
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--ink);
+        }
+
+        .quad-code {
+            background: var(--paper);
+            border: 1px solid var(--ink-line);
+            padding: 18px 20px;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            line-height: 1.55;
+            color: var(--ink);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* ===========================================
+           SLIDE 4: INVARIANTES ESTRUCTURALES
+           =========================================== */
+        .ledger-table {
+            border: 1.5px solid var(--ink);
+            background: var(--paper-2);
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .ledger-header {
+            display: grid;
+            grid-template-columns: 280px 1.4fr 1.6fr 160px;
+            border-bottom: 1.5px solid var(--ink);
+            padding: 18px 28px;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--paper);
+        }
+
+        .ledger-item {
+            display: grid;
+            grid-template-columns: 280px 1.4fr 1.6fr 160px;
+            padding: 28px 28px;
+            border-bottom: 1px solid var(--ink-faint);
+            align-items: center;
+            font-size: 18px;
+            line-height: 1.45;
+        }
+
+        .ledger-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-weight: 500;
+        }
+
+        .item-cond {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            color: var(--ink);
+            padding-right: 20px;
+        }
+
+        .item-desc {
+            font-size: 18px;
+            padding-right: 20px;
+        }
+
+        .item-tag {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            text-align: right;
+            letter-spacing: 0.05em;
+            color: var(--ink-soft);
+        }
+
+        .caps-strip {
+            margin-top: 32px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .cap-card {
+            border: 1.5px solid var(--ink-line);
+            background: var(--paper);
+            padding: 16px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: var(--font-mono);
+        }
+
+        .cap-card .cap-label {
+            font-size: 13px;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .cap-card strong {
+            color: var(--ink);
+            font-size: 16px;
+            line-height: 1.25;
+        }
+
+        .cap-card .cap-desc {
+            font-family: var(--font-sans);
+            font-size: 14.5px;
+            line-height: 1.35;
+            color: var(--ink);
+            opacity: 0.9;
+        }
+
+        /* ===========================================
+           SLIDE 5: INVARIANTES DE COHERENCIA Y ESTADO
+           =========================================== */
+        .coherence-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 40px;
+            margin-top: 6px;
+        }
+
+        .p-cards-col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .p-card {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 70px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .p-badge {
+            font-family: var(--font-serif);
+            font-size: 38px;
+            color: var(--ink);
+            border-right: 1.5px solid var(--ink);
+            padding-right: 16px;
+            line-height: 1;
+        }
+
+        .p-body h4 {
+            font-family: var(--font-mono);
+            font-size: 16.5px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+        }
+
+        .p-body p {
+            font-size: 17px;
+            line-height: 1.42;
+        }
+
+        .transition-panel {
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            padding: 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .trans-header {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid var(--ink);
+            padding-bottom: 12px;
+            margin-bottom: 22px;
+        }
+
+        .trans-thesis {
+            font-family: var(--font-serif);
+            font-size: 30px;
+            line-height: 1.25;
+            color: var(--ink);
+            margin-bottom: 22px;
+        }
+
+        .state-flow {
+            background: var(--paper);
+            border: 1px solid var(--ink-line);
+            padding: 22px;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            line-height: 1.75;
+            margin-bottom: 22px;
+        }
+
+        .lemma-list {
+            font-family: var(--font-mono);
+            font-size: 14.5px;
+            color: var(--ink-soft);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* ===========================================
+           SLIDE 6: CIERRE (GRACIAS)
+           =========================================== */
+        .closing-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: calc(1080px - 220px);
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .huge-gracias {
+            font-family: var(--font-serif);
+            font-size: 195px;
+            font-weight: 400;
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            color: var(--ink);
+            margin-bottom: 30px;
+        }
+
+        .closing-sub {
+            font-size: 34px;
+            line-height: 1.45;
+            color: var(--ink);
+            max-width: 1100px;
+            margin-bottom: 50px;
+        }
+
+        .closing-details {
+            display: flex;
+            gap: 48px;
+            padding: 24px 56px;
+            background: var(--paper-2);
+            border: 1.5px solid var(--ink);
+            font-family: var(--font-mono);
+            font-size: 17px;
+        }
+
+        .detail-item span:first-child {
+            color: var(--ink-soft);
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <!-- Edit Mode Indicator -->
+        <div class="edit-badge" id="editBadge">MODO EDICIÓN ACTIVO · CTRL+S PARA GUARDAR</div>
+
+        <main class="deck-stage" id="deckStage">
+
+            <!-- ========================================================
+                 SLIDE 1: PORTADA
+                 ======================================================== -->
+            <section class="slide active" id="slide-1">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        AFVE · TURNO C · GRUPO 1
+                    </div>
+                    <div class="meta-tag">INFORME TÉCNICO // ESPECIFICACIÓN FORMAL</div>
+                </div>
+
+                <div class="cover-container">
+                    <div class="cover-left">
+                        <div class="kicker reveal delay-1">ARQUITECTURA DE SOFTWARE FORMALMENTE VERIFICADO</div>
+                        <h1 class="cover-headline reveal delay-2">Verificador de Coherencia ABAC</h1>
+                        <p class="cover-desc reveal delay-3">
+                            Catálogo sistemático de <strong>Tipos de Datos</strong>, <strong>Estructuras Compuestas</strong> e <strong>Invariantes Formales</strong> en el paquete <code>@grupo1/abac-verifier</code>.
+                        </p>
+                        <div class="cover-meta-grid reveal delay-4">
+                            <div class="cover-meta-item">
+                                <div class="label">Motor Central</div>
+                                <div class="val">Dafny 4 (SMT / Z3)</div>
+                            </div>
+                            <div class="cover-meta-item">
+                                <div class="label">Capa de Frontera</div>
+                                <div class="val">TypeScript Strict FFI</div>
+                            </div>
+                            <div class="cover-meta-item">
+                                <div class="label">Garantía Central</div>
+                                <div class="val">Invariante Inductivo</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="risograph-panel reveal delay-3">
+                        <div class="panel-header-tag">
+                            <span>INTEGRANTES</span>
+                            <span>GRUPO 1</span>
+                        </div>
+                        <div class="qr-deco">
+                            <div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div>
+                            <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                            <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                            <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                            <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                            <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                            <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                            <div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell on"></div>
+                        </div>
+                        <div class="spec-list">
+                            <div class="spec-row">
+                                <span>01</span>
+                                <span>Jara Mamani, Mariel Alisson</span>
+                            </div>
+                            <div class="spec-row">
+                                <span>02</span>
+                                <span>Mestas Zegarra, Christian Raúl</span>
+                            </div>
+                            <div class="spec-row">
+                                <span>03</span>
+                                <span>Noa Camino, Yenaro Joel</span>
+                            </div>
+                            <div class="spec-row">
+                                <span>04</span>
+                                <span>Sequeiros Condori, Luis Gustavo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>ESPECIFICACIÓN FORMAL Y MODEL CHECKING</div>
+                    <div class="hint">Navegación: [←] / [→] · [E] Modo Edición</div>
+                    <div>SLIDE [ 01 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 2: TIPOS DE DATOS PRIMITIVOS Y BASE
+                 ======================================================== -->
+            <section class="slide" id="slide-2">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        PREGUNTA 1 // TIPOS DE DATOS DEL PROYECTO
+                    </div>
+                    <div class="meta-tag">MODELO FORMAL DE ATRIBUTOS (PIP)</div>
+                </div>
+
+                <div class="kicker reveal delay-1">01 // TIPOS PRIMITIVOS Y DATATYPES ESCALARES</div>
+                <h2 class="slide-title reveal delay-2">Tipos de Datos Primitivos y Base</h2>
+                <p class="slide-lede reveal delay-2">
+                    Para garantizar <strong>decidibilidad automática en SMT (Z3)</strong>, el sistema restringe los atributos a tipos escalares finitos y datatypes algebraicos en Dafny:
+                </p>
+
+                <div class="tri-grid reveal delay-3">
+                    <!-- Columna 1: BoundedInt -->
+                    <div class="card-box">
+                        <div>
+                            <div class="card-num">01</div>
+                            <h3 class="card-name">BoundedInt (Enteros)</h3>
+                            <p class="card-desc">
+                                Entero acotado a un intervalo cerrado finito <code>[lo, hi]</code>. Evita la no-terminación y mantiene la aritmética lineal en dominios seguros.
+                            </p>
+                        </div>
+                        <div class="card-example">
+                            <span class="code-comment">// Ejemplo en el esquema v1:</span>
+                            clearance: BoundedInt (1..5)<br>
+                            hour: BoundedInt (0..23)<br>
+                            sensitivity: BoundedInt (1..5)
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Enum -->
+                    <div class="card-box">
+                        <div>
+                            <div class="card-num">02</div>
+                            <h3 class="card-name">Enum (Enumeraciones)</h3>
+                            <p class="card-desc">
+                                Conjunto finito y explícito de cadenas de texto (<code>seq&lt;string&gt;</code>) con cota estricta <code>0 &lt; |valores| ≤ 16</code>.
+                            </p>
+                        </div>
+                        <div class="card-example">
+                            <span class="code-comment">// Ejemplo en el esquema v1:</span>
+                            role ∈ {medic, nurse, admin}<br>
+                            dept ∈ {cardio, radio, er}<br>
+                            action ∈ {read, write}
+                        </div>
+                    </div>
+
+                    <!-- Columna 3: Bool & Datatypes Base -->
+                    <div class="card-box">
+                        <div>
+                            <div class="card-num">03</div>
+                            <h3 class="card-name">Bool y Datatypes Base</h3>
+                            <p class="card-desc">
+                                Booleanos puros y uniones discriminadas (datatypes) que modelan efectos de autorización y valores universales.
+                            </p>
+                        </div>
+                        <div class="card-example">
+                            <span class="code-comment">// Ejemplo en Dafny:</span>
+                            emergency: Bool (true | false)<br>
+                            datatype Effect = Permit | Deny<br>
+                            datatype Opt&lt;T&gt; = None | Some(v)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-banner reveal delay-4">
+                    <div>PRINCIPIO: Sin cadenas arbitrarias ni aritmética no lineal dentro del núcleo de verificación.</div>
+                    <div>SECCIÓN [ 02 / 06 ]</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // DATOS ESCALARES</div>
+                    <div>SLIDE [ 02 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 3: TIPOS DE DATOS COMPUESTOS
+                 ======================================================== -->
+            <section class="slide" id="slide-3">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        PREGUNTA 2 // PARTE 1: ESTRUCTURAS COMPUESTAS
+                    </div>
+                    <div class="meta-tag">SINTAXIS Y MODELO DE POLÍTICA</div>
+                </div>
+
+                <div class="kicker reveal delay-1">02 // ESTRUCTURAS DE DATOS COMPUESTAS</div>
+                <h2 class="slide-title reveal delay-2">Tipos de Datos Compuestos</h2>
+                <p class="slide-lede reveal delay-2">
+                    Estructuras algebraicas recursivas y colecciones que representan el <strong>AST de predicados</strong>, el <strong>conjunto de reglas</strong> y las <strong>peticiones</strong>:
+                </p>
+
+                <div class="quad-grid reveal delay-3">
+                    <!-- 1. Pred (AST) -->
+                    <div class="quad-box">
+                        <div>
+                            <h3 class="quad-title">Pred (AST de Predicados)</h3>
+                            <p class="quad-text">
+                                Datatype recursivo inductivo que construye árboles lógicos con átomos de comparación, negación, conjunción y disyunción.
+                            </p>
+                        </div>
+                        <div class="quad-code">
+                            datatype Pred =<br>
+                            &nbsp;| Atom(family, attr, op, lit, num)<br>
+                            &nbsp;| Not(p: Pred)<br>
+                            &nbsp;| And(a: Pred, b: Pred)<br>
+                            &nbsp;| Or(a: Pred, b: Pred)
+                        </div>
+                    </div>
+
+                    <!-- 2. Rule & Ruleset -->
+                    <div class="quad-box">
+                        <div>
+                            <h3 class="quad-title">Rule y Ruleset</h3>
+                            <p class="quad-text">
+                                Regla compuesta por un identificador numérico, su efecto y su predicado objetivo; un <code>Ruleset</code> es una secuencia <code>seq&lt;Rule&gt;</code>.
+                            </p>
+                        </div>
+                        <div class="quad-code">
+                            datatype Rule =<br>
+                            &nbsp;Rule(id: int, effect: Effect, target: Pred)<br><br>
+                            type Ruleset = seq&lt;Rule&gt;<br>
+                            <span style="color:var(--ink-soft);">// Ej: Rule(1, Permit, role == "medic")</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. AttrDecl & Schema -->
+                    <div class="quad-box">
+                        <div>
+                            <h3 class="quad-title">AttrDecl y Schema</h3>
+                            <p class="quad-text">
+                                Contrato de atributos PIP. Cada declaración fija familia, nombre, tipo y dominio; el esquema es la secuencia <code>seq&lt;AttrDecl&gt;</code>.
+                            </p>
+                        </div>
+                        <div class="quad-code">
+                            datatype AttrDecl = AttrDecl(<br>
+                            &nbsp;family: string, name: string,<br>
+                            &nbsp;attrType: AttrType,<br>
+                            &nbsp;enumVals: seq&lt;string&gt;,<br>
+                            &nbsp;lo: int, hi: int)<br>
+                            type Schema = seq&lt;AttrDecl&gt;
+                        </div>
+                    </div>
+
+                    <!-- 4. Request, Witness y AddResult -->
+                    <div class="quad-box">
+                        <div>
+                            <h3 class="quad-title">Request, Witness y AddResult</h3>
+                            <p class="quad-text">
+                                Petición posicional <code>seq&lt;Value&gt;</code>, testigos de contraejemplo para fallos de coherencia y tipos suma para resultados seguros.
+                            </p>
+                        </div>
+                        <div class="quad-code">
+                            type Request = seq&lt;Value&gt;<br>
+                            datatype Witness = Witness(<br>
+                            &nbsp;req, ruleIds, failedProperty, expl)<br>
+                            datatype AddResult =<br>
+                            &nbsp;Accepted(Ruleset) | Rejected(Witness)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-banner reveal delay-4">
+                    <div>PRINCIPIO: Representación inductiva en Dafny con recursión estructural pura sobre el AST.</div>
+                    <div>SECCIÓN [ 03 / 06 ]</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // ESTRUCTURAS COMPUESTAS</div>
+                    <div>SLIDE [ 03 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 4: INVARIANTES ESTRUCTURALES Y DE BIEN FORMACIÓN
+                 ======================================================== -->
+            <section class="slide" id="slide-4">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        PREGUNTA 2 // PARTE 2: INVARIANTES DE BIEN FORMACIÓN
+                    </div>
+                    <div class="meta-tag">CONDICIONES PREVIAS Y CAPS</div>
+                </div>
+
+                <div class="kicker reveal delay-1">03 // INVARIANTES, PRECONDICIONES Y POSTCONDICIONES</div>
+                <h2 class="slide-title reveal delay-2">Invariantes Estructurales y Contratos</h2>
+                <p class="slide-lede reveal delay-2">
+                    Predicados de validez (<strong>invariantes</strong>) y cláusulas formales de contrato (<strong>requires / ensures</strong>) implementados en Dafny:
+                </p>
+
+                <div class="ledger-table reveal delay-3">
+                    <div class="ledger-header">
+                        <div>INVARIANTE / PREDICADO</div>
+                        <div>CONDICIÓN FORMAL EN CÓDIGO</div>
+                        <div>OBJETIVO Y GARANTÍA</div>
+                        <div>UBICACIÓN</div>
+                    </div>
+
+                    <div class="ledger-item">
+                        <div class="item-name">predicate SchemaWellFormed</div>
+                        <div class="item-cond">∀ d ∈ schema · ValidDecl(d) ∧ ∀ i &lt; j · DeclKey(s[i]) ≠ DeclKey(s[j])</div>
+                        <div class="item-desc">Unicidad de atributos por familia (<code>DeclKey</code>), no vacíos y cotas coherentes <code>lo ≤ hi</code>.</div>
+                        <div class="item-tag">Schema.dfy (l. 41)</div>
+                    </div>
+
+                    <div class="ledger-item">
+                        <div class="item-name">predicate ValidRule & ValidAtom</div>
+                        <div class="item-cond">LookupDecl(schema, a.attr).Some? ∧ ValidOp(a.op) ∧ a.lit ∈ enumVals</div>
+                        <div class="item-desc">Tipado estricto: toda regla usa atributos declarados con operadores y literales válidos (prohíbe <code>role &gt; 3</code>).</div>
+                        <div class="item-tag">Syntax.dfy (l. 37, 54)</div>
+                    </div>
+
+                    <div class="ledger-item">
+                        <div class="item-name">predicate ValidRequest</div>
+                        <div class="item-cond">|req| == |schema| ∧ ∀ i · ValueMatchesDecl(req[i], schema[i])</div>
+                        <div class="item-desc">Petición total por construcción; peticiones fuera de dominio se rechazan en la frontera TypeScript.</div>
+                        <div class="item-tag">Schema.dfy (l. 52)</div>
+                    </div>
+                </div>
+
+                <div class="caps-strip reveal delay-4">
+                    <div class="cap-card">
+                        <span class="cap-label">Precondición (requires)</span>
+                        <strong>requires SchemaWellFormed(schema)</strong>
+                        <p class="cap-desc">Exige atributos y tipos válidos antes de enumerar o evaluar peticiones.</p>
+                    </div>
+                    <div class="cap-card">
+                        <span class="cap-label">Precondición (requires)</span>
+                        <strong>requires ValidRequest(req, schema)</strong>
+                        <p class="cap-desc">Exige que la petición sea completa y pertenezca al dominio declarado.</p>
+                    </div>
+                    <div class="cap-card">
+                        <span class="cap-label">Postcondición (ensures)</span>
+                        <strong>ensures Coherent(RemoveById(R, id), schema)</strong>
+                        <p class="cap-desc">Garantiza formalmente que retirar una regla siempre preserva la coherencia.</p>
+                    </div>
+                </div>
+
+                <div class="bottom-banner reveal delay-4">
+                    <div>CONTRATOS FORMALES: Toda función y lema declara sus hipótesis (requires) y garantías verificadas (ensures).</div>
+                    <div>SECCIÓN [ 04 / 06 ]</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // INVARIANTES ESTRUCTURALES</div>
+                    <div>SLIDE [ 04 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 5: INVARIANTES DE COHERENCIA Y TRANSICIÓN
+                 ======================================================== -->
+            <section class="slide" id="slide-5">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        PREGUNTA 2 // PARTE 3: INVARIANTES DE COHERENCIA
+                    </div>
+                    <div class="meta-tag">PROPIEDADES P1..P4 Y PRESERVACIÓN</div>
+                </div>
+
+                <div class="kicker reveal delay-1">04 // PROPIEDADES P1..P4 Y PRESERVACIÓN INDUCTIVA</div>
+                <h2 class="slide-title reveal delay-2">Invariantes de Coherencia y Transición</h2>
+                <p class="slide-lede reveal delay-2">
+                    El verificador formaliza la conjunción <strong>Coherent(R, schema) ≡ P1 ∧ P2 ∧ P3 ∧ P4</strong> y demuestra su preservación inductiva:
+                </p>
+
+                <div class="coherence-grid reveal delay-3">
+                    <!-- Columna Izquierda: P1..P4 -->
+                    <div class="p-cards-col">
+                        <div class="p-card">
+                            <div class="p-badge">P1</div>
+                            <div class="p-body">
+                                <h4>P1 · Consistencia (No Contradicción)</h4>
+                                <p>Ninguna petición satisface simultáneamente una regla Permit y una Deny: <code>¬(PermitApplies ∧ DenyApplies)</code>.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-card">
+                            <div class="p-badge">P2</div>
+                            <div class="p-body">
+                                <h4>P2 · Satisfacibilidad de Reglas</h4>
+                                <p>Toda regla r debe activarse en al menos una petición: <code>∃ req · Applies(req, r)</code>. Prohíbe reglas vacías.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-card">
+                            <div class="p-badge">P3</div>
+                            <div class="p-body">
+                                <h4>P3 · No Sombreamiento (No Subsunción)</h4>
+                                <p>Cada regla decide en solitario al menos una petición. Ninguna regla está anulada o enmascarada por otra existente.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-card">
+                            <div class="p-badge">P4</div>
+                            <div class="p-body">
+                                <h4>P4 · Validez Tipográfica de Esquema</h4>
+                                <p>Todas las reglas cumplen <code>AllRulesValid(ruleset, schema)</code> tipadas estrictamente contra el PIP.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Invariante Inductivo -->
+                    <div class="transition-panel">
+                        <div>
+                            <div class="trans-header">INVARIANTE INDUCTIVO DE ESTADO</div>
+                            <div class="trans-thesis">
+                                Todo ruleset alcanzable mediante la API protegida es coherente por construcción.
+                            </div>
+                            <div class="state-flow">
+                                <strong>TryAdd(R, r)</strong> → Accepted(R') | Rejected(witness)<br>
+                                <strong>TryUpdate(R, id, r)</strong> → Accepted(R') | Rejected(witness)<br>
+                                <strong>TryRemove(R, id)</strong> → R' (Preserva coherencia)
+                            </div>
+                        </div>
+                        <div class="lemma-list">
+                            <div>✓ <strong>EmptyCoherent</strong>: Ruleset vacío es vacuamente coherente.</div>
+                            <div>✓ <strong>AddPreserves</strong>: Guarded Add rechaza violaciones con contraejemplo.</div>
+                            <div>✓ <strong>RemovePreservesCoherent</strong>: Probado por monotonía de subconjuntos.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-banner reveal delay-4">
+                    <div>VERIFICACIÓN: Lemas demostrados inductivamente sin axiomas no verificados en Dafny 4.</div>
+                    <div>SECCIÓN [ 05 / 06 ]</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // COHERENCIA INDUCTIVA</div>
+                    <div>SLIDE [ 05 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 6: CIERRE (GRACIAS)
+                 ======================================================== -->
+            <section class="slide" id="slide-6">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        AFVE · TURNO C · GRUPO 1
+                    </div>
+                    <div class="meta-tag">CIERRE // 2026-B FINAL</div>
+                </div>
+
+                <div class="closing-container">
+                    <div class="kicker reveal delay-1" style="justify-content:center;">VERIFICACIÓN FORMAL DE REGLAS DE ACCESO</div>
+                    <h1 class="huge-gracias reveal delay-2">¡Muchas Gracias!</h1>
+                    <p class="closing-sub reveal delay-3">
+                        Verificación formal de coherencia para políticas ABAC.<br>
+                        <strong>Dafny decide formalmente; TypeScript envuelve con seguridad.</strong>
+                    </p>
+
+                    <div class="closing-details reveal delay-4">
+                        <div class="detail-item">
+                            <span>Paquete:</span>
+                            <code>@grupo1/abac-verifier</code>
+                        </div>
+                        <div class="detail-item">
+                            <span>Garantía:</span>
+                            <span>P1 · P2 · P3 · P4 Coherent</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Integrantes:</span>
+                            <span>Jara · Mestas · Noa · Sequeiros</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>PREGUNTAS Y DISCUSIÓN TÉCNICA</div>
+                    <div>SLIDE [ 06 / 06 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Presentation Deck Controls -->
+    <nav class="deck-controls" aria-label="Controles de diapositivas">
+        <button class="ctrl-btn" id="prevBtn" title="Anterior (Flecha izquierda)">← Anterior</button>
+        <span class="counter-badge" id="slideCounter">1 / 6</span>
+        <button class="ctrl-btn" id="nextBtn" title="Siguiente (Flecha derecha o Espacio)">Siguiente →</button>
+        <button class="ctrl-btn" id="editToggleBtn" title="Alternar modo edición (E)">Editar [E]</button>
+    </nav>
+
+    <!-- Presentation Controller Script -->
+    <script>
+        class SlideDeckController {
+            constructor() {
+                this.slides = Array.from(document.querySelectorAll('.slide'));
+                this.current = 0;
+                this.total = this.slides.length;
+                this.stage = document.getElementById('deckStage');
+                this.counter = document.getElementById('slideCounter');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.editToggleBtn = document.getElementById('editToggleBtn');
+                this.isEditing = false;
+
+                this.initScale();
+                this.initEvents();
+                this.showSlide(0);
+            }
+
+            initScale() {
+                const resize = () => {
+                    const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                    const x = (window.innerWidth - 1920 * factor) / 2;
+                    const y = (window.innerHeight - 1080 * factor) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+                };
+                window.addEventListener('resize', resize);
+                resize();
+            }
+
+            showSlide(index) {
+                if (index < 0 || index >= this.total) return;
+
+                this.slides.forEach((s, idx) => {
+                    if (idx === index) {
+                        s.classList.add('active');
+                        // Trigger CSS reveal
+                        setTimeout(() => s.classList.add('visible'), 20);
+                    } else {
+                        s.classList.remove('active', 'visible');
+                    }
+                });
+
+                this.current = index;
+                this.counter.textContent = `${index + 1} / ${this.total}`;
+                this.prevBtn.disabled = index === 0;
+                this.nextBtn.disabled = index === this.total - 1;
+            }
+
+            next() {
+                if (this.current < this.total - 1) {
+                    this.showSlide(this.current + 1);
+                }
+            }
+
+            prev() {
+                if (this.current > 0) {
+                    this.showSlide(this.current - 1);
+                }
+            }
+
+            toggleEdit() {
+                this.isEditing = !this.isEditing;
+                document.body.classList.toggle('edit-mode', this.isEditing);
+                this.editToggleBtn.textContent = this.isEditing ? 'Salir Edición' : 'Editar [E]';
+
+                const editables = document.querySelectorAll('.slide-title, .slide-lede, .cover-headline, .cover-desc, .huge-gracias, .closing-sub, .card-name, .card-desc, .quad-title, .quad-text, .item-desc');
+                editables.forEach(el => {
+                    el.contentEditable = this.isEditing ? 'true' : 'false';
+                });
+            }
+
+            initEvents() {
+                this.prevBtn.addEventListener('click', () => this.prev());
+                this.nextBtn.addEventListener('click', () => this.next());
+                this.editToggleBtn.addEventListener('click', () => this.toggleEdit());
+
+                window.addEventListener('keydown', (e) => {
+                    if (this.isEditing && (e.target.isContentEditable || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+                        if (e.key === 'Escape') this.toggleEdit();
+                        return;
+                    }
+
+                    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                        e.preventDefault();
+                        this.prev();
+                    } else if (e.key === 'Home') {
+                        e.preventDefault();
+                        this.showSlide(0);
+                    } else if (e.key === 'End') {
+                        e.preventDefault();
+                        this.showSlide(this.total - 1);
+                    } else if (e.key.toLowerCase() === 'e') {
+                        e.preventDefault();
+                        this.toggleEdit();
+                    }
+                });
+
+                // Touch swipe support
+                let touchStartX = 0;
+                window.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                window.addEventListener('touchend', (e) => {
+                    const diff = e.changedTouches[0].screenX - touchStartX;
+                    if (Math.abs(diff) > 50) {
+                        if (diff < 0) this.next();
+                        else this.prev();
+                    }
+                }, { passive: true });
+            }
+        }
+
+        // Initialize presentation on load
+        window.addEventListener('DOMContentLoaded', () => {
+            window.presentation = new SlideDeckController();
+        });
+    </script>
+</body>
+</html>
