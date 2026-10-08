@@ -32,6 +32,8 @@
             nodejs
           ])
           (with unstable; [
+            typst
+            typstyle
           ])
         ];
         ldPkgs = with pkgs; [

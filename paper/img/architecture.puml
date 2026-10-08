@@ -1,0 +1,33 @@
+@startuml architecture
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam componentStyle rectangle
+
+package "Núcleo Dafny" {
+  [Esquema] as schema
+  [Sintaxis] as syntax
+  [Evaluación] as eval
+  [Coherencia P1-P4] as coherence
+  [Transición guardada] as transition
+  schema --> syntax
+  syntax --> eval
+  eval --> coherence
+  coherence --> transition
+}
+
+package "Envolturas TypeScript" {
+  [Carga de esquema] as load
+  [Analizador] as parser
+  [Adaptadores] as adapters
+  [Interfaz] as api
+  [Conjunto de reglas] as ruleset
+  load --> parser
+  parser --> adapters
+  adapters --> api
+  api --> ruleset : confirma\ncoherentes
+}
+
+transition ..> adapters : compila a JS
+@enduml
