@@ -63,7 +63,7 @@
   show raw: set text(
     font: "TeX Gyre Cursor",
     ligatures: false,
-    size: 1em / 0.8,
+    size: 7pt,
     spacing: 100%,
   )
 

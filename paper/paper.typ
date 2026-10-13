@@ -3,7 +3,6 @@
 #show: ieee.with(
   title: [Verificación formal de coherencia en políticas ABAC: un verificador en Dafny compilado a JavaScript con escalabilidad acotada],
   abstract: [
-    El control de acceso basado en atributos, conocido por sus siglas en inglés como ABAC por Attribute-Based Access Control, decide cada solicitud a partir de atributos de sujeto, recurso, acción y entorno. Los conjuntos de reglas ABAC escritos a mano son propensos a tres defectos silenciosos: contradicciones entre reglas de permiso y de denegación sobre la misma solicitud, reglas insatisfacibles que nunca se activan y reglas sombreadas que ninguna solicitud decide en solitario. Este trabajo propone un verificador de coherencia con núcleo formalmente verificado en Dafny. El predicado Coherent conjuga cuatro propiedades llamadas P1 a P4 que cubren consistencia, satisfacibilidad, no sombreado y validez de esquema, y la interfaz guardada solo confirma conjuntos de reglas coherentes y devuelve en caso contrario un testigo verificable por máquina con la solicitud, las reglas implicadas y la propiedad violada. La escalabilidad se garantiza por construcción acotada y decidible con dominios finitos por esquema, topes explícitos, recorridos por índice y decisiones exactas compiladas de Dafny a JavaScript sin reimplementación en TypeScript. Ni los veredictos sobre casos de estudio ni las mediciones de rendimiento forman parte de este entregable y quedan como trabajo futuro junto con la interfaz de demostración.
   ],
   index-terms: (
     "control de acceso basado en atributos",
@@ -124,7 +123,10 @@ El sistema se organiza en tres capas con una sola dirección de dependencia. La 
   image("img/architecture.png", width: 60%),
   caption: [Arquitectura del verificador: el núcleo Dafny compila a JavaScript y las envolturas TypeScript validan, adaptan y presentan sin reimplementar decisiones.],
 ) <fig:arquitectura>
+
 = Requerimientos funcionales <sec:requerimientos>
+
+Quedan fuera del alcance la persistencia más allá del almacenamiento local, las cuentas de usuario, los conectores de puntos de información de políticas en vivo, la aplicación y distribución de decisiones, las estrategias de resolución de conflictos donde toda superposición de permiso y denegación es error, y el historial o reversión de versiones. Los requerimientos funcionales que sí se abordan se resumen en la @tab:requerimientos, donde cada fila describe un requisito con su interfaz y comportamiento ante error.
 
 #figure(
   placement: auto,
@@ -149,7 +151,6 @@ El sistema se organiza en tres capas con una sola dirección de dependencia. La 
   caption: [Requerimientos funcionales del verificador con su interfaz y comportamiento ante error.],
 ) <tab:requerimientos>
 
-Quedan fuera del alcance la persistencia más allá del almacenamiento local, las cuentas de usuario, los conectores de puntos de información de políticas en vivo, la aplicación y distribución de decisiones, las estrategias de resolución de conflictos donde toda superposición de permiso y denegación es error, y el historial o reversión de versiones.
 
 = Implementación <sec:implementacion>
 
@@ -160,6 +161,86 @@ La enumeración de solicitudes es constructiva y total: combina los valores de c
 La frontera entre Dafny y TypeScript usa una única conversión no verificada donde el módulo JavaScript emitido por el compilador se interpreta bajo una interfaz que fija exactamente los miembros usados, y todo acceso posterior pasa por lectores defensivos que lanzan una violación de invariante ante formas inesperadas. Los valores enteros cruzan la frontera como números de precisión arbitraria y los identificadores de regla se asignan en la envoltura como el siguiente entero libre al confirmar. La evaluación de una solicitud nunca enumera el espacio de solicitudes y su costo es lineal en el tamaño del conjunto de reglas.
 
 El chequeo de topes precede a toda operación costosa: número de valores por enumeración, número de reglas y tamaño del espacio de solicitudes. El modo de topes liberados recorre exactamente el mismo camino de decisión y emite un aviso de rendimiento no verificado por llamada, por lo que los veredictos siguen siendo exactos.
+
+== Clases del núcleo y de las envolturas
+
+La @fig:clases muestra las clases del sistema en dos paquetes con una sola dependencia entre ellos, donde el paquete TypeScript invoca el núcleo compilado y nunca reimplementa decisiones.
+
+#figure(
+  image("img/classes.png", width: 100%),
+  caption: [Diagrama de clases del verificador con el núcleo Dafny y las envolturas TypeScript.],
+) <fig:clases>
+
+En el núcleo, AttrDecl declara cada atributo con familia, nombre, tipo y dominio mediante valores de enumeración o intervalo entero acotado. AttrType distingue enumeración, booleano y entero acotado, mientras Value representa el valor concreto de cada variante. Request es una secuencia posicional de valores alineada con el orden de declaraciones del esquema, decisión que mantiene la enumeración y las demostraciones dentro de teoría pura de secuencias. Pred modela átomos de comparación contra literales más negación, conjunción y disyunción, Effect distingue permiso y denegación, Rule une identificador, efecto y condición, y Ruleset agrega reglas como secuencia ordenada. Witness exhibe una solicitud junto con identificadores de reglas, propiedad incumplida y explicación, WitnessOpt envuelve el testigo opcional de cada chequeo, AddResult confirma un conjunto o rechaza con testigo, y Decision separa permiso, denegación y conflicto interno.
+
+En las envolturas, Esquema valida declaraciones y conserva el valor opaco compilado, Atributo duplica la declaración con tipos propios del lenguaje anfitrión, Analizador contrasta sintaxis contra esquema, Interfaz expone adición, actualización, eliminación, informe de coherencia, evaluación y variantes en lote, y Errores señala exceso de topes, esquema inválido, error sintáctico, valor fuera de dominio y violación de invariante. El analizador produce predicados y la interfaz devuelve resultados de adición, interpreta testigos y decide solicitudes mediante el núcleo.
+
+== Construcciones Dafny empleadas
+
+El núcleo usa tipos de datos algebraicos para AttrType, Value, Pred, Effect, Rule, Witness, WitnessOpt, AddResult y Decision, junto con alias de secuencia para Schema, Request y Ruleset. Los predicados ValidDecl, SchemaWellFormed, ValueMatchesDecl y ValidRequest fijan el vocabulario válido, mientras ValidAtom, ValidPred y ValidRule exigen atributos conocidos, literales dentro del dominio y operadores compatibles con el tipo. La búsqueda de declaraciones con LookupDecl y de posiciones con FindIndex resuelve cada referencia por nombre de familia y atributo.
+
+Las funciones puras Satisfies, Applies, PermitApplies, DenyApplies y Evaluate definen la semántica por recursión estructural sobre predicados y reglas, y AllRequests construye el producto cartesiano de valores por declaración con PrependHead y CombineHeads. Evaluate devuelve permiso ante aplicación exclusiva de permiso, denegación ante ausencia de permiso y conflicto interno ante aplicación de ambos efectos, estado que la interfaz guardada vuelve inalcanzable. Los predicados fantasma P1 a P4 con Coherent y WitnessGenuine expresan propiedades sin costo en tiempo de ejecución, pues el compilador los borra y solo conserva las funciones de chequeo.
+
+Cada lema declara lo que exige con requires, lo que garantiza con ensures y la medida de terminación con decreases, y demuestra por inducción sobre el índice de solicitud o la estructura de la secuencia de reglas. El recorrido de solicitudes usa índices explícitos con medida sobre la diferencia entre longitud e índice, mientras el recorrido de reglas usa recursión sobre cabeza y cola porque los conjuntos de reglas son pequeños. El siguiente bloque muestra la guarda de adición con su lema de preservación.
+
+```dafny
+function TryAdd(R: Ruleset, r: Rule, schema: Schema): AddResult {
+  var w := CheckCoherent(R + [r], schema);
+  if w.NoWitness? then Accepted(R + [r]) else Rejected(w.wit)
+}
+lemma AddPreserves(R: Ruleset, r: Rule, schema: Schema)
+  ensures match TryAdd(R, r, schema)
+    case Accepted(rs) => Coherent(rs, schema)
+    case Rejected(_) => true
+{
+  var w := CheckCoherent(R + [r], schema);
+  if w == NoWitness {
+    CheckCoherentSound(R + [r], schema);
+  }
+}
+```
+
+La compilación traduce cinco módulos con destino JavaScript y excluye el módulo de comprobación acotada por ser solo fantasma y de prueba, de modo que el paquete distribuye decisión verificada sin buscador simbólico adicional.
+
+== Chequeos ejecutables y lemas por propiedad
+
+La @tab:chequeos resume cada chequeo con su función, su testigo, sus lemas y su costo. CheckCoherent encadena los cuatro chequeos en orden P1 a P4 sobre la enumeración total con solidez y completitud globales, y la envoltura consulta los cuatro de forma independiente para insignias por propiedad mientras el primer fallo coincide con el testigo combinado sin quinto barrido.
+
+#figure(
+  table(
+    columns: (auto, 1fr, 1fr, 1fr, 1fr),
+    inset: 6pt,
+    align: left,
+    table.header([Chequeo], [Función ejecutable], [Testigo], [Lemas], [Costo]),
+    [P1], [Barrido de solicitudes con primer permiso y primera denegación], [Solicitud más ambos identificadores], [Solidez y completitud del barrido más hallazgo dirigido], [Lineal en solicitudes por reglas],
+    [P2], [Prueba de disparo por regla con índice de primer disparo], [Solicitud vacía más regla muerta], [Solidez de ausencia de disparo y completitud de existencia], [Lineal en reglas por solicitudes],
+    [P3], [Búsqueda de decisión solitaria con cobertura y solicitud compartida], [Solicitud más regla sombreada y coberturas], [Solidez y completitud de testigo solitario más monotonía], [Cuadrático en reglas por solicitudes],
+    [P4], [Validación de regla contra esquema por búsqueda de declaración], [Solicitud vacía más regla inválida], [Solidez y completitud del recorrido de reglas], [Lineal en reglas],
+  ),
+  caption: [Chequeos ejecutables con testigo, lemas y costo por propiedad.],
+) <tab:chequeos>
+
+El chequeo P1 barre solicitudes con CheckP1From mediante índice y obtiene con FirstFiringId el primer permiso y la primera denegación que disparan, de modo que el testigo porta solicitud más ambos identificadores. Los lemas de solidez ligan el testigo con solicitudes enumeradas y aplicación de ambos efectos, y los lemas de completitud más el hallazgo dirigido de testigo reconstruyen el reporte ante cualquier violación.
+
+El chequeo P2 pregunta por cada regla si dispara en alguna solicitud con RuleFiresFrom y rescata el índice del primer disparo con FirstFiringIndex, de modo que el testigo porta solicitud vacía más el identificador de la regla muerta. Los lemas de solidez extraen la regla sin disparo del barrido y los de completitud reconstruyen el disparo desde la existencia garantizada por la propiedad.
+
+El chequeo P3 exige por cada regla una solicitud que solo ella decida con RuleSoleFrom sobre OtherApplies, y ante ausencia de testigo solitario rescata con FirstSharedReq una solicitud compartida más los identificadores que también disparan con FiringIdsExcept. Los lemas de solidez y completitud más monotonía de OtherApplies ligan el reporte con ausencia genuina de decisión solitaria, y los duplicados exactos caen aquí por carecer de solicitud solitaria.
+
+El chequeo P4 valida cada regla con ValidRule por búsqueda de declaración de atributo más operador y literal compatibles, de modo que el testigo porta solicitud vacía más el identificador inválido. Los lemas de solidez y completitud son recorridos directos sobre la secuencia de reglas.
+
+== Invariante de evolución y operaciones guardadas
+
+El estado es el conjunto ordenado de reglas con referencia al esquema y el estado inicial vacío es coherente por EmptyCoherent. La invariante de tesis afirma que todo conjunto alcanzable por la interfaz guardada es coherente, y cada operación la preserva por un lema dedicado.
+
+TryAdd y TryUpdate confirman solo si el conjunto resultante supera CheckCoherent y en otro caso rechazan con testigo genuino sin mutación parcial, según AddPreserves, UpdatePreserves, solidez de testigo y completitud de testigo. La actualización con identificador desconocido rechaza como P4 con el identificador pedido, y el lote en orden aborta al primer rechazo y devuelve el conjunto original con semántica de todo o nada. La eliminación preserva coherencia por monotonía de subconjunto con lemas de subconjunto tras RemoveById más monotonía de aplicación por efecto y de cobertura, según RemovePreservesCoherent.
+
+EvaluateAgreesOnCoherent liga decisión con aplicación de permiso sobre conjuntos coherentes y solicitudes válidas, por lo que el estado interno de conflicto resulta inalcanzable por la interfaz guardada y la envoltura lo señala como violación de invariante. El módulo de comprobación acotada enumera además todos los conjuntos hasta longitud tres sobre seis reglas con un total de 259 estados y demuestra preservación más solidez de testigo sobre ese universo.
+
+== Frontera con TypeScript y topes explícitos
+
+El cargador interpreta el módulo compilado bajo una interfaz que fija exactamente los miembros usados y concentra en un solo punto la conversión no verificada, mientras los lectores defensivos validan objetos, booleanos, secuencias y enteros de precisión arbitraria. Los constructores traducen texto y números hacia secuencias y enteros del motor, los adaptadores convierten esquemas, predicados, reglas, conjuntos y solicitudes hacia valores Dafny y de vuelta hacia testigos legibles con claves por familia y nombre, y los identificadores se asignan como el siguiente entero libre al confirmar mientras la actualización conserva el suyo.
+
+El analizador contrasta sintaxis contra esquema y produce rechazo P4 ante atributo o literal fuera de dominio, el presentador de testigos solo redacta texto y nunca decide, y la evaluación atribuye reglas que disparan mediante Applies sin enumerar el espacio con costo lineal en el tamaño del conjunto. El chequeo de topes precede a toda operación costosa con máximos de valores por enumeración, reglas y tamaño del espacio de solicitudes, donde el exceso produce error declarado de exceso y la opción de topes liberados recorre el mismo camino de decisión con aviso de rendimiento no verificado por llamada y veredictos exactos. La construcción compila el núcleo hacia JavaScript como módulo con exportaciones expuestas, luego compila TypeScript con su compilador y valida con la suite de repetición y envolturas, de modo que la prueba de regresión fija testigos exactos ante cambios en las pruebas.
 
 = Disponibilidad de datos <sec:datos>
 

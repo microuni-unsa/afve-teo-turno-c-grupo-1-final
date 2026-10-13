@@ -1,0 +1,124 @@
+@startuml classes
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam classAttributeIconSize 0
+skinparam linetype polyline
+
+package "Núcleo Dafny" as core {
+  class AttrDecl {
+    family : string
+    name : string
+    attrType : AttrType
+    enumVals : seq<string>
+    lo : int
+    hi : int
+  }
+  enum AttrType {
+    Enum
+    Bool
+    BoundedInt
+  }
+  class Value <<datatype>> {
+    EnumVal
+    BoolVal
+    IntVal
+  }
+  class Request <<type>> {
+    seq<Value> posicional
+  }
+  class Pred <<datatype>> {
+    Atom
+    Not
+    And
+    Or
+  }
+  enum Effect {
+    Permit
+    Deny
+  }
+  class Rule {
+    id : int
+    effect : Effect
+    target : Pred
+  }
+  class Ruleset <<type>> {
+    seq<Rule>
+  }
+  class Witness {
+    req : Request
+    ruleIds : seq<int>
+    failedProperty : string
+    explanation : string
+  }
+  enum WitnessOpt <<datatype>> {
+    NoWitness
+    HasWitness
+  }
+  enum AddResult <<datatype>> {
+    Accepted
+    Rejected
+  }
+  enum Decision <<datatype>> {
+    Permit
+    Deny
+    Conflict
+  }
+  AttrDecl --> AttrType : declara
+  Request --> Value : contiene en orden
+  Ruleset *-- Rule : agrega
+  Rule --> Effect : decide
+  Rule --> Pred : evalúa
+  Witness --> Request : exhibe
+  WitnessOpt ..> Witness : envuelve
+  AddResult ..> Witness : rechaza con
+  AddResult ..> Ruleset : confirma
+}
+
+package "Envolturas TypeScript" as ts {
+  class Atributo {
+    family : string
+    name : string
+    type : TipoAttr
+    values : string[]
+    lo : int
+    hi : int
+  }
+  enum TipoAttr {
+    Enum
+    Bool
+    BoundedInt
+  }
+  class Esquema {
+    decls : Atributo[]
+    dafnySchema : opaco
+  }
+  class Interfaz {
+    tryAdd
+    tryUpdate
+    remove
+    checkCoherent
+    evaluate
+    tryAddMany
+    evaluateMany
+  }
+  enum Errores {
+    TooLarge
+    SchemaError
+    ParseError
+    DomainError
+    InvariantViolation
+  }
+  class Analizador {
+    parseRule
+  }
+  Atributo --> TipoAttr : declara
+  Esquema "1" *-- "many" Atributo : valida
+  Analizador ..> Esquema : contrasta
+  Interfaz ..> Errores : señala
+}
+
+ts ..> core : invoca núcleo compilado
+note on link : valida, adapta y presenta sin reimplementar decisiones
+@enduml
