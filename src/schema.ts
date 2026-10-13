@@ -7,12 +7,6 @@ import {
   TooLarge,
 } from "#src/errors.js";
 
-// ---- Dafny FFI types ----
-// The Dafny compiler emits an untyped JS module. These interfaces describe
-// exactly the members the wrappers touch; the single unchecked cast below
-// is the only place compiler knowledge is assumed.
-
-/** A Dafny-compiled object value (datatype instance). Fields are read via df* helpers. */
 export type DfObj = Record<string, unknown>;
 
 export interface DfSeq extends Array<unknown> {
@@ -59,12 +53,9 @@ function loadVerifier(): VerifierRoot {
       );
     }
   }
-  // Single unchecked cast: Dafny emits untyped JS; the VerifierRoot
-  // interface pins the exact members used, checked by df* readers.
   return raw as unknown as VerifierRoot;
 }
 
-/** The Dafny-compiled core. All Satisfies / Applies / Coherent / Try* decisions run here. */
 export const verifier: VerifierRoot = loadVerifier();
 
 function isDfSeq(v: unknown): v is DfSeq {
@@ -112,7 +103,6 @@ export const MAX_ENUM_VALUES = 16;
 export const MAX_RULES_CHECKED = 64;
 export const DEFAULT_INT_MIN = 0;
 export const DEFAULT_INT_MAX = 100;
-/** Upper bound on |AllRequests| admitted without the unsafe opt-in. */
 export const MAX_REQUEST_SPACE = 1000000;
 
 export type AttrType = "Enum" | "Bool" | "BoundedInt";
@@ -137,7 +127,6 @@ export interface AttrDecl {
 
 export interface Schema {
   decls: AttrDecl[];
-  /** Opaque handle to the Dafny-compiled schema value. */
   dafnySchema: DfSeq;
 }
 
@@ -159,7 +148,6 @@ export type Pred =
   | { kind: "or"; a: Pred; b: Pred };
 
 export interface Rule {
-  /** 0 means unassigned; tryAdd assigns the next free id on commit. */
   id: number;
   effect: Effect;
   target: Pred;
@@ -167,7 +155,6 @@ export interface Rule {
 
 export type Ruleset = Rule[];
 
-/** Total assignment keyed by `family.name`. Values are validated at the boundary. */
 export type Request = Record<string, string | boolean | number>;
 
 export type FailedProperty = "P1" | "P2" | "P3" | "P4";
@@ -209,8 +196,6 @@ export function findDecl(
 ): AttrDecl | undefined {
   return schema.decls.find((d) => d.family === family && d.name === name);
 }
-
-// ---- Dafny value construction (TS -> Dafny) ----
 
 export function S(s: string): DfSeq {
   return verifier._dafny.Seq.UnicodeFromString(s);
@@ -283,7 +268,6 @@ export function toDafnyRuleset(ruleset: Ruleset): DfSeq {
   return verifier._dafny.Seq.of(...ruleset.map(toDafnyRule));
 }
 
-/** Positional Dafny request aligned with schema.decls order. Rejects out-of-domain input. */
 export function toDafnyRequest(request: Request, schema: Schema): DfSeq {
   const known: Record<string, true> = {};
   for (const d of schema.decls) {
@@ -325,8 +309,6 @@ export function toDafnyRequest(request: Request, schema: Schema): DfSeq {
   });
   return verifier._dafny.Seq.of(...values);
 }
-
-// ---- Dafny value reading (Dafny -> TS) ----
 
 export function fromDafnyValue(dv: unknown): string | boolean | number {
   const obj = asDfObj(dv, "value");
@@ -395,8 +377,6 @@ export function fromDafnyRequest(dreq: unknown, schema: Schema): Request {
   if (!isDfSeq(dreq)) {
     throw new InvariantViolation("Dafny request is not a sequence");
   }
-  // P2/P4 witnesses carry an empty request (the violation concerns a rule,
-  // not a request); P1/P3 witnesses always carry a full positional request.
   if (dreq.length === 0) return {};
   if (dreq.length !== schema.decls.length) {
     throw new InvariantViolation(
@@ -428,8 +408,6 @@ export function fromDafnyWitness(dw: unknown, schema: Schema): Witness {
     explanation: jsStr(dfSeq(obj, "dtor_explanation")),
   };
 }
-
-// ---- Schema loading and caps ----
 
 function validateDecl(raw: unknown, index: number): AttrDecl {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
@@ -563,7 +541,6 @@ export function loadSchema(decls: unknown, opts?: Opts): Schema {
   return { decls: parsed, dafnySchema: toDafnySchema(parsed) };
 }
 
-/** Guard enumerating entry points (tryAdd/tryUpdate/tryAddMany/checkCoherent). */
 export function checkCaps(
   ruleCount: number,
   schema: Schema,

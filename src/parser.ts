@@ -375,13 +375,6 @@ class Parser {
   }
 }
 
-/**
- * Parse `Permit where <pred>` / `Deny where <pred>`. Supports `! && ||`,
- * parens, `in {a, b}`, and `between m and n` (desugared to the core).
- * Returns the Rule with id 0 (unassigned); tryAdd assigns ids on commit.
- * All syntax, type, and domain violations return a ParseError value;
- * check the result with instanceof before use.
- */
 export function parseRule(src: string, schema: Schema): Rule | ParseError {
   try {
     const tokens = tokenize(src);

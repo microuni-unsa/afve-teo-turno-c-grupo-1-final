@@ -1,9 +1,3 @@
-// Coherence properties P1..P4: ghost specifications plus executable
-// per-property checks returning witnesses. Request scans are index-based
-// (never reqs[1..]): Dafny seq slicing copies, which made full-schema
-// scans quadratic. Ruleset scans keep structural recursion (rulesets are
-// tiny). All checks compile to JS; soundness and completeness are proven
-// per check and Transition.dfy builds the guarded API on top.
 include "Eval.dfy"
 
 module Coherence {
@@ -14,8 +8,6 @@ module Coherence {
   datatype Witness = Witness(req: Request, ruleIds: seq<int>, failedProperty: string, explanation: string)
   datatype WitnessOpt = NoWitness | HasWitness(wit: Witness)
 
-  // Membership transfers from a sequence to its tail; used by the
-  // ruleset inductions in this file and in Transition.dfy.
   lemma SeqTailMember<T>(s: seq<T>, x: T)
     requires x in s && |s| > 0 && s[0] != x
     ensures x in s[1..]
@@ -24,8 +16,6 @@ module Coherence {
     assert i != 0;
     assert s[1..][i - 1] == x;
   }
-
-  // ---- P1: no request fires both a Permit and a Deny rule ----
 
   function FirstFiringId(ruleset: Ruleset, req: Request, schema: Schema, e: Effect): Opt<int> {
     if |ruleset| == 0 then None
@@ -111,8 +101,6 @@ module Coherence {
     CheckP1FromComplete(reqs, 0, ruleset, schema);
   }
 
-  // ---- P2: every rule fires on at least one request ----
-
   function RuleFiresFrom(rule: Rule, reqs: seq<Request>, i: int, schema: Schema): bool
     requires 0 <= i <= |reqs|
     decreases |reqs| - i
@@ -193,8 +181,6 @@ module Coherence {
     if Applies(reqs[i], rule, schema) then i else FirstFiringIndex(rule, reqs, i + 1, schema)
   }
 
-  // Empty request: P2/P4 violations concern rules, not requests; the
-  // witness request field is meaningless there and set to [].
   function CheckP2Rules(rules: Ruleset, reqs: seq<Request>, schema: Schema): WitnessOpt {
     if |rules| == 0 then NoWitness
     else if RuleFiresOnSome(rules[0], reqs, schema) then CheckP2Rules(rules[1..], reqs, schema)
@@ -238,8 +224,6 @@ module Coherence {
       CheckP2RulesComplete(rules[1..], reqs, schema);
     }
   }
-
-  // ---- P3: every rule alone decides at least one request ----
 
   function OtherApplies(rules: Ruleset, skip: int, req: Request, schema: Schema): bool {
     if |rules| == 0 then false
@@ -424,8 +408,6 @@ module Coherence {
     }
   }
 
-  // ---- P4: every rule type-checks against the schema ----
-
   function CheckP4Rules(rules: Ruleset, schema: Schema): WitnessOpt {
     if |rules| == 0 then NoWitness
     else if ValidRule(rules[0], schema) then CheckP4Rules(rules[1..], schema)
@@ -463,8 +445,6 @@ module Coherence {
     }
   }
 
-  // ---- Combined coherence ----
-
   ghost predicate Coherent(ruleset: Ruleset, schema: Schema) {
     P1(ruleset, schema) && P2(ruleset, schema) && P3(ruleset, schema) && P4(ruleset, schema)
   }
@@ -488,7 +468,6 @@ module Coherence {
         if w3.HasWitness? then w3 else CheckP4Rules(ruleset, schema)
   }
 
-  // Independently queryable per-property checks for UI badges.
   function CheckP1(ruleset: Ruleset, schema: Schema): WitnessOpt {
     CheckP1Reqs(AllRequests(schema), ruleset, schema)
   }
@@ -562,7 +541,6 @@ module Coherence {
     }
   }
 
-  // Helper existentials used by CheckCoherentSound (the finder direction).
   lemma P1WitnessFound(reqs: seq<Request>, i: int, ruleset: Ruleset, schema: Schema, j: int)
     requires 0 <= i <= j < |reqs|
     requires PermitApplies(ruleset, reqs[j], schema) && DenyApplies(ruleset, reqs[j], schema)

@@ -1,6 +1,5 @@
 import type { Witness } from "#src/schema.js";
 
-/** Human-readable witness description (TS-side only; never a verifier decision). */
 export function explain(witness: Witness): string {
   const req = Object.entries(witness.req)
     .map(([k, v]) => `${k}=${String(v)}`)

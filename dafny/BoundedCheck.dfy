@@ -1,8 +1,3 @@
-// Bounded model check (ghost/test-only, excluded from the JS build):
-// a finite state space over a shrunk schema is defined as data, and the
-// transition invariant plus witness soundness are discharged over every
-// element via the general Transition lemmas. SmallStateCount is executable
-// so paper artifacts can report the explored state count.
 include "Transition.dfy"
 
 module BoundedCheck {

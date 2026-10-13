@@ -1,7 +1,3 @@
-// Attribute schema (PIP contract): declarations, positional requests,
-// bounded enumeration of all schema-valid requests with soundness and
-// completeness lemmas. Requests are positional: req[i] is the value for
-// schema[i]. This keeps enumeration and proofs in pure sequence theory.
 module Schema {
   datatype AttrType = Enum | Bool | BoundedInt
 
@@ -53,8 +49,6 @@ module Schema {
     |req| == |schema| && forall i :: 0 <= i < |schema| ==> ValueMatchesDecl(req[i], schema[i])
   }
 
-  // ---- Bounded enumeration of all schema-valid requests ----
-
   function EnumValsAsValues(vals: seq<string>): seq<Value> {
     if |vals| == 0 then [] else [EnumVal(vals[0])] + EnumValsAsValues(vals[1..])
   }
@@ -89,8 +83,6 @@ module Schema {
     assert forall d :: d in schema[1..] ==> d in schema;
     assert forall i :: 0 <= i < |schema[1..]| ==> schema[1..][i] == schema[i + 1];
   }
-
-  // ---- Value-domain membership lemmas ----
 
   lemma EnumValsAsValuesMember(vals: seq<string>, s: string)
     ensures (EnumVal(s) in EnumValsAsValues(vals)) <==> (s in vals)
@@ -178,8 +170,6 @@ module Schema {
       CombineHeadsMember(vs[1..], tails, req);
     }
   }
-
-  // ---- Enumeration soundness and completeness ----
 
   lemma AllRequestsSound(schema: Schema, req: Request)
     requires SchemaWellFormed(schema)

@@ -1,6 +1,3 @@
-// Request evaluation: pure recursive functions over predicates and rules.
-// Everything here is executable and compiles to JS (no quantifiers,
-// no heap, structural recursion over sequences only).
 include "Syntax.dfy"
 
 module Eval {
@@ -74,8 +71,6 @@ module Eval {
 
   datatype Decision = Permit | Deny | Conflict
 
-  // Closed-world default: no applicable rule denies. Conflict is internal
-  // only for raw (unguarded) input; unreachable on coherent rulesets.
   function Evaluate(ruleset: Ruleset, req: Request, schema: Schema): Decision {
     if PermitApplies(ruleset, req, schema) && DenyApplies(ruleset, req, schema) then Decision.Conflict
     else if PermitApplies(ruleset, req, schema) then Decision.Permit

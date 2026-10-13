@@ -1,7 +1,3 @@
-// Guarded ruleset evolution: total TryAdd / TryRemove / TryUpdate with an
-// inductive coherence invariant. Preservation for Add and Update holds by
-// construction of the guard; removal preservation is proved by subset
-// monotonicity. Unknown-id update is rejected as P4 per plan.
 include "Coherence.dfy"
 
 module Transition {
@@ -35,14 +31,10 @@ module Transition {
       if w.NoWitness? then Accepted(R2) else Rejected(w.wit)
   }
 
-  // ---- 1. Empty ruleset is vacuously coherent ----
-
   lemma EmptyCoherent(schema: Schema)
     ensures Coherent([], schema)
   {
   }
-
-  // ---- 2/4. Guarded add/update preserve coherence by construction ----
 
   lemma AddPreserves(R: Ruleset, r: Rule, schema: Schema)
     ensures match TryAdd(R, r, schema)
@@ -69,8 +61,6 @@ module Transition {
       }
     }
   }
-
-  // ---- 3. Removal preserves coherence (subset monotonicity) ----
 
   lemma AnyEffectAppliesWitness(rules: Ruleset, req: Request, schema: Schema, e: Effect, r: Rule)
     requires r in rules && r.effect == e && Applies(req, r, schema)
@@ -149,8 +139,6 @@ module Transition {
     }
   }
 
-  // ---- 5. Evaluate agrees with the Permit side on coherent rulesets ----
-
   lemma EvaluateAgreesOnCoherent(ruleset: Ruleset, req: Request, schema: Schema)
     requires SchemaWellFormed(schema)
     requires Coherent(ruleset, schema)
@@ -161,8 +149,6 @@ module Transition {
     assert req in AllRequests(schema);
     assert P1(ruleset, schema);
   }
-
-  // ---- 6. Every Rejected witness genuinely violates the named property ----
 
   lemma WitnessSoundness(R: Ruleset, r: Rule, schema: Schema, w: Witness)
     requires TryAdd(R, r, schema) == Rejected(w)
@@ -192,9 +178,6 @@ module Transition {
     ensures w.failedProperty == "P4" && w.ruleIds == [id]
   {
   }
-
-  // ---- 7. Every coherence violation yields a witness (bounded scope:
-  // the enumeration is finite by construction over the schema domains) ----
 
   lemma WitnessCompleteness(R: Ruleset, r: Rule, schema: Schema)
     requires !Coherent(R + [r], schema)

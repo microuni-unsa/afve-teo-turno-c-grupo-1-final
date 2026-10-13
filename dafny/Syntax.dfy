@@ -1,6 +1,3 @@
-// Policy syntax: effects, predicates, rules, validity against a schema.
-// ValidRule lives here (not in Schema.dfy) because it references Pred;
-// the include direction Schema <- Syntax forbids the reverse.
 include "Schema.dfy"
 
 module Syntax {
