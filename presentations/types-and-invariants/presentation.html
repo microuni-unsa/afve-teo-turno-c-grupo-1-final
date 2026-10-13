@@ -654,11 +654,11 @@
 
         .ledger-header {
             display: grid;
-            grid-template-columns: 280px 1.4fr 1.6fr 160px;
+            grid-template-columns: 310px 1fr 1fr;
             border-bottom: 1.5px solid var(--ink);
-            padding: 18px 28px;
+            padding: 14px 28px;
             font-family: var(--font-mono);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -667,12 +667,13 @@
 
         .ledger-item {
             display: grid;
-            grid-template-columns: 280px 1.4fr 1.6fr 160px;
-            padding: 28px 28px;
+            grid-template-columns: 310px 1fr 1fr;
+            padding: 18px 28px;
             border-bottom: 1px solid var(--ink-faint);
-            align-items: center;
-            font-size: 18px;
-            line-height: 1.45;
+            align-items: flex-start;
+            gap: 24px;
+            font-size: 16px;
+            line-height: 1.4;
         }
 
         .ledger-item:last-child {
@@ -681,49 +682,91 @@
 
         .item-name {
             font-family: var(--font-serif);
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 500;
+            line-height: 1.15;
+        }
+
+        .item-scope {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            color: var(--ink-soft);
+            margin-top: 6px;
+            text-transform: uppercase;
         }
 
         .item-cond {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 12px;
+        }
+
+        .formal-expr {
             font-family: var(--font-mono);
-            font-size: 15px;
+            font-size: 14px;
             color: var(--ink);
-            padding-right: 20px;
+            background: var(--paper);
+            border: 1px solid var(--ink-line);
+            padding: 6px 10px;
+            border-radius: 2px;
+            line-height: 1.35;
+        }
+
+        .cond-explanation {
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--ink);
+            opacity: 0.95;
+        }
+
+        .cond-explanation strong {
+            color: var(--ink);
+            font-weight: 600;
         }
 
         .item-desc {
-            font-size: 18px;
-            padding-right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 12px;
         }
 
-        .item-tag {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            text-align: right;
-            letter-spacing: 0.05em;
-            color: var(--ink-soft);
+        .goal-highlight {
+            font-size: 15.5px;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.35;
+        }
+
+        .goal-detail {
+            font-size: 15px;
+            line-height: 1.4;
+            color: var(--ink);
+            opacity: 0.92;
         }
 
         .caps-strip {
-            margin-top: 32px;
+            margin-top: 24px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
+            gap: 24px;
         }
 
         .cap-card {
             border: 1.5px solid var(--ink-line);
             background: var(--paper);
-            padding: 16px 22px;
+            padding: 14px 20px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             font-family: var(--font-mono);
         }
 
         .cap-card .cap-label {
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--ink-soft);
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -731,13 +774,13 @@
 
         .cap-card strong {
             color: var(--ink);
-            font-size: 16px;
+            font-size: 15.5px;
             line-height: 1.25;
         }
 
         .cap-card .cap-desc {
             font-family: var(--font-sans);
-            font-size: 14.5px;
+            font-size: 14px;
             line-height: 1.35;
             color: var(--ink);
             opacity: 0.9;
@@ -1187,30 +1230,71 @@
                 <div class="ledger-table reveal delay-3">
                     <div class="ledger-header">
                         <div>INVARIANTE / PREDICADO</div>
-                        <div>CONDICIÓN FORMAL EN CÓDIGO</div>
-                        <div>OBJETIVO Y GARANTÍA</div>
-                        <div>UBICACIÓN</div>
+                        <div>CONDICIÓN FORMAL Y EXPLICACIÓN</div>
+                        <div>OBJETIVO Y GARANTÍA FORMAL</div>
                     </div>
 
                     <div class="ledger-item">
-                        <div class="item-name">predicate SchemaWellFormed</div>
-                        <div class="item-cond">∀ d ∈ schema · ValidDecl(d) ∧ ∀ i &lt; j · DeclKey(s[i]) ≠ DeclKey(s[j])</div>
-                        <div class="item-desc">Unicidad de atributos por familia (<code>DeclKey</code>), no vacíos y cotas coherentes <code>lo ≤ hi</code>.</div>
-                        <div class="item-tag">Schema.dfy (l. 41)</div>
+                        <div class="item-name">
+                            predicate SchemaWellFormed
+                            <span class="item-scope">CONTRATO DE ESQUEMA (PIP)</span>
+                        </div>
+                        <div class="item-cond">
+                            <div class="formal-expr">∀ d ∈ schema · ValidDecl(d) ∧ ∀ i &lt; j · DeclKey(s[i]) ≠ DeclKey(s[j])</div>
+                            <div class="cond-explanation">
+                                <strong>Condición:</strong> Exige que cada declaración posea rangos válidos (<code>lo ≤ hi</code> o <code>0 &lt; |enum| ≤ 16</code>) y que no existan atributos duplicados con la misma clave.
+                            </div>
+                        </div>
+                        <div class="item-desc">
+                            <div class="goal-highlight">
+                                <strong>Objetivo:</strong> Consistencia estructural y determinismo del PIP.
+                            </div>
+                            <div class="goal-detail">
+                                Previene colisiones de atributos y asegura dominios finitos acotados, garantizando la decidibilidad automática del verificador SMT (Z3).
+                            </div>
+                        </div>
                     </div>
 
                     <div class="ledger-item">
-                        <div class="item-name">predicate ValidRule & ValidAtom</div>
-                        <div class="item-cond">LookupDecl(schema, a.attr).Some? ∧ ValidOp(a.op) ∧ a.lit ∈ enumVals</div>
-                        <div class="item-desc">Tipado estricto: toda regla usa atributos declarados con operadores y literales válidos (prohíbe <code>role &gt; 3</code>).</div>
-                        <div class="item-tag">Syntax.dfy (l. 37, 54)</div>
+                        <div class="item-name">
+                            predicate ValidRule &amp; ValidAtom
+                            <span class="item-scope">TIPADO DEL AST DE REGLAS</span>
+                        </div>
+                        <div class="item-cond">
+                            <div class="formal-expr">LookupDecl(schema, a.attr).Some? ∧ ValidOp(a.op) ∧ LiteralInDomain(a, d)</div>
+                            <div class="cond-explanation">
+                                <strong>Condición:</strong> Todo átomo del predicado debe referenciar un atributo declarado en el esquema, emplear un operador compatible con su tipo y comparar con literales válidos de su dominio.
+                            </div>
+                        </div>
+                        <div class="item-desc">
+                            <div class="goal-highlight">
+                                <strong>Objetivo:</strong> Preservar tipado estricto en el AST de políticas (P4).
+                            </div>
+                            <div class="goal-detail">
+                                Imposibilita comparaciones inválidas en tiempo de ejecución (como comparar roles con números o invocar campos inexistentes), blindando el evaluador.
+                            </div>
+                        </div>
                     </div>
 
                     <div class="ledger-item">
-                        <div class="item-name">predicate ValidRequest</div>
-                        <div class="item-cond">|req| == |schema| ∧ ∀ i · ValueMatchesDecl(req[i], schema[i])</div>
-                        <div class="item-desc">Petición total por construcción; peticiones fuera de dominio se rechazan en la frontera TypeScript.</div>
-                        <div class="item-tag">Schema.dfy (l. 52)</div>
+                        <div class="item-name">
+                            predicate ValidRequest
+                            <span class="item-scope">ENTORNO DE EVALUACIÓN (PEP/PDP)</span>
+                        </div>
+                        <div class="item-cond">
+                            <div class="formal-expr">|req| == |schema| ∧ ∀ i · ValueMatchesDecl(req[i], schema[i])</div>
+                            <div class="cond-explanation">
+                                <strong>Condición:</strong> La petición debe contener exactamente un valor por cada atributo del esquema ordenado posicionalmente, y cada valor debe satisfacer el tipo y cota de su declaración.
+                            </div>
+                        </div>
+                        <div class="item-desc">
+                            <div class="goal-highlight">
+                                <strong>Objetivo:</strong> Asegurar peticiones totales y bien tipadas por construcción.
+                            </div>
+                            <div class="goal-detail">
+                                Elimina peticiones parciales o fuera de rango antes de la evaluación; las peticiones mal formadas se rechazan de inmediato en la frontera TypeScript.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1218,17 +1302,17 @@
                     <div class="cap-card">
                         <span class="cap-label">Precondición (requires)</span>
                         <strong>requires SchemaWellFormed(schema)</strong>
-                        <p class="cap-desc">Exige atributos y tipos válidos antes de enumerar o evaluar peticiones.</p>
+                        <p class="cap-desc"><strong>Objetivo:</strong> Exigir atributos y tipos íntegros antes de enumerar el espacio de peticiones o verificar reglas.</p>
                     </div>
                     <div class="cap-card">
                         <span class="cap-label">Precondición (requires)</span>
                         <strong>requires ValidRequest(req, schema)</strong>
-                        <p class="cap-desc">Exige que la petición sea completa y pertenezca al dominio declarado.</p>
+                        <p class="cap-desc"><strong>Objetivo:</strong> Garantizar que la evaluación de reglas opere exclusivamente sobre peticiones completas y en dominio.</p>
                     </div>
                     <div class="cap-card">
                         <span class="cap-label">Postcondición (ensures)</span>
                         <strong>ensures Coherent(RemoveById(R, id), schema)</strong>
-                        <p class="cap-desc">Garantiza formalmente que retirar una regla siempre preserva la coherencia.</p>
+                        <p class="cap-desc"><strong>Objetivo:</strong> Demostrar que retirar una regla preserva inductivamente la coherencia global del sistema de acceso.</p>
                     </div>
                 </div>
 
@@ -1458,7 +1542,7 @@
                 document.body.classList.toggle('edit-mode', this.isEditing);
                 this.editToggleBtn.textContent = this.isEditing ? 'Salir Edición' : 'Editar [E]';
 
-                const editables = document.querySelectorAll('.slide-title, .slide-lede, .cover-headline, .cover-desc, .huge-gracias, .closing-sub, .card-name, .card-desc, .quad-title, .quad-text, .item-desc');
+                const editables = document.querySelectorAll('.slide-title, .slide-lede, .cover-headline, .cover-desc, .huge-gracias, .closing-sub, .card-name, .card-desc, .quad-title, .quad-text, .item-desc, .cond-explanation, .goal-highlight, .goal-detail, .cap-desc');
                 editables.forEach(el => {
                     el.contentEditable = this.isEditing ? 'true' : 'false';
                 });
