@@ -550,7 +550,7 @@
         }
 
         /* ===========================================
-           SLIDE 2: TIPOS DE DATOS PRIMITIVOS
+           SLIDE 9: TIPOS DE DATOS PRIMITIVOS
            =========================================== */
         .tri-grid {
             display: grid;
@@ -624,7 +624,7 @@
         }
 
         /* ===========================================
-           SLIDE 3: TIPOS DE DATOS COMPUESTOS
+           SLIDE 10: TIPOS DE DATOS COMPUESTOS
            =========================================== */
         .quad-grid {
             display: grid;
@@ -672,7 +672,7 @@
         }
 
         /* ===========================================
-           SLIDE 4: INVARIANTES ESTRUCTURALES
+           SLIDE 11: INVARIANTES ESTRUCTURALES
            =========================================== */
         .ledger-table {
             border: 1.5px solid var(--ink);
@@ -816,7 +816,7 @@
         }
 
         /* ===========================================
-           SLIDE 5: INVARIANTES DE COHERENCIA Y ESTADO
+           SLIDE 12: INVARIANTES DE COHERENCIA Y ESTADO
            =========================================== */
         .coherence-grid {
             display: grid;
@@ -911,7 +911,7 @@
         }
 
         /* ===========================================
-           SLIDE 6: CIERRE (GRACIAS)
+           SLIDE 13: CIERRE (GRACIAS)
            =========================================== */
         .closing-container {
             display: flex;
@@ -985,10 +985,10 @@
         }
 
         /* ===========================================
-           SLIDES 6–12: PAPER & PROJECT SLIDES
+           SLIDES 2–8: PAPER & PROJECT SLIDES
            =========================================== */
 
-        /* SLIDE 6: PROBLEMA Y MOTIVACIÓN */
+        /* SLIDE 2: PROBLEMA Y MOTIVACIÓN */
         .problem-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1082,7 +1082,7 @@
             color: #FFFFFF;
         }
 
-        /* SLIDE 7: OBJETIVOS */
+        /* SLIDE 3: OBJETIVOS */
         .obj-general {
             margin-top: 8px;
             background: var(--ink);
@@ -1174,7 +1174,7 @@
             color: var(--ink-soft);
         }
 
-        /* SLIDE 8: TRABAJO RELACIONADO */
+        /* SLIDE 4: TRABAJO RELACIONADO */
         .rel-table {
             border: 1.5px solid var(--ink);
             background: var(--paper-2);
@@ -1277,7 +1277,7 @@
             color: var(--ink);
         }
 
-        /* SLIDE 9: ARQUITECTURA EN TRES CAPAS */
+        /* SLIDE 5: ARQUITECTURA EN TRES CAPAS */
         .arch-flow {
             display: grid;
             grid-template-columns: 1fr 64px 1fr 64px 1fr;
@@ -1400,7 +1400,7 @@
             gap: 24px;
         }
 
-        /* SLIDE 10: REQUERIMIENTOS FUNCIONALES */
+        /* SLIDE 6: REQUERIMIENTOS FUNCIONALES */
         .rf-columns {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1500,7 +1500,7 @@
             color: var(--ink-soft);
         }
 
-        /* SLIDE 11: IMPLEMENTACIÓN */
+        /* SLIDE 7: IMPLEMENTACIÓN */
         .impl-quad {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1565,7 +1565,7 @@
             font-weight: 500;
         }
 
-        /* SLIDE 12: RESULTADOS Y DATOS */
+        /* SLIDE 8: RESULTADOS Y DATOS */
         .metrics-strip {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1772,9 +1772,589 @@
             </section>
 
             <!-- ========================================================
-                 SLIDE 2: TIPOS DE DATOS PRIMITIVOS Y BASE
+                 SLIDE 2: PROBLEMA Y MOTIVACIÓN (paper §1–§2)
                  ======================================================== -->
             <section class="slide" id="slide-2">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // PROBLEMA Y MOTIVACIÓN
+                    </div>
+                    <div class="meta-tag">§1 INTRODUCCIÓN · §2 DEFINICIÓN DEL PROBLEMA</div>
+                </div>
+
+                <div class="kicker reveal delay-1">01 // EL PROBLEMA DOBLE</div>
+                <h2 class="slide-title reveal delay-2">Reglas editadas a mano, errores silenciosos</h2>
+                <p class="slide-lede reveal delay-2">
+                    Hospitales, universidades y entidades públicas editan reglas ABAC en archivos y paneles <strong>sin chequeo formal</strong>. Cada edición puede bloquear una atención urgente o exponer un recurso confidencial.
+                </p>
+
+                <div class="problem-grid reveal delay-3">
+                    <div class="prob-card">
+                        <div>
+                            <div class="prob-tag">PROBLEMA A · DECISIÓN ESTÁTICA</div>
+                            <h3 class="prob-title">¿Es coherente este conjunto de reglas?</h3>
+                            <p class="prob-desc">
+                                Decidir formalmente P1–P4 y producir un <strong>testigo concreto</strong> ante cualquier fallo: solicitud exacta, identificadores y propiedad violada.
+                            </p>
+                            <div class="prob-callout">
+                                <strong>Dilema latente:</strong> Inconsistencias invisibles al ojo humano en catálogos de 50+ reglas editadas por múltiples áreas.
+                            </div>
+                        </div>
+                        <div class="prob-bullets">
+                            <div>▪ <strong>Contradicción (P1):</strong> Una solicitud activa un permiso y una denegación simultáneos.</div>
+                            <div>▪ <strong>Regla muerta (P2):</strong> Una regla jamás dispara bajo ninguna solicitud válida.</div>
+                            <div>▪ <strong>Sombreado (P3):</strong> Una regla es redundante o está oculta por otras reglas previas.</div>
+                        </div>
+                    </div>
+
+                    <div class="prob-card blue-top">
+                        <div>
+                            <div class="prob-tag">PROBLEMA B · EVOLUCIÓN DINÁMICA</div>
+                            <h3 class="prob-title">¿Sigue coherente tras cada cambio?</h3>
+                            <p class="prob-desc">
+                                Añadir, actualizar o eliminar reglas garantizando matemáticamente que el sistema <strong>jamás transite a un estado incoherente</strong>.
+                            </p>
+                            <div class="prob-callout">
+                                <strong>Riesgo en producción:</strong> Una excepción temporal de emergencia rompe invariantes globales sin aviso alguno.
+                            </div>
+                        </div>
+                        <div class="prob-bullets">
+                            <div>▪ <strong>Guarda transaccional:</strong> Rechazo total con testigo genuino, sin mutación parcial.</div>
+                            <div>▪ <strong>Preservación inductiva:</strong> Lemas formales garantizan que todo estado alcanzable es coherente.</div>
+                            <div>▪ <strong>Monotonía:</strong> La eliminación de reglas preserva coherencia por subconjuntos.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="thesis-banner reveal delay-4">
+                    <div><strong>INVARIANTE DE TESIS:</strong> Todo conjunto de reglas alcanzable a través de la interfaz guardada es inductivamente coherente.</div>
+                    <div>SECCIÓN [ 02 / 13 ]</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // PROBLEMA</div>
+                    <div>SLIDE [ 02 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 3: OBJETIVOS (paper §3: OG + OE1–OE4)
+                 ======================================================== -->
+            <section class="slide" id="slide-3">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // OBJETIVOS DEL PROYECTO
+                    </div>
+                    <div class="meta-tag">§3 OBJETIVO GENERAL Y ESPECÍFICOS</div>
+                </div>
+
+                <div class="kicker reveal delay-1">02 // COMPROMISOS FORMALES Y METAS</div>
+                <h2 class="slide-title reveal delay-2">Objetivo general y específicos</h2>
+
+                <div class="obj-general reveal delay-2">
+                    <div class="og-label">OBJETIVO GENERAL</div>
+                    <div class="og-text">
+                        Proponer un verificador de coherencia para políticas ABAC <strong>formalmente verificado</strong>, con garantías de coherencia y escalabilidad acotada, distribuido como <strong>paquete npm</strong> cuyo núcleo de decisión está probado en Dafny y compilado a JavaScript.
+                    </div>
+                </div>
+
+                <div class="obj-four-grid reveal delay-3">
+                    <div class="obj-col">
+                        <div>
+                            <div class="obj-col-id">OE1 // DAFNY</div>
+                            <h3 class="obj-col-title">Formalización y Semántica</h3>
+                            <p class="obj-col-text">
+                                Formalizar en Dafny el lenguaje ABAC (Permit/Deny sobre sujeto, recurso, acción y entorno; ¬ ∧ ∨, enteros acotados), la evaluación y las propiedades P1–P4.
+                            </p>
+                        </div>
+                        <div class="obj-col-chip">§3.1 · Sintaxis, AST y P1–P4</div>
+                    </div>
+
+                    <div class="obj-col blue-top">
+                        <div>
+                            <div class="obj-col-id">OE2 // GUARDA</div>
+                            <h3 class="obj-col-title">Evolución Guardada</h3>
+                            <p class="obj-col-text">
+                                Demostrar preservación inductiva por lemas: la interfaz total solo confirma transiciones coherentes; el rechazo entrega testigo sin mutación.
+                            </p>
+                        </div>
+                        <div class="obj-col-chip">§3.2 · Preservación inductiva</div>
+                    </div>
+
+                    <div class="obj-col blue-top">
+                        <div>
+                            <div class="obj-col-id">OE3 // LÍMITES</div>
+                            <h3 class="obj-col-title">Escalabilidad Acotada</h3>
+                            <p class="obj-col-text">
+                                Demostrar decidibilidad dentro de dominios finitos con topes explícitos; evaluación lineal en reglas sin enumerar el espacio cartesiano.
+                            </p>
+                        </div>
+                        <div class="obj-col-chip">§3.3 · Decisión acotada y topes</div>
+                    </div>
+
+                    <div class="obj-col">
+                        <div>
+                            <div class="obj-col-id">OE4 // NPM</div>
+                            <h3 class="obj-col-title">Empaquetado Seguro</h3>
+                            <p class="obj-col-text">
+                                Compilar el núcleo a JavaScript y envolverlo en TypeScript estricto con separación de roles: validar, adaptar y presentar sin redecidir.
+                            </p>
+                        </div>
+                        <div class="obj-col-chip">§3.4 · FFI y paquete npm</div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // OBJETIVOS OE1–OE4</div>
+                    <div>SLIDE [ 03 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 4: TRABAJO RELACIONADO (paper §4 + tabla)
+                 ======================================================== -->
+            <section class="slide" id="slide-4">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // TRABAJO RELACIONADO
+                    </div>
+                    <div class="meta-tag">§4 SÍNTESIS COMPARATIVA</div>
+                </div>
+
+                <div class="kicker reveal delay-1">03 // DÓNDE NOS UBICAMOS</div>
+                <h2 class="slide-title reveal delay-2">Trabajo relacionado: síntesis comparativa</h2>
+                <p class="slide-lede reveal delay-2">
+                    Los enfoques previos deciden <strong>por consulta</strong> (traducción pesada a SMT o algoritmos heurísticos). Este trabajo <strong>compila el decisor desde pruebas formales</strong> y sella el ciclo con evolución guardada.
+                </p>
+
+                <div class="rel-table reveal delay-3">
+                    <div class="rel-header">
+                        <div>ENFOQUE</div>
+                        <div>MÉTODO DE DECISIÓN</div>
+                        <div>TESTIGO ENTREGADO</div>
+                        <div>GARANTÍA DE EVOLUCIÓN</div>
+                    </div>
+                    <div class="rel-row">
+                        <div class="row-name">XACML + SMT</div>
+                        <div>Traducción externa a SMT por consulta</div>
+                        <div>Modelo genérico del solucionador</div>
+                        <div>Sin invariante de estado ni evolución</div>
+                    </div>
+                    <div class="rel-row">
+                        <div class="row-name">Conflictos ABAC</div>
+                        <div>Algoritmos heurísticos de pares de reglas</div>
+                        <div>Par de reglas en conflicto</div>
+                        <div>Sin guarda transaccional ante cambios</div>
+                    </div>
+                    <div class="rel-row">
+                        <div class="row-name">Cedar (AWS)</div>
+                        <div>Lenguaje analizable verificado en Lean</div>
+                        <div>Diagnósticos sintácticos y de alcance</div>
+                        <div>Lenguaje seguro, sin invariante de conjunto</div>
+                    </div>
+                    <div class="rel-row ours">
+                        <div class="row-name">Este trabajo <span class="rel-badge">NUESTRO APORTE</span></div>
+                        <div>Núcleo Dafny compilado nativo a JS</div>
+                        <div>Solicitud exacta + reglas + P1–P4</div>
+                        <div>Interfaz guardada que solo confirma coherentes</div>
+                    </div>
+                </div>
+
+                <div class="rel-insight reveal delay-4">
+                    <div class="rel-insight-col">
+                        <div class="rel-insight-tag">BRECHA RESUELTA // EJECUCIÓN SIN SOLVER EXTERNO</div>
+                        <div class="rel-insight-text">
+                            No requiere desplegar Z3 o solvers pesados en servidores de producción: el código de decisión emite JavaScript optimizado con garantías matemáticas demostradas en origen.
+                        </div>
+                    </div>
+                    <div class="rel-insight-col">
+                        <div class="rel-insight-tag">DIFERENCIADOR CLAVE // INVARIANTE INDUCTIVO DE EVOLUCIÓN</div>
+                        <div class="rel-insight-text">
+                            Cierra la brecha entre verificación estática y mantenimiento dinámico: cada mutación es atómica y demostradamente preserva coherencia mediante lemas inductivos en Dafny.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // ESTADO DEL ARTE</div>
+                    <div>SLIDE [ 04 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 5: ARQUITECTURA (paper §5)
+                 ======================================================== -->
+            <section class="slide" id="slide-5">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // ARQUITECTURA DEL SISTEMA
+                    </div>
+                    <div class="meta-tag">§5 TRES CAPAS, UNA DIRECCIÓN</div>
+                </div>
+
+                <div class="kicker reveal delay-1">04 // CÓMO SE ORGANIZA EL SISTEMA</div>
+                <h2 class="slide-title reveal delay-2">Arquitectura en tres capas</h2>
+                <p class="slide-lede reveal delay-2">
+                    Flujo estrictamente unidireccional: la lógica de decisión formal reside exclusivamente en Dafny; TypeScript valida la entrada y expone una API idiomática para Node/Bun.
+                </p>
+
+                <div class="arch-flow reveal delay-3">
+                    <div class="arch-node core">
+                        <div>
+                            <div class="arch-kicker">Capa 1 // Verificación Formal</div>
+                            <h3 class="arch-name">Núcleo Dafny</h3>
+                            <div class="arch-role">Demostrado con SMT / Z3</div>
+                            <ul class="arch-list">
+                                <li><strong>Schema & Syntax:</strong> Tipos escalares finitos y AST</li>
+                                <li><strong>Eval & Coherence:</strong> Decisor ejecutable P1–P4</li>
+                                <li><strong>Transition:</strong> Interfaz guardada y lemas</li>
+                                <li><strong>BoundedCheck:</strong> Verificación acotada 259 estados</li>
+                            </ul>
+                        </div>
+                        <div class="arch-tagline">Garantía matemática formal · 0 suposiciones</div>
+                    </div>
+
+                    <div class="arch-arrow">→</div>
+
+                    <div class="arch-node wrap">
+                        <div>
+                            <div class="arch-kicker">Capa 2 // Envolturas Seguras</div>
+                            <h3 class="arch-name">TypeScript FFI</h3>
+                            <div class="arch-role">Frontera estricta y adaptadores</div>
+                            <ul class="arch-list">
+                                <li><strong>loadSchema & parseRule:</strong> Validación de entrada</li>
+                                <li><strong>Adaptadores FFI:</strong> Traducción bidireccional limpia</li>
+                                <li><strong>tryAdd / tryUpdate:</strong> Guardas transaccionales</li>
+                                <li><strong>Lectores defensivos:</strong> Invariantes en runtime</li>
+                            </ul>
+                        </div>
+                        <div class="arch-tagline">Punto único de conversión · Cero desbordes</div>
+                    </div>
+
+                    <div class="arch-arrow">→</div>
+
+                    <div class="arch-node dist">
+                        <div>
+                            <div class="arch-kicker">Capa 3 // Ecosistema</div>
+                            <h3 class="arch-name">Paquete npm</h3>
+                            <div class="arch-role">Consumo en producción</div>
+                            <ul class="arch-list">
+                                <li><strong>JS Compilado:</strong> Código optimizado directo</li>
+                                <li><strong>Tipos .d.ts:</strong> Autocompletado estricto</li>
+                                <li><strong>explain():</strong> Diagnóstico legible para humanos</li>
+                                <li><strong>Zero Dependencies:</strong> Corre en Node, Bun y Deno</li>
+                            </ul>
+                        </div>
+                        <div class="arch-tagline">Listo para npm · @grupo1/abac-verifier</div>
+                    </div>
+                </div>
+
+                <div class="arch-rule reveal delay-4">
+                    <div><strong>REGLA DE ORO DE LA FRONTERA:</strong> TypeScript valida la sintaxis, adapta datos y formatea diagnósticos — <strong>jamás reimplementa una decisión</strong>.</div>
+                    <div>§5 ARQUITECTURA</div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // ARQUITECTURA</div>
+                    <div>SLIDE [ 05 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 6: REQUERIMIENTOS FUNCIONALES (paper §6, RF-01–RF-11)
+                 ======================================================== -->
+            <section class="slide" id="slide-6">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // REQUERIMIENTOS FUNCIONALES
+                    </div>
+                    <div class="meta-tag">§6 RF-01 – RF-11 · ESPECIFICACIÓN Y FRONTERAS</div>
+                </div>
+
+                <div class="kicker reveal delay-1">05 // QUÉ HACE EL SISTEMA</div>
+                <h2 class="slide-title reveal delay-2">Requerimientos funcionales: RF-01 a RF-11</h2>
+                <p class="slide-lede reveal delay-2">
+                    11 requerimientos formales organizados en 3 ejes funcionales con interfaz explícita y comportamiento determinista ante errores:
+                </p>
+
+                <div class="rf-columns reveal delay-3">
+                    <div class="rf-col">
+                        <div>
+                            <div class="rf-col-header">
+                                <div class="rf-col-tag">01 // ESQUEMA Y SINTAXIS</div>
+                                <h3 class="rf-col-name">Carga y Validación</h3>
+                            </div>
+                            <div class="rf-items-list">
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-01 · <strong>loadSchema</strong>(raw)</div>
+                                    <div class="rf-item-desc">Carga atributos con familia, nombre, tipo y dominios finitos. Esquema malformado o duplicado produce <code>SchemaError</code>.</div>
+                                </div>
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-02 · <strong>parseRule</strong>(raw, schema)</div>
+                                    <div class="rf-item-desc">Analiza reglas Permit/Deny. Atributos o literales fuera de dominio son rechazados inmediatamente como fallo P4.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rf-col-guarantee">Filtro temprano: nada malformado ingresa a Dafny.</div>
+                    </div>
+
+                    <div class="rf-col featured">
+                        <div>
+                            <div class="rf-col-header">
+                                <div class="rf-col-tag">02 // EVOLUCIÓN GUARDADA</div>
+                                <h3 class="rf-col-name">El Núcleo Transaccional</h3>
+                            </div>
+                            <div class="rf-items-list">
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-03 · <strong>tryAdd</strong>(R, rule) <span class="rel-badge">NÚCLEO</span></div>
+                                    <div class="rf-item-desc">Añade solo si el nuevo ruleset es coherente. El rechazo entrega testigo genuino y deja el conjunto inalterado.</div>
+                                </div>
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-04 · <strong>tryUpdate</strong>(R, id, rule)</div>
+                                    <div class="rf-item-desc">Misma guarda que tryAdd. Si el ID no existe, emite rechazo P4 sin mutar el estado.</div>
+                                </div>
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-05 / 06 · <strong>remove</strong> & <strong>tryAddMany</strong></div>
+                                    <div class="rf-item-desc">Eliminación segura por monotonía. Adición en lote con semántica estricta de todo o nada al primer rechazo.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rf-col-guarantee">Preservación matemática: el conjunto en memoria siempre es coherente.</div>
+                    </div>
+
+                    <div class="rf-col ink-top">
+                        <div>
+                            <div class="rf-col-header">
+                                <div class="rf-col-tag">03 // CONSULTAS Y TOPES</div>
+                                <h3 class="rf-col-name">Decisión y Frontera</h3>
+                            </div>
+                            <div class="rf-items-list">
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-07 · <strong>checkCoherent</strong>(R)</div>
+                                    <div class="rf-item-desc">Informe con desglose independiente P1–P4 y primer testigo en orden canónico.</div>
+                                </div>
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-08 / 09 · <strong>evaluate</strong> & <strong>evaluateMany</strong></div>
+                                    <div class="rf-item-desc">Decisión de permiso/denegación lineal en el número de reglas ($O(|R|)$) sin enumerar el espacio cartesiano.</div>
+                                </div>
+                                <div class="rf-item-block">
+                                    <div class="rf-item-sig">RF-10 / 11 · <strong>explain</strong> & <strong>Topes</strong></div>
+                                    <div class="rf-item-desc">Explicaciones legibles solo en TS. Topes explícitos con rechazo antes de operaciones costosas (<code>TooLarge</code>).</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rf-col-guarantee">Escalabilidad acotada: costo lineal garantizado por solicitud.</div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // RF-01 – RF-11</div>
+                    <div>SLIDE [ 06 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 7: IMPLEMENTACIÓN (paper §7)
+                 ======================================================== -->
+            <section class="slide" id="slide-7">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // IMPLEMENTACIÓN FORMAL
+                    </div>
+                    <div class="meta-tag">§7 DECISIONES QUE HACEN VERIFICABLE EL NÚCLEO</div>
+                </div>
+
+                <div class="kicker reveal delay-1">06 // CÓMO SE HIZO VERIFICABLE</div>
+                <h2 class="slide-title reveal delay-2">Implementación: decisiones arquitectónicas clave</h2>
+                <p class="slide-lede reveal delay-2">
+                    Para lograr decidibilidad automática en Z3 y ejecución ultra-rápida en JavaScript, se adoptaron cuatro decisiones formales en Dafny:
+                </p>
+
+                <div class="impl-quad reveal delay-3">
+                    <div class="impl-box">
+                        <div>
+                            <div class="impl-box-head">
+                                <span class="impl-num">01</span>
+                                <h3 class="impl-title">Secuencias Posicionales e Índices</h3>
+                            </div>
+                            <div class="impl-text">
+                                <ul>
+                                    <li>Solicitud modelada como <strong>secuencia posicional</strong> pura en teoría de secuencias.</li>
+                                    <li>Barridos con <strong>índices numéricos explícitos</strong>: evita el rebanado de secuencias que provocaba copias cuadráticas de memoria.</li>
+                                    <li>Reglas en recursión estructural para conjuntos de tamaño acotado.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="impl-chip">seq&lt;Value&gt; · O(1) attribute lookup · Sin copias de memoria</div>
+                    </div>
+
+                    <div class="impl-box">
+                        <div>
+                            <div class="impl-box-head">
+                                <span class="impl-num">02</span>
+                                <h3 class="impl-title">Enumeración Constructiva & Lemas SMT</h3>
+                            </div>
+                            <div class="impl-text">
+                                <ul>
+                                    <li>Generación de solicitudes por <strong>producto cartesiano total</strong> sobre dominios finitos.</li>
+                                    <li>Chequeos P1–P4 como <strong>funciones ejecutables</strong> que devuelven testigos opcionales.</li>
+                                    <li>Lemas formales de <strong>solidez y completitud</strong>: todo testigo reportado viola genuinamente la propiedad (cero falsos positivos).</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="impl-chip">Soundness & Completeness lemmas · 0 falsos reportes</div>
+                    </div>
+
+                    <div class="impl-box">
+                        <div>
+                            <div class="impl-box-head">
+                                <span class="impl-num">03</span>
+                                <h3 class="impl-title">Frontera FFI y Lectores Defensivos</h3>
+                            </div>
+                            <div class="impl-text">
+                                <ul>
+                                    <li><strong>Único punto de conversión no verificado</strong> entre el módulo JavaScript compilado y TypeScript.</li>
+                                    <li>Lectores defensivos con validación estricta de invariantes ante cualquier anomalía estructural.</li>
+                                    <li>Aritmética de precisión arbitraria para enteros acotados en la frontera.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="impl-chip">Single unverified boundary · Lectores defensivos en runtime</div>
+                    </div>
+
+                    <div class="impl-box">
+                        <div>
+                            <div class="impl-box-head">
+                                <span class="impl-num">04</span>
+                                <h3 class="impl-title">Evaluación Lineal y Topes Previos</h3>
+                            </div>
+                            <div class="impl-text">
+                                <ul>
+                                    <li><code>evaluate</code> es <strong>lineal en el número de reglas ($O(|R|)$)</strong> y jamás enumera el espacio de solicitudes.</li>
+                                    <li>Chequeo estricto de topes previo a cualquier cálculo intensivo (16 valores, 64 reglas, 1M solicitudes).</li>
+                                    <li>Modo con topes liberados emite advertencia de rendimiento manteniendo veredictos exactos.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="impl-chip">O(|R|) evaluate · Topes explícitos con error TooLarge</div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // IMPLEMENTACIÓN</div>
+                    <div>SLIDE [ 07 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 8: RESULTADOS Y DATOS (BoundedCheck + §8)
+                 ======================================================== -->
+            <section class="slide" id="slide-8">
+                <div class="hairline-top"></div>
+
+                <div class="slide-header reveal delay-1">
+                    <div class="brand">
+                        <span class="square-tag"></span>
+                        ARTÍCULO // RESULTADOS Y EVIDENCIA
+                    </div>
+                    <div class="meta-tag">BOUNDEDCHECK.DFY · §8 DISPONIBILIDAD DE DATOS</div>
+                </div>
+
+                <div class="kicker reveal delay-1">07 // EVIDENCIA, NO SOLO PROMESAS</div>
+                <h2 class="slide-title reveal delay-2">Verificación exhaustiva acotada y disponibilidad</h2>
+
+                <div class="metrics-strip reveal delay-3">
+                    <div class="metric-box">
+                        <div class="metric-val">7 / 7</div>
+                        <div class="metric-label">Obligaciones Dafny</div>
+                        <div class="metric-detail">Verificación formal completa en Z3 SMT sin <code>assume</code> ni fallos.</div>
+                    </div>
+
+                    <div class="metric-box blue-top">
+                        <div class="metric-val">259</div>
+                        <div class="metric-label">Estados Explorados</div>
+                        <div class="metric-detail">BoundedModelCheck: universo total de rulesets hasta 3 reglas sobre 6 base.</div>
+                    </div>
+
+                    <div class="metric-box ink-top">
+                        <div class="metric-val">27 / 27</div>
+                        <div class="metric-label">Pruebas Bun Test</div>
+                        <div class="metric-detail">Suite automatizada en verde: parser, replay de testigos y adaptadores FFI.</div>
+                    </div>
+                </div>
+
+                <div class="results-row reveal delay-4">
+                    <div class="res-card">
+                        <div>
+                            <h3>BoundedModelCheck: Preservación y Testigos</h3>
+                            <p>
+                                <code>BoundedModelCheck()</code> en <code>BoundedCheck.dfy</code> demuestra exhaustivamente la preservación del invariante y la solidez/completitud del testigo ante cada transición de adición sobre los 259 estados posibles.
+                            </p>
+                            <ul>
+                                <li>Prueba formal constructiva que vincula semántica y autómata de estados.</li>
+                                <li>Demuestra que ningún estado incoherente es accesible mediante <code>tryAdd</code>.</li>
+                            </ul>
+                        </div>
+                        <div class="res-card-chip">dafny verify BoundedCheck.dfy: 7/7 obligaciones verificadas</div>
+                    </div>
+
+                    <div class="res-card blue-chip">
+                        <div>
+                            <h3>Topes de Escalabilidad y Reproducibilidad (§8)</h3>
+                            <p>
+                                El sistema garantiza decidibilidad predecible y reproducibilidad pública de todos sus artefactos de investigación:
+                            </p>
+                            <ul>
+                                <li><strong>Topes declarados:</strong> 16 valores por atributo · 64 reglas · 1 000 000 de solicitudes.</li>
+                                <li><strong>Reproducibilidad total:</strong> Modelos Dafny, scripts, casos de prueba y manuscrito Typst abiertos en GitHub.</li>
+                            </ul>
+                        </div>
+                        <div class="res-card-chip">github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final</div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div>@GRUPO1/ABAC-VERIFIER // EVIDENCIA</div>
+                    <div>SLIDE [ 08 / 13 ]</div>
+                </div>
+
+                <div class="hairline-bottom"></div>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 9: TIPOS DE DATOS PRIMITIVOS Y BASE
+                 ======================================================== -->
+            <section class="slide" id="slide-9">
                 <div class="hairline-top"></div>
 
                 <div class="slide-header reveal delay-1">
@@ -1846,21 +2426,21 @@
 
                 <div class="bottom-banner reveal delay-4">
                     <div>PRINCIPIO: Sin cadenas arbitrarias ni aritmética no lineal dentro del núcleo de verificación.</div>
-                    <div>SECCIÓN [ 02 / 13 ]</div>
+                    <div>SECCIÓN [ 09 / 13 ]</div>
                 </div>
 
                 <div class="slide-footer">
                     <div>@GRUPO1/ABAC-VERIFIER // DATOS ESCALARES</div>
-                    <div>SLIDE [ 02 / 13 ]</div>
+                    <div>SLIDE [ 09 / 13 ]</div>
                 </div>
 
                 <div class="hairline-bottom"></div>
             </section>
 
             <!-- ========================================================
-                 SLIDE 3: TIPOS DE DATOS COMPUESTOS
+                 SLIDE 10: TIPOS DE DATOS COMPUESTOS
                  ======================================================== -->
-            <section class="slide" id="slide-3">
+            <section class="slide" id="slide-10">
                 <div class="hairline-top"></div>
 
                 <div class="slide-header reveal delay-1">
@@ -1949,21 +2529,21 @@
 
                 <div class="bottom-banner reveal delay-4">
                     <div>PRINCIPIO: Representación inductiva en Dafny con recursión estructural pura sobre el AST.</div>
-                    <div>SECCIÓN [ 03 / 13 ]</div>
+                    <div>SECCIÓN [ 10 / 13 ]</div>
                 </div>
 
                 <div class="slide-footer">
                     <div>@GRUPO1/ABAC-VERIFIER // ESTRUCTURAS COMPUESTAS</div>
-                    <div>SLIDE [ 03 / 13 ]</div>
+                    <div>SLIDE [ 10 / 13 ]</div>
                 </div>
 
                 <div class="hairline-bottom"></div>
             </section>
 
             <!-- ========================================================
-                 SLIDE 4: INVARIANTES ESTRUCTURALES Y DE BIEN FORMACIÓN
+                 SLIDE 11: INVARIANTES ESTRUCTURALES Y DE BIEN FORMACIÓN
                  ======================================================== -->
-            <section class="slide" id="slide-4">
+            <section class="slide" id="slide-11">
                 <div class="hairline-top"></div>
 
                 <div class="slide-header reveal delay-1">
@@ -2071,21 +2651,21 @@
 
                 <div class="bottom-banner reveal delay-4">
                     <div>CONTRATOS FORMALES: Toda función y lema declara sus hipótesis (requires) y garantías verificadas (ensures).</div>
-                    <div>SECCIÓN [ 04 / 13 ]</div>
+                    <div>SECCIÓN [ 11 / 13 ]</div>
                 </div>
 
                 <div class="slide-footer">
                     <div>@GRUPO1/ABAC-VERIFIER // INVARIANTES ESTRUCTURALES</div>
-                    <div>SLIDE [ 04 / 13 ]</div>
+                    <div>SLIDE [ 11 / 13 ]</div>
                 </div>
 
                 <div class="hairline-bottom"></div>
             </section>
 
             <!-- ========================================================
-                 SLIDE 5: INVARIANTES DE COHERENCIA Y TRANSICIÓN
+                 SLIDE 12: INVARIANTES DE COHERENCIA Y TRANSICIÓN
                  ======================================================== -->
-            <section class="slide" id="slide-5">
+            <section class="slide" id="slide-12">
                 <div class="hairline-top"></div>
 
                 <div class="slide-header reveal delay-1">
@@ -2161,591 +2741,11 @@
 
                 <div class="bottom-banner reveal delay-4">
                     <div>VERIFICACIÓN: Lemas demostrados inductivamente sin axiomas no verificados en Dafny 4.</div>
-                    <div>SECCIÓN [ 05 / 13 ]</div>
+                    <div>SECCIÓN [ 12 / 13 ]</div>
                 </div>
 
                 <div class="slide-footer">
                     <div>@GRUPO1/ABAC-VERIFIER // COHERENCIA INDUCTIVA</div>
-                    <div>SLIDE [ 05 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 6: PROBLEMA Y MOTIVACIÓN (paper §1–§2)
-                 ======================================================== -->
-            <section class="slide" id="slide-6">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // PROBLEMA Y MOTIVACIÓN
-                    </div>
-                    <div class="meta-tag">§1 INTRODUCCIÓN · §2 DEFINICIÓN DEL PROBLEMA</div>
-                </div>
-
-                <div class="kicker reveal delay-1">01 // EL PROBLEMA DOBLE</div>
-                <h2 class="slide-title reveal delay-2">Reglas editadas a mano, errores silenciosos</h2>
-                <p class="slide-lede reveal delay-2">
-                    Hospitales, universidades y entidades públicas editan reglas ABAC en archivos y paneles <strong>sin chequeo formal</strong>. Cada edición puede bloquear una atención urgente o exponer un recurso confidencial.
-                </p>
-
-                <div class="problem-grid reveal delay-3">
-                    <div class="prob-card">
-                        <div>
-                            <div class="prob-tag">PROBLEMA A · DECISIÓN ESTÁTICA</div>
-                            <h3 class="prob-title">¿Es coherente este conjunto de reglas?</h3>
-                            <p class="prob-desc">
-                                Decidir formalmente P1–P4 y producir un <strong>testigo concreto</strong> ante cualquier fallo: solicitud exacta, identificadores y propiedad violada.
-                            </p>
-                            <div class="prob-callout">
-                                <strong>Dilema latente:</strong> Inconsistencias invisibles al ojo humano en catálogos de 50+ reglas editadas por múltiples áreas.
-                            </div>
-                        </div>
-                        <div class="prob-bullets">
-                            <div>▪ <strong>Contradicción (P1):</strong> Una solicitud activa un permiso y una denegación simultáneos.</div>
-                            <div>▪ <strong>Regla muerta (P2):</strong> Una regla jamás dispara bajo ninguna solicitud válida.</div>
-                            <div>▪ <strong>Sombreado (P3):</strong> Una regla es redundante o está oculta por otras reglas previas.</div>
-                        </div>
-                    </div>
-
-                    <div class="prob-card blue-top">
-                        <div>
-                            <div class="prob-tag">PROBLEMA B · EVOLUCIÓN DINÁMICA</div>
-                            <h3 class="prob-title">¿Sigue coherente tras cada cambio?</h3>
-                            <p class="prob-desc">
-                                Añadir, actualizar o eliminar reglas garantizando matemáticamente que el sistema <strong>jamás transite a un estado incoherente</strong>.
-                            </p>
-                            <div class="prob-callout">
-                                <strong>Riesgo en producción:</strong> Una excepción temporal de emergencia rompe invariantes globales sin aviso alguno.
-                            </div>
-                        </div>
-                        <div class="prob-bullets">
-                            <div>▪ <strong>Guarda transaccional:</strong> Rechazo total con testigo genuino, sin mutación parcial.</div>
-                            <div>▪ <strong>Preservación inductiva:</strong> Lemas formales garantizan que todo estado alcanzable es coherente.</div>
-                            <div>▪ <strong>Monotonía:</strong> La eliminación de reglas preserva coherencia por subconjuntos.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="thesis-banner reveal delay-4">
-                    <div><strong>INVARIANTE DE TESIS:</strong> Todo conjunto de reglas alcanzable a través de la interfaz guardada es inductivamente coherente.</div>
-                    <div>SECCIÓN [ 06 / 13 ]</div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // PROBLEMA</div>
-                    <div>SLIDE [ 06 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 7: OBJETIVOS (paper §3: OG + OE1–OE4)
-                 ======================================================== -->
-            <section class="slide" id="slide-7">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // OBJETIVOS DEL PROYECTO
-                    </div>
-                    <div class="meta-tag">§3 OBJETIVO GENERAL Y ESPECÍFICOS</div>
-                </div>
-
-                <div class="kicker reveal delay-1">02 // COMPROMISOS FORMALES Y METAS</div>
-                <h2 class="slide-title reveal delay-2">Objetivo general y específicos</h2>
-
-                <div class="obj-general reveal delay-2">
-                    <div class="og-label">OBJETIVO GENERAL</div>
-                    <div class="og-text">
-                        Proponer un verificador de coherencia para políticas ABAC <strong>formalmente verificado</strong>, con garantías de coherencia y escalabilidad acotada, distribuido como <strong>paquete npm</strong> cuyo núcleo de decisión está probado en Dafny y compilado a JavaScript.
-                    </div>
-                </div>
-
-                <div class="obj-four-grid reveal delay-3">
-                    <div class="obj-col">
-                        <div>
-                            <div class="obj-col-id">OE1 // DAFNY</div>
-                            <h3 class="obj-col-title">Formalización y Semántica</h3>
-                            <p class="obj-col-text">
-                                Formalizar en Dafny el lenguaje ABAC (Permit/Deny sobre sujeto, recurso, acción y entorno; ¬ ∧ ∨, enteros acotados), la evaluación y las propiedades P1–P4.
-                            </p>
-                        </div>
-                        <div class="obj-col-chip">§3.1 · Sintaxis, AST y P1–P4</div>
-                    </div>
-
-                    <div class="obj-col blue-top">
-                        <div>
-                            <div class="obj-col-id">OE2 // GUARDA</div>
-                            <h3 class="obj-col-title">Evolución Guardada</h3>
-                            <p class="obj-col-text">
-                                Demostrar preservación inductiva por lemas: la interfaz total solo confirma transiciones coherentes; el rechazo entrega testigo sin mutación.
-                            </p>
-                        </div>
-                        <div class="obj-col-chip">§3.2 · Preservación inductiva</div>
-                    </div>
-
-                    <div class="obj-col blue-top">
-                        <div>
-                            <div class="obj-col-id">OE3 // LÍMITES</div>
-                            <h3 class="obj-col-title">Escalabilidad Acotada</h3>
-                            <p class="obj-col-text">
-                                Demostrar decidibilidad dentro de dominios finitos con topes explícitos; evaluación lineal en reglas sin enumerar el espacio cartesiano.
-                            </p>
-                        </div>
-                        <div class="obj-col-chip">§3.3 · Decisión acotada y topes</div>
-                    </div>
-
-                    <div class="obj-col">
-                        <div>
-                            <div class="obj-col-id">OE4 // NPM</div>
-                            <h3 class="obj-col-title">Empaquetado Seguro</h3>
-                            <p class="obj-col-text">
-                                Compilar el núcleo a JavaScript y envolverlo en TypeScript estricto con separación de roles: validar, adaptar y presentar sin redecidir.
-                            </p>
-                        </div>
-                        <div class="obj-col-chip">§3.4 · FFI y paquete npm</div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // OBJETIVOS OE1–OE4</div>
-                    <div>SLIDE [ 07 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 8: TRABAJO RELACIONADO (paper §4 + tabla)
-                 ======================================================== -->
-            <section class="slide" id="slide-8">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // TRABAJO RELACIONADO
-                    </div>
-                    <div class="meta-tag">§4 SÍNTESIS COMPARATIVA</div>
-                </div>
-
-                <div class="kicker reveal delay-1">03 // DÓNDE NOS UBICAMOS</div>
-                <h2 class="slide-title reveal delay-2">Trabajo relacionado: síntesis comparativa</h2>
-                <p class="slide-lede reveal delay-2">
-                    Los enfoques previos deciden <strong>por consulta</strong> (traducción pesada a SMT o algoritmos heurísticos). Este trabajo <strong>compila el decisor desde pruebas formales</strong> y sella el ciclo con evolución guardada.
-                </p>
-
-                <div class="rel-table reveal delay-3">
-                    <div class="rel-header">
-                        <div>ENFOQUE</div>
-                        <div>MÉTODO DE DECISIÓN</div>
-                        <div>TESTIGO ENTREGADO</div>
-                        <div>GARANTÍA DE EVOLUCIÓN</div>
-                    </div>
-                    <div class="rel-row">
-                        <div class="row-name">XACML + SMT</div>
-                        <div>Traducción externa a SMT por consulta</div>
-                        <div>Modelo genérico del solucionador</div>
-                        <div>Sin invariante de estado ni evolución</div>
-                    </div>
-                    <div class="rel-row">
-                        <div class="row-name">Conflictos ABAC</div>
-                        <div>Algoritmos heurísticos de pares de reglas</div>
-                        <div>Par de reglas en conflicto</div>
-                        <div>Sin guarda transaccional ante cambios</div>
-                    </div>
-                    <div class="rel-row">
-                        <div class="row-name">Cedar (AWS)</div>
-                        <div>Lenguaje analizable verificado en Lean</div>
-                        <div>Diagnósticos sintácticos y de alcance</div>
-                        <div>Lenguaje seguro, sin invariante de conjunto</div>
-                    </div>
-                    <div class="rel-row ours">
-                        <div class="row-name">Este trabajo <span class="rel-badge">NUESTRO APORTE</span></div>
-                        <div>Núcleo Dafny compilado nativo a JS</div>
-                        <div>Solicitud exacta + reglas + P1–P4</div>
-                        <div>Interfaz guardada que solo confirma coherentes</div>
-                    </div>
-                </div>
-
-                <div class="rel-insight reveal delay-4">
-                    <div class="rel-insight-col">
-                        <div class="rel-insight-tag">BRECHA RESUELTA // EJECUCIÓN SIN SOLVER EXTERNO</div>
-                        <div class="rel-insight-text">
-                            No requiere desplegar Z3 o solvers pesados en servidores de producción: el código de decisión emite JavaScript optimizado con garantías matemáticas demostradas en origen.
-                        </div>
-                    </div>
-                    <div class="rel-insight-col">
-                        <div class="rel-insight-tag">DIFERENCIADOR CLAVE // INVARIANTE INDUCTIVO DE EVOLUCIÓN</div>
-                        <div class="rel-insight-text">
-                            Cierra la brecha entre verificación estática y mantenimiento dinámico: cada mutación es atómica y demostradamente preserva coherencia mediante lemas inductivos en Dafny.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // ESTADO DEL ARTE</div>
-                    <div>SLIDE [ 08 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 9: ARQUITECTURA (paper §5)
-                 ======================================================== -->
-            <section class="slide" id="slide-9">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // ARQUITECTURA DEL SISTEMA
-                    </div>
-                    <div class="meta-tag">§5 TRES CAPAS, UNA DIRECCIÓN</div>
-                </div>
-
-                <div class="kicker reveal delay-1">04 // CÓMO SE ORGANIZA EL SISTEMA</div>
-                <h2 class="slide-title reveal delay-2">Arquitectura en tres capas</h2>
-                <p class="slide-lede reveal delay-2">
-                    Flujo estrictamente unidireccional: la lógica de decisión formal reside exclusivamente en Dafny; TypeScript valida la entrada y expone una API idiomática para Node/Bun.
-                </p>
-
-                <div class="arch-flow reveal delay-3">
-                    <div class="arch-node core">
-                        <div>
-                            <div class="arch-kicker">Capa 1 // Verificación Formal</div>
-                            <h3 class="arch-name">Núcleo Dafny</h3>
-                            <div class="arch-role">Demostrado con SMT / Z3</div>
-                            <ul class="arch-list">
-                                <li><strong>Schema & Syntax:</strong> Tipos escalares finitos y AST</li>
-                                <li><strong>Eval & Coherence:</strong> Decisor ejecutable P1–P4</li>
-                                <li><strong>Transition:</strong> Interfaz guardada y lemas</li>
-                                <li><strong>BoundedCheck:</strong> Verificación acotada 259 estados</li>
-                            </ul>
-                        </div>
-                        <div class="arch-tagline">Garantía matemática formal · 0 suposiciones</div>
-                    </div>
-
-                    <div class="arch-arrow">→</div>
-
-                    <div class="arch-node wrap">
-                        <div>
-                            <div class="arch-kicker">Capa 2 // Envolturas Seguras</div>
-                            <h3 class="arch-name">TypeScript FFI</h3>
-                            <div class="arch-role">Frontera estricta y adaptadores</div>
-                            <ul class="arch-list">
-                                <li><strong>loadSchema & parseRule:</strong> Validación de entrada</li>
-                                <li><strong>Adaptadores FFI:</strong> Traducción bidireccional limpia</li>
-                                <li><strong>tryAdd / tryUpdate:</strong> Guardas transaccionales</li>
-                                <li><strong>Lectores defensivos:</strong> Invariantes en runtime</li>
-                            </ul>
-                        </div>
-                        <div class="arch-tagline">Punto único de conversión · Cero desbordes</div>
-                    </div>
-
-                    <div class="arch-arrow">→</div>
-
-                    <div class="arch-node dist">
-                        <div>
-                            <div class="arch-kicker">Capa 3 // Ecosistema</div>
-                            <h3 class="arch-name">Paquete npm</h3>
-                            <div class="arch-role">Consumo en producción</div>
-                            <ul class="arch-list">
-                                <li><strong>JS Compilado:</strong> Código optimizado directo</li>
-                                <li><strong>Tipos .d.ts:</strong> Autocompletado estricto</li>
-                                <li><strong>explain():</strong> Diagnóstico legible para humanos</li>
-                                <li><strong>Zero Dependencies:</strong> Corre en Node, Bun y Deno</li>
-                            </ul>
-                        </div>
-                        <div class="arch-tagline">Listo para npm · @grupo1/abac-verifier</div>
-                    </div>
-                </div>
-
-                <div class="arch-rule reveal delay-4">
-                    <div><strong>REGLA DE ORO DE LA FRONTERA:</strong> TypeScript valida la sintaxis, adapta datos y formatea diagnósticos — <strong>jamás reimplementa una decisión</strong>.</div>
-                    <div>§5 ARQUITECTURA</div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // ARQUITECTURA</div>
-                    <div>SLIDE [ 09 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 10: REQUERIMIENTOS FUNCIONALES (paper §6, RF-01–RF-11)
-                 ======================================================== -->
-            <section class="slide" id="slide-10">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // REQUERIMIENTOS FUNCIONALES
-                    </div>
-                    <div class="meta-tag">§6 RF-01 – RF-11 · ESPECIFICACIÓN Y FRONTERAS</div>
-                </div>
-
-                <div class="kicker reveal delay-1">05 // QUÉ HACE EL SISTEMA</div>
-                <h2 class="slide-title reveal delay-2">Requerimientos funcionales: RF-01 a RF-11</h2>
-                <p class="slide-lede reveal delay-2">
-                    11 requerimientos formales organizados en 3 ejes funcionales con interfaz explícita y comportamiento determinista ante errores:
-                </p>
-
-                <div class="rf-columns reveal delay-3">
-                    <div class="rf-col">
-                        <div>
-                            <div class="rf-col-header">
-                                <div class="rf-col-tag">01 // ESQUEMA Y SINTAXIS</div>
-                                <h3 class="rf-col-name">Carga y Validación</h3>
-                            </div>
-                            <div class="rf-items-list">
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-01 · <strong>loadSchema</strong>(raw)</div>
-                                    <div class="rf-item-desc">Carga atributos con familia, nombre, tipo y dominios finitos. Esquema malformado o duplicado produce <code>SchemaError</code>.</div>
-                                </div>
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-02 · <strong>parseRule</strong>(raw, schema)</div>
-                                    <div class="rf-item-desc">Analiza reglas Permit/Deny. Atributos o literales fuera de dominio son rechazados inmediatamente como fallo P4.</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="rf-col-guarantee">Filtro temprano: nada malformado ingresa a Dafny.</div>
-                    </div>
-
-                    <div class="rf-col featured">
-                        <div>
-                            <div class="rf-col-header">
-                                <div class="rf-col-tag">02 // EVOLUCIÓN GUARDADA</div>
-                                <h3 class="rf-col-name">El Núcleo Transaccional</h3>
-                            </div>
-                            <div class="rf-items-list">
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-03 · <strong>tryAdd</strong>(R, rule) <span class="rel-badge">NÚCLEO</span></div>
-                                    <div class="rf-item-desc">Añade solo si el nuevo ruleset es coherente. El rechazo entrega testigo genuino y deja el conjunto inalterado.</div>
-                                </div>
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-04 · <strong>tryUpdate</strong>(R, id, rule)</div>
-                                    <div class="rf-item-desc">Misma guarda que tryAdd. Si el ID no existe, emite rechazo P4 sin mutar el estado.</div>
-                                </div>
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-05 / 06 · <strong>remove</strong> & <strong>tryAddMany</strong></div>
-                                    <div class="rf-item-desc">Eliminación segura por monotonía. Adición en lote con semántica estricta de todo o nada al primer rechazo.</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="rf-col-guarantee">Preservación matemática: el conjunto en memoria siempre es coherente.</div>
-                    </div>
-
-                    <div class="rf-col ink-top">
-                        <div>
-                            <div class="rf-col-header">
-                                <div class="rf-col-tag">03 // CONSULTAS Y TOPES</div>
-                                <h3 class="rf-col-name">Decisión y Frontera</h3>
-                            </div>
-                            <div class="rf-items-list">
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-07 · <strong>checkCoherent</strong>(R)</div>
-                                    <div class="rf-item-desc">Informe con desglose independiente P1–P4 y primer testigo en orden canónico.</div>
-                                </div>
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-08 / 09 · <strong>evaluate</strong> & <strong>evaluateMany</strong></div>
-                                    <div class="rf-item-desc">Decisión de permiso/denegación lineal en el número de reglas ($O(|R|)$) sin enumerar el espacio cartesiano.</div>
-                                </div>
-                                <div class="rf-item-block">
-                                    <div class="rf-item-sig">RF-10 / 11 · <strong>explain</strong> & <strong>Topes</strong></div>
-                                    <div class="rf-item-desc">Explicaciones legibles solo en TS. Topes explícitos con rechazo antes de operaciones costosas (<code>TooLarge</code>).</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="rf-col-guarantee">Escalabilidad acotada: costo lineal garantizado por solicitud.</div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // RF-01 – RF-11</div>
-                    <div>SLIDE [ 10 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 11: IMPLEMENTACIÓN (paper §7)
-                 ======================================================== -->
-            <section class="slide" id="slide-11">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // IMPLEMENTACIÓN FORMAL
-                    </div>
-                    <div class="meta-tag">§7 DECISIONES QUE HACEN VERIFICABLE EL NÚCLEO</div>
-                </div>
-
-                <div class="kicker reveal delay-1">06 // CÓMO SE HIZO VERIFICABLE</div>
-                <h2 class="slide-title reveal delay-2">Implementación: decisiones arquitectónicas clave</h2>
-                <p class="slide-lede reveal delay-2">
-                    Para lograr decidibilidad automática en Z3 y ejecución ultra-rápida en JavaScript, se adoptaron cuatro decisiones formales en Dafny:
-                </p>
-
-                <div class="impl-quad reveal delay-3">
-                    <div class="impl-box">
-                        <div>
-                            <div class="impl-box-head">
-                                <span class="impl-num">01</span>
-                                <h3 class="impl-title">Secuencias Posicionales e Índices</h3>
-                            </div>
-                            <div class="impl-text">
-                                <ul>
-                                    <li>Solicitud modelada como <strong>secuencia posicional</strong> pura en teoría de secuencias.</li>
-                                    <li>Barridos con <strong>índices numéricos explícitos</strong>: evita el rebanado de secuencias que provocaba copias cuadráticas de memoria.</li>
-                                    <li>Reglas en recursión estructural para conjuntos de tamaño acotado.</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="impl-chip">seq&lt;Value&gt; · O(1) attribute lookup · Sin copias de memoria</div>
-                    </div>
-
-                    <div class="impl-box">
-                        <div>
-                            <div class="impl-box-head">
-                                <span class="impl-num">02</span>
-                                <h3 class="impl-title">Enumeración Constructiva & Lemas SMT</h3>
-                            </div>
-                            <div class="impl-text">
-                                <ul>
-                                    <li>Generación de solicitudes por <strong>producto cartesiano total</strong> sobre dominios finitos.</li>
-                                    <li>Chequeos P1–P4 como <strong>funciones ejecutables</strong> que devuelven testigos opcionales.</li>
-                                    <li>Lemas formales de <strong>solidez y completitud</strong>: todo testigo reportado viola genuinamente la propiedad (cero falsos positivos).</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="impl-chip">Soundness & Completeness lemmas · 0 falsos reportes</div>
-                    </div>
-
-                    <div class="impl-box">
-                        <div>
-                            <div class="impl-box-head">
-                                <span class="impl-num">03</span>
-                                <h3 class="impl-title">Frontera FFI y Lectores Defensivos</h3>
-                            </div>
-                            <div class="impl-text">
-                                <ul>
-                                    <li><strong>Único punto de conversión no verificado</strong> entre el módulo JavaScript compilado y TypeScript.</li>
-                                    <li>Lectores defensivos con validación estricta de invariantes ante cualquier anomalía estructural.</li>
-                                    <li>Aritmética de precisión arbitraria para enteros acotados en la frontera.</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="impl-chip">Single unverified boundary · Lectores defensivos en runtime</div>
-                    </div>
-
-                    <div class="impl-box">
-                        <div>
-                            <div class="impl-box-head">
-                                <span class="impl-num">04</span>
-                                <h3 class="impl-title">Evaluación Lineal y Topes Previos</h3>
-                            </div>
-                            <div class="impl-text">
-                                <ul>
-                                    <li><code>evaluate</code> es <strong>lineal en el número de reglas ($O(|R|)$)</strong> y jamás enumera el espacio de solicitudes.</li>
-                                    <li>Chequeo estricto de topes previo a cualquier cálculo intensivo (16 valores, 64 reglas, 1M solicitudes).</li>
-                                    <li>Modo con topes liberados emite advertencia de rendimiento manteniendo veredictos exactos.</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="impl-chip">O(|R|) evaluate · Topes explícitos con error TooLarge</div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // IMPLEMENTACIÓN</div>
-                    <div>SLIDE [ 11 / 13 ]</div>
-                </div>
-
-                <div class="hairline-bottom"></div>
-            </section>
-
-            <!-- ========================================================
-                 SLIDE 12: RESULTADOS Y DATOS (BoundedCheck + §8)
-                 ======================================================== -->
-            <section class="slide" id="slide-12">
-                <div class="hairline-top"></div>
-
-                <div class="slide-header reveal delay-1">
-                    <div class="brand">
-                        <span class="square-tag"></span>
-                        ARTÍCULO // RESULTADOS Y EVIDENCIA
-                    </div>
-                    <div class="meta-tag">BOUNDEDCHECK.DFY · §8 DISPONIBILIDAD DE DATOS</div>
-                </div>
-
-                <div class="kicker reveal delay-1">07 // EVIDENCIA, NO SOLO PROMESAS</div>
-                <h2 class="slide-title reveal delay-2">Verificación exhaustiva acotada y disponibilidad</h2>
-
-                <div class="metrics-strip reveal delay-3">
-                    <div class="metric-box">
-                        <div class="metric-val">7 / 7</div>
-                        <div class="metric-label">Obligaciones Dafny</div>
-                        <div class="metric-detail">Verificación formal completa en Z3 SMT sin <code>assume</code> ni fallos.</div>
-                    </div>
-
-                    <div class="metric-box blue-top">
-                        <div class="metric-val">259</div>
-                        <div class="metric-label">Estados Explorados</div>
-                        <div class="metric-detail">BoundedModelCheck: universo total de rulesets hasta 3 reglas sobre 6 base.</div>
-                    </div>
-
-                    <div class="metric-box ink-top">
-                        <div class="metric-val">27 / 27</div>
-                        <div class="metric-label">Pruebas Bun Test</div>
-                        <div class="metric-detail">Suite automatizada en verde: parser, replay de testigos y adaptadores FFI.</div>
-                    </div>
-                </div>
-
-                <div class="results-row reveal delay-4">
-                    <div class="res-card">
-                        <div>
-                            <h3>BoundedModelCheck: Preservación y Testigos</h3>
-                            <p>
-                                <code>BoundedModelCheck()</code> en <code>BoundedCheck.dfy</code> demuestra exhaustivamente la preservación del invariante y la solidez/completitud del testigo ante cada transición de adición sobre los 259 estados posibles.
-                            </p>
-                            <ul>
-                                <li>Prueba formal constructiva que vincula semántica y autómata de estados.</li>
-                                <li>Demuestra que ningún estado incoherente es accesible mediante <code>tryAdd</code>.</li>
-                            </ul>
-                        </div>
-                        <div class="res-card-chip">dafny verify BoundedCheck.dfy: 7/7 obligaciones verificadas</div>
-                    </div>
-
-                    <div class="res-card blue-chip">
-                        <div>
-                            <h3>Topes de Escalabilidad y Reproducibilidad (§8)</h3>
-                            <p>
-                                El sistema garantiza decidibilidad predecible y reproducibilidad pública de todos sus artefactos de investigación:
-                            </p>
-                            <ul>
-                                <li><strong>Topes declarados:</strong> 16 valores por atributo · 64 reglas · 1 000 000 de solicitudes.</li>
-                                <li><strong>Reproducibilidad total:</strong> Modelos Dafny, scripts, casos de prueba y manuscrito Typst abiertos en GitHub.</li>
-                            </ul>
-                        </div>
-                        <div class="res-card-chip">github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final</div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div>@GRUPO1/ABAC-VERIFIER // EVIDENCIA</div>
                     <div>SLIDE [ 12 / 13 ]</div>
                 </div>
 
