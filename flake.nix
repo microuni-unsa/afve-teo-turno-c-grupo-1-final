@@ -30,6 +30,7 @@
             dafny
             bun
             nodejs
+            uppaal
           ])
           (with unstable; [
             typst

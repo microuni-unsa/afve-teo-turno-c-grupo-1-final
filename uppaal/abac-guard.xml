@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+<declaration>
+const int ROLE_N = 2;
+const int DEPT_N = 1;
+const int CLR_LO = 1;
+const int CLR_N = 1;
+const int RT_N = 1;
+const int SEN_LO = 4;
+const int SEN_N = 1;
+const int ACT_N = 2;
+const int HR_N = 2;
+const int HR_VALS[2] = { 8, 18 };
+const int EM_N = 2;
+const int NREQ = ROLE_N * DEPT_N * CLR_N * RT_N * SEN_N * ACT_N * HR_N * EM_N;
+const int MAX_R = 3;
+const int POOL_N = 10;
+const int poolEffect[10] = { 0, 1, 0, 1, 0, 0, 0, 0, 1, 0 };
+const int poolValid[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+int committed[3];
+int csz = 0;
+int cand[3];
+int cszC = 0;
+int witIdx = -1;
+int witA = -1;
+int witB = -1;
+int wprop = 0;
+int lastOp = -1;
+bool rejP1 = false;
+bool rejP2 = false;
+bool rejP3 = false;
+bool rejP4 = false;
+bool rejUnknownP4 = false;
+bool cleanAccepted = false;
+bool inC(int r) {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (committed[j] == r) { return true; }
+  }
+  return false;
+}
+bool inCexcept(int r, int skip) {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (j != skip &amp;&amp; committed[j] == r) { return true; }
+  }
+  return false;
+}
+bool applies_idx(int r, int idx) {
+  int t;
+  int em;
+  int hi;
+  int hr;
+  int ac;
+  int si;
+  int se;
+  int rt;
+  int ci;
+  int cl;
+  int dept;
+  int role;
+  t = idx;
+  em = t % EM_N; t = t / EM_N;
+  hi = t % HR_N; t = t / HR_N;
+  hr = HR_VALS[hi];
+  ac = t % ACT_N; t = t / ACT_N;
+  si = t % SEN_N; t = t / SEN_N;
+  se = SEN_LO + si;
+  rt = t % RT_N; t = t / RT_N;
+  ci = t % CLR_N; t = t / CLR_N;
+  cl = CLR_LO + ci;
+  dept = t % DEPT_N; t = t / DEPT_N;
+  role = t % ROLE_N;
+  if (r == 0) { return role == 0 &amp;&amp; ac == 0; }
+  if (r == 1) { return ac == 1 &amp;&amp; se &gt;= 4 &amp;&amp; cl &lt;= 2; }
+  if (r == 2) { return em == 1 &amp;&amp; ac == 0; }
+  if (r == 3) { return role == 0 &amp;&amp; ac == 0; }
+  if (r == 4) { return role == 0; }
+  if (r == 5) { return role == 0 &amp;&amp; dept == 0; }
+  if (r == 6) { return cl &gt; 5 &amp;&amp; cl &lt; 2; }
+  if (r == 7) { return em == 1; }
+  if (r == 8) { return hr &gt;= 18; }
+  return em == 0;
+}
+bool ruleFires(int r) {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (applies_idx(r, i)) { return true; }
+  }
+  return false;
+}
+bool permitAppliesAt(int idx) {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (poolEffect[committed[j]] == 0 &amp;&amp; applies_idx(committed[j], idx)) { return true; }
+  }
+  return false;
+}
+bool denyAppliesAt(int idx) {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (poolEffect[committed[j]] == 1 &amp;&amp; applies_idx(committed[j], idx)) { return true; }
+  }
+  return false;
+}
+bool otherAppliesAt(int skipRule, int idx) {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (committed[j] != skipRule &amp;&amp; applies_idx(committed[j], idx)) { return true; }
+  }
+  return false;
+}
+bool soleWit(int r) {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (applies_idx(r, i) &amp;&amp; !otherAppliesAt(r, i)) { return true; }
+  }
+  return false;
+}
+bool p1() {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (permitAppliesAt(i) &amp;&amp; denyAppliesAt(i)) { return false; }
+  }
+  return true;
+}
+bool p2() {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (!ruleFires(committed[j])) { return false; }
+  }
+  return true;
+}
+bool p3() {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (!soleWit(committed[j])) { return false; }
+  }
+  return true;
+}
+bool p4() {
+  int j;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (poolValid[committed[j]] == 0) { return false; }
+  }
+  return true;
+}
+bool coherent() { return p1() &amp;&amp; p2() &amp;&amp; p3() &amp;&amp; p4(); }
+bool permitAppliesAtC(int idx) {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (poolEffect[cand[j]] == 0 &amp;&amp; applies_idx(cand[j], idx)) { return true; }
+  }
+  return false;
+}
+bool denyAppliesAtC(int idx) {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (poolEffect[cand[j]] == 1 &amp;&amp; applies_idx(cand[j], idx)) { return true; }
+  }
+  return false;
+}
+bool otherAppliesAtC(int skipRule, int idx) {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (cand[j] != skipRule &amp;&amp; applies_idx(cand[j], idx)) { return true; }
+  }
+  return false;
+}
+bool soleWitC(int r) {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (applies_idx(r, i) &amp;&amp; !otherAppliesAtC(r, i)) { return true; }
+  }
+  return false;
+}
+bool p1C() {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (permitAppliesAtC(i) &amp;&amp; denyAppliesAtC(i)) { return false; }
+  }
+  return true;
+}
+bool p2C() {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (!ruleFires(cand[j])) { return false; }
+  }
+  return true;
+}
+bool p3C() {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (!soleWitC(cand[j])) { return false; }
+  }
+  return true;
+}
+bool p4C() {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (poolValid[cand[j]] == 0) { return false; }
+  }
+  return true;
+}
+bool coherentC() { return p1C() &amp;&amp; p2C() &amp;&amp; p3C() &amp;&amp; p4C(); }
+int failPropC() {
+  if (!p1C()) { return 1; }
+  if (!p2C()) { return 2; }
+  if (!p3C()) { return 3; }
+  return 4;
+}
+bool isCleanC() {
+  return cszC == 3 &amp;&amp; cand[0] == 0 &amp;&amp; cand[1] == 1 &amp;&amp; cand[2] == 2;
+}
+int firstFiringC(int eff, int idx) {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) {
+    if (poolEffect[cand[j]] == eff &amp;&amp; applies_idx(cand[j], idx)) { return cand[j]; }
+  }
+  return -1;
+}
+int firstFireIdx(int r) {
+  int i;
+  for (i = 0; i &lt; NREQ; i = i + 1) {
+    if (applies_idx(r, i)) { return i; }
+  }
+  return -1;
+}
+void recordWitnessC(int k) {
+  int i;
+  int j;
+  wprop = k;
+  witIdx = -1;
+  witA = -1;
+  witB = -1;
+  if (k == 1) {
+    for (i = 0; i &lt; NREQ; i = i + 1) {
+      if (witIdx == -1 &amp;&amp; permitAppliesAtC(i) &amp;&amp; denyAppliesAtC(i)) {
+        witIdx = i;
+        witA = firstFiringC(0, i);
+        witB = firstFiringC(1, i);
+      }
+    }
+  } else if (k == 2) {
+    for (j = 0; j &lt; cszC; j = j + 1) {
+      if (witA == -1 &amp;&amp; !ruleFires(cand[j])) { witA = cand[j]; }
+    }
+  } else if (k == 3) {
+    for (j = 0; j &lt; cszC; j = j + 1) {
+      if (witA == -1 &amp;&amp; !soleWitC(cand[j])) {
+        witA = cand[j];
+        witIdx = firstFireIdx(cand[j]);
+      }
+    }
+  } else {
+    for (j = 0; j &lt; cszC; j = j + 1) {
+      if (witA == -1 &amp;&amp; poolValid[cand[j]] == 0) { witA = cand[j]; }
+    }
+  }
+}
+void clearWit() {
+  wprop = 0;
+  witIdx = -1;
+  witA = -1;
+  witB = -1;
+}
+void clearCand() {
+  cszC = 0;
+  cand[0] = 0;
+  cand[1] = 0;
+  cand[2] = 0;
+}
+void candFillAdd(int pick) {
+  int pos;
+  int j;
+  pos = 0;
+  while (pos &lt; csz &amp;&amp; committed[pos] &lt; pick) { pos = pos + 1; }
+  for (j = 0; j &lt; csz; j = j + 1) { cand[j] = committed[j]; }
+  j = csz;
+  while (j &gt; pos) { cand[j] = cand[j - 1]; j = j - 1; }
+  cand[pos] = pick;
+  cszC = csz + 1;
+}
+void candFillUpd(int slot, int pick) {
+  int n;
+  int j;
+  int pos;
+  n = 0;
+  for (j = 0; j &lt; csz; j = j + 1) {
+    if (j != slot) { cand[n] = committed[j]; n = n + 1; }
+  }
+  pos = 0;
+  while (pos &lt; n &amp;&amp; cand[pos] &lt; pick) { pos = pos + 1; }
+  j = n;
+  while (j &gt; pos) { cand[j] = cand[j - 1]; j = j - 1; }
+  cand[pos] = pick;
+  cszC = n + 1;
+}
+void acceptCand(int op) {
+  int j;
+  for (j = 0; j &lt; cszC; j = j + 1) { committed[j] = cand[j]; }
+  csz = cszC;
+  clearCand();
+  clearWit();
+  lastOp = op;
+  if (csz == 3 &amp;&amp; committed[0] == 0 &amp;&amp; committed[1] == 1 &amp;&amp; committed[2] == 2) { cleanAccepted = true; }
+}
+void rejectCand(int op, int k) {
+  recordWitnessC(k);
+  if (k == 1) { rejP1 = true; }
+  else if (k == 2) { rejP2 = true; }
+  else if (k == 3) { rejP3 = true; }
+  else { rejP4 = true; }
+  lastOp = op;
+  clearCand();
+}
+void doRemoveC(int slot) {
+  int j;
+  for (j = slot; j + 1 &lt; csz; j = j + 1) { committed[j] = committed[j + 1]; }
+  csz = csz - 1;
+  committed[csz] = 0;
+  clearWit();
+  lastOp = 2;
+}
+void onUnknown(int id) {
+  wprop = 4;
+  witIdx = -1;
+  witA = id;
+  witB = -1;
+  rejUnknownP4 = true;
+  lastOp = 3;
+}
+int rejP() {
+  return failPropC();
+}
+void rejectUnified(int op) {
+  int k;
+  k = failPropC();
+  rejectCand(op, k);
+}
+</declaration>
+<template>
+<name>Admin</name>
+<declaration></declaration>
+<location id="id0" x="-420" y="0">
+<name x="-445" y="-35">Empty</name>
+</location>
+<location id="id1" x="180" y="0">
+<name x="170" y="-32">Coherent</name>
+</location>
+<location id="id2" x="-120" y="-220">
+<name x="-155" y="-255">TryingAddE</name>
+<committed/>
+</location>
+<location id="id3" x="600" y="-220">
+<name x="565" y="-255">TryingAddC</name>
+<committed/>
+</location>
+<location id="id4" x="600" y="220">
+<name x="565" y="248">TryingUpdC</name>
+<committed/>
+</location>
+<init ref="id0"/>
+<transition><source ref="id0"/><target ref="id2"/>
+<label kind="select" x="-500" y="-180">pick : int[0,9]</label>
+<label kind="guard" x="-500" y="-162">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
+<label kind="assignment" x="-500" y="-144">candFillAdd(pick)</label>
+<nail x="-340" y="-110"/>
+<nail x="-220" y="-180"/>
+</transition>
+<transition><source ref="id0"/><target ref="id0"/>
+<label kind="select" x="-610" y="-20">updid : int[0,9]</label>
+<label kind="guard" x="-610" y="-2">!inC(updid)</label>
+<label kind="assignment" x="-610" y="16">onUnknown(updid)</label>
+<nail x="-480" y="-30"/>
+<nail x="-480" y="30"/>
+</transition>
+<transition><source ref="id2"/><target ref="id0"/>
+<label kind="guard" x="-330" y="-90">!coherentC()</label>
+<label kind="assignment" x="-330" y="-72">rejectUnified(0)</label>
+<nail x="-200" y="-65"/>
+</transition>
+<transition><source ref="id2"/><target ref="id1"/>
+<label kind="guard" x="30" y="-165">coherentC()</label>
+<label kind="assignment" x="30" y="-147">acceptCand(0)</label>
+<nail x="30" y="-125"/>
+</transition>
+<transition><source ref="id1"/><target ref="id3"/>
+<label kind="select" x="280" y="-265">pick : int[0,9]</label>
+<label kind="guard" x="280" y="-247">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
+<label kind="assignment" x="280" y="-229">candFillAdd(pick)</label>
+<nail x="320" y="-160"/>
+<nail x="480" y="-215"/>
+</transition>
+<transition><source ref="id3"/><target ref="id1"/>
+<label kind="guard" x="375" y="-155">coherentC()</label>
+<label kind="assignment" x="375" y="-137">acceptCand(0)</label>
+<nail x="400" y="-115"/>
+</transition>
+<transition><source ref="id3"/><target ref="id1"/>
+<label kind="guard" x="440" y="-65">!coherentC()</label>
+<label kind="assignment" x="440" y="-47">rejectUnified(0)</label>
+<nail x="410" y="-40"/>
+</transition>
+<transition><source ref="id1"/><target ref="id4"/>
+<label kind="select" x="200" y="255">slot : int[0,2], pick : int[0,9]</label>
+<label kind="guard" x="200" y="273">slot &lt; csz &amp;&amp; pick != committed[slot] &amp;&amp; !inCexcept(pick, slot)</label>
+<label kind="assignment" x="200" y="291">candFillUpd(slot, pick)</label>
+<nail x="320" y="160"/>
+<nail x="480" y="215"/>
+</transition>
+<transition><source ref="id4"/><target ref="id1"/>
+<label kind="guard" x="375" y="130">coherentC()</label>
+<label kind="assignment" x="375" y="148">acceptCand(1)</label>
+<nail x="400" y="115"/>
+</transition>
+<transition><source ref="id4"/><target ref="id1"/>
+<label kind="guard" x="440" y="40">!coherentC()</label>
+<label kind="assignment" x="440" y="58">rejectUnified(1)</label>
+<nail x="410" y="40"/>
+</transition>
+<transition><source ref="id1"/><target ref="id1"/>
+<label kind="select" x="-40" y="-40">updid : int[0,9]</label>
+<label kind="guard" x="-40" y="-22">!inC(updid)</label>
+<label kind="assignment" x="-40" y="-4">onUnknown(updid)</label>
+<nail x="105" y="-30"/>
+<nail x="105" y="5"/>
+</transition>
+<transition><source ref="id1"/><target ref="id1"/>
+<label kind="select" x="0" y="55">slot : int[0,2]</label>
+<label kind="guard" x="0" y="73">slot &lt; csz</label>
+<label kind="assignment" x="0" y="91">doRemoveC(slot)</label>
+<nail x="125" y="55"/>
+<nail x="165" y="65"/>
+</transition>
+</template>
+<system>system Admin;
+</system>
+</nta>
