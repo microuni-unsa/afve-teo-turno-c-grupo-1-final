@@ -55,7 +55,7 @@ El problema que aborda este trabajo es doble. Primero, decidir la coherencia de 
 
 La importancia de esta propuesta radica en que traslada la confianza desde las pruebas empíricas hacia las demostraciones verificadas por máquina. Un decisor compilado desde lemas de preservación ofrece la garantía de que todo conjunto de reglas confirmado por la interfaz guardada es coherente, propiedad que ningún conjunto de casos de prueba puede establecer por sí solo.
 
-El resto del artículo se organiza como sigue. La @sec:problema define el problema y fija el vocabulario formal. La @sec:objetivos presenta los objetivos generales y específicos. La @sec:relacionado revisa el trabajo relacionado con una tabla comparativa. La @sec:arquitectura describe la arquitectura del sistema. La @sec:requerimientos lista los requerimientos funcionales. La @sec:implementacion detalla los temas específicos de implementación. La @sec:datos declara la disponibilidad de datos y código.
+El resto del artículo se organiza como sigue. La @sec:problema define el problema y fija el vocabulario formal. La @sec:objetivos presenta los objetivos generales y específicos. La @sec:relacionado revisa el trabajo relacionado con una tabla comparativa. La @sec:arquitectura describe la arquitectura del sistema. La @sec:requerimientos lista los requerimientos funcionales. La @sec:implementacion detalla los temas específicos de implementación, incluido el model checking del modelo de transición. La @sec:datos declara la disponibilidad de datos y código.
 
 = Definición del problema <sec:problema>
 
@@ -230,11 +230,52 @@ El chequeo P4 valida cada regla con ValidRule por búsqueda de declaración de a
 
 == Invariante de evolución y operaciones guardadas
 
-El estado es el conjunto ordenado de reglas con referencia al esquema y el estado inicial vacío es coherente por EmptyCoherent. La invariante de tesis afirma que todo conjunto alcanzable por la interfaz guardada es coherente, y cada operación la preserva por un lema dedicado.
+El estado es el conjunto ordenado de reglas con referencia al esquema y el estado inicial vacío es coherente por EmptyCoherent. La invariante de tesis afirma que todo conjunto alcanzable por la interfaz guardada es coherente, y cada operación la preserva por un lema dedicado demostrado en Dafny sobre dominios no acotados.
 
-TryAdd y TryUpdate confirman solo si el conjunto resultante supera CheckCoherent y en otro caso rechazan con testigo genuino sin mutación parcial, según AddPreserves, UpdatePreserves, solidez de testigo y completitud de testigo. La actualización con identificador desconocido rechaza como P4 con el identificador pedido, y el lote en orden aborta al primer rechazo y devuelve el conjunto original con semántica de todo o nada. La eliminación preserva coherencia por monotonía de subconjunto con lemas de subconjunto tras RemoveById más monotonía de aplicación por efecto y de cobertura, según RemovePreservesCoherent.
+TryAdd y TryUpdate confirman solo si el conjunto resultante supera CheckCoherent y en otro caso rechazan con testigo genuino sin mutación parcial, según AddPreserves, UpdatePreserves, solidez de testigo y completitud de testigo. La actualización con identificador desconocido rechaza como P4 con el identificador pedido, y el lote en orden aborta al primer rechazo y devuelve el conjunto original con semántica de todo o nada.
 
-EvaluateAgreesOnCoherent liga decisión con aplicación de permiso sobre conjuntos coherentes y solicitudes válidas, por lo que el estado interno de conflicto resulta inalcanzable por la interfaz guardada y la envoltura lo señala como violación de invariante. El módulo de comprobación acotada enumera además todos los conjuntos hasta longitud tres sobre seis reglas con un total de 259 estados y demuestra preservación más solidez de testigo sobre ese universo.
+EvaluateAgreesOnCoherent liga decisión con aplicación de permiso sobre conjuntos coherentes y solicitudes válidas, por lo que el estado interno de conflicto resulta inalcanzable por la interfaz guardada y la envoltura lo señala como violación de invariante.
+== Comprobación del modelo con UPPAAL
+
+El diseño del componente Admin se verifica por model checking con UPPAAL #cite(<larsen1997uppaal>) sobre el modelo en uppaal/abac-guard.xml y las consultas en uppaal/abac-guard.q. El universo es finito por construcción: dieciséis solicitudes como producto de dos roles, dos acciones, dos horas y dos valores de emergencia con el resto de atributos fijos, más diez reglas candidatas con efectos y validez fijos, donde clean es el conjunto {r0, r1, r2}.
+
+#figure(
+  image("img/model_diagram.png", width: 90%),
+  caption: [Autómata Admin (uppaal/abac-guard.xml).],
+) <fig:transicion>
+
+Los estados Empty y Coherent representan conjuntos confirmados, vacío y no vacío coherente, mientras TryingAddE, TryingAddC y TryingUpdC son estados comprometidos donde el candidato ya está construido y la salida es atómica: aceptar o rechazar sin interleaving. Las variables committed y csz guardan el conjunto confirmado y su tamaño con tope MAX_R = 3, mientras cand y cszC guardan el candidato bajo evaluación. La variable lastOp registra la última operación para razonar sobre la eliminación y las banderas rejP1, rejP2, rejP3 y rejUnknownP4 más cleanAccepted marcan qué clase de veredicto ya ocurrió. El modelo no usa canales de sincronización: es un único autómata no temporizado cuyas guardas deciden cada transición.
+
+Las nueve consultas se agrupan en dos clases, como resume la @tab:consultas. Las propiedades de seguridad exigen que nada malo ocurra en ningún estado: A[] coherent() pide coherencia en todo estado alcanzable dentro del universo acotado, A[] !deadlock pide ausencia de bloqueo y A[] (lastOp != 2 || coherent()) reexamina en el modelo la preservación ante eliminación ya probada en Dafny. Las propiedades de alcanzabilidad exigen que el sistema pueda hacer su trabajo: E<> cleanAccepted pide que el conjunto limpio sea aceptable, E<> rejP1, E<> rejP2, E<> rejP3 y E<> rejUnknownP4 piden que cada clase de rechazo con testigo sea alcanzable y ninguna ruta de error sea código muerto, y E[] coherent() pide una senda que permanece coherente.
+
+#figure(
+  image("img/checking_results.png", width: 90%),
+  caption: [Verificador de UPPAAL: las nueve consultas se satisfacen.],
+) <fig:verificador>
+
+#figure(
+  table(
+    columns: (auto, 1fr, auto),
+    inset: 6pt,
+    align: left,
+    table.header([Consulta], [Lectura en lenguaje natural], [Clase]),
+    [A\[\] coherent()], [Todo estado alcanzable es coherente], [Seguridad],
+    [A\[\] \!deadlock], [Ninguna ejecución se bloquea], [Seguridad],
+    [A\[\] (lastOp \!= 2 \|\| coherent())], [Toda eliminación preserva coherencia], [Seguridad],
+    [E\<\> cleanAccepted], [El conjunto {r0, r1, r2} es aceptable], [Alcanzabilidad],
+    [E\<\> rejP1], [El rechazo por contradicción ocurre, testigo {r0, r3}], [Alcanzabilidad],
+    [E\<\> rejP2], [El rechazo por regla muerta ocurre, testigo {r6}], [Alcanzabilidad],
+    [E\<\> rejP3], [El rechazo por sombreado ocurre, testigo {r0, r4}], [Alcanzabilidad],
+    [E\<\> rejUnknownP4], [El rechazo por identificador desconocido ocurre], [Alcanzabilidad],
+    [E\[\] coherent()], [Existe una senda siempre coherente], [Alcanzabilidad],
+  ),
+  caption: [Consultas de uppaal/abac-guard.q agrupadas por clase.],
+) <tab:consultas>
+
+Las nueve consultas se satisfacen, como muestra la @fig:verificador con Property is satisfied en cada una. El panel Status reporta 16.7 s para A[] coherent(), 28.7 s para A[] !deadlock y 12.9 s para A[] (lastOp != 2 || coherent()), con picos residentes de 59, 71 y 84 MB; cada alcanzabilidad responde entre 0.001 y 0.058 s con pico de 84 MB. La enumeración exhaustiva independiente confirma 23 nodos alcanzables, 529 transiciones y 470 evaluaciones de candidato, sin estados incoherentes ni bloqueos. Tras aplicar model checking, el diseño del componente Admin queda matemáticamente respaldado: está libre de bloqueos y preserva la coherencia P1 a P4 bajo cualquier secuencia de adiciones, actualizaciones y eliminaciones dentro del universo acotado.
+
+
+
 
 == Frontera con TypeScript y topes explícitos
 

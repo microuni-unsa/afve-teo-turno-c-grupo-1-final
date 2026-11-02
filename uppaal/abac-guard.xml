@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-<declaration>
+	<declaration>
 const int ROLE_N = 2;
 const int DEPT_N = 1;
 const int CLR_LO = 1;
@@ -340,101 +340,200 @@ void rejectUnified(int op) {
   rejectCand(op, k);
 }
 </declaration>
-<template>
-<name>Admin</name>
-<declaration></declaration>
-<location id="id0" x="-420" y="0">
-<name x="-445" y="-35">Empty</name>
-</location>
-<location id="id1" x="180" y="0">
-<name x="170" y="-32">Coherent</name>
-</location>
-<location id="id2" x="-120" y="-220">
-<name x="-155" y="-255">TryingAddE</name>
-<committed/>
-</location>
-<location id="id3" x="600" y="-220">
-<name x="565" y="-255">TryingAddC</name>
-<committed/>
-</location>
-<location id="id4" x="600" y="220">
-<name x="565" y="248">TryingUpdC</name>
-<committed/>
-</location>
-<init ref="id0"/>
-<transition><source ref="id0"/><target ref="id2"/>
-<label kind="select" x="-500" y="-180">pick : int[0,9]</label>
-<label kind="guard" x="-500" y="-162">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
-<label kind="assignment" x="-500" y="-144">candFillAdd(pick)</label>
-<nail x="-340" y="-110"/>
-<nail x="-220" y="-180"/>
-</transition>
-<transition><source ref="id0"/><target ref="id0"/>
-<label kind="select" x="-610" y="-20">updid : int[0,9]</label>
-<label kind="guard" x="-610" y="-2">!inC(updid)</label>
-<label kind="assignment" x="-610" y="16">onUnknown(updid)</label>
-<nail x="-480" y="-30"/>
-<nail x="-480" y="30"/>
-</transition>
-<transition><source ref="id2"/><target ref="id0"/>
-<label kind="guard" x="-330" y="-90">!coherentC()</label>
-<label kind="assignment" x="-330" y="-72">rejectUnified(0)</label>
-<nail x="-200" y="-65"/>
-</transition>
-<transition><source ref="id2"/><target ref="id1"/>
-<label kind="guard" x="30" y="-165">coherentC()</label>
-<label kind="assignment" x="30" y="-147">acceptCand(0)</label>
-<nail x="30" y="-125"/>
-</transition>
-<transition><source ref="id1"/><target ref="id3"/>
-<label kind="select" x="280" y="-265">pick : int[0,9]</label>
-<label kind="guard" x="280" y="-247">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
-<label kind="assignment" x="280" y="-229">candFillAdd(pick)</label>
-<nail x="320" y="-160"/>
-<nail x="480" y="-215"/>
-</transition>
-<transition><source ref="id3"/><target ref="id1"/>
-<label kind="guard" x="375" y="-155">coherentC()</label>
-<label kind="assignment" x="375" y="-137">acceptCand(0)</label>
-<nail x="400" y="-115"/>
-</transition>
-<transition><source ref="id3"/><target ref="id1"/>
-<label kind="guard" x="440" y="-65">!coherentC()</label>
-<label kind="assignment" x="440" y="-47">rejectUnified(0)</label>
-<nail x="410" y="-40"/>
-</transition>
-<transition><source ref="id1"/><target ref="id4"/>
-<label kind="select" x="200" y="255">slot : int[0,2], pick : int[0,9]</label>
-<label kind="guard" x="200" y="273">slot &lt; csz &amp;&amp; pick != committed[slot] &amp;&amp; !inCexcept(pick, slot)</label>
-<label kind="assignment" x="200" y="291">candFillUpd(slot, pick)</label>
-<nail x="320" y="160"/>
-<nail x="480" y="215"/>
-</transition>
-<transition><source ref="id4"/><target ref="id1"/>
-<label kind="guard" x="375" y="130">coherentC()</label>
-<label kind="assignment" x="375" y="148">acceptCand(1)</label>
-<nail x="400" y="115"/>
-</transition>
-<transition><source ref="id4"/><target ref="id1"/>
-<label kind="guard" x="440" y="40">!coherentC()</label>
-<label kind="assignment" x="440" y="58">rejectUnified(1)</label>
-<nail x="410" y="40"/>
-</transition>
-<transition><source ref="id1"/><target ref="id1"/>
-<label kind="select" x="-40" y="-40">updid : int[0,9]</label>
-<label kind="guard" x="-40" y="-22">!inC(updid)</label>
-<label kind="assignment" x="-40" y="-4">onUnknown(updid)</label>
-<nail x="105" y="-30"/>
-<nail x="105" y="5"/>
-</transition>
-<transition><source ref="id1"/><target ref="id1"/>
-<label kind="select" x="0" y="55">slot : int[0,2]</label>
-<label kind="guard" x="0" y="73">slot &lt; csz</label>
-<label kind="assignment" x="0" y="91">doRemoveC(slot)</label>
-<nail x="125" y="55"/>
-<nail x="165" y="65"/>
-</transition>
-</template>
-<system>system Admin;
+	<template>
+		<name>Admin</name>
+		<location id="id0" x="-420" y="0">
+			<name x="-445" y="-35">Empty</name>
+		</location>
+		<location id="id1" x="180" y="0">
+			<name x="170" y="-32">Coherent</name>
+		</location>
+		<location id="id2" x="-120" y="-220">
+			<name x="-155" y="-255">TryingAddE</name>
+			<committed/>
+		</location>
+		<location id="id3" x="600" y="-220">
+			<name x="565" y="-255">TryingAddC</name>
+			<committed/>
+		</location>
+		<location id="id4" x="600" y="220">
+			<name x="565" y="248">TryingUpdC</name>
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="select" x="-500" y="-180">pick : int[0,9]</label>
+			<label kind="guard" x="-500" y="-162">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
+			<label kind="assignment" x="-500" y="-144">candFillAdd(pick)</label>
+			<nail x="-340" y="-110"/>
+			<nail x="-220" y="-180"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="select" x="-610" y="-20">updid : int[0,9]</label>
+			<label kind="guard" x="-610" y="-2">!inC(updid)</label>
+			<label kind="assignment" x="-610" y="16">onUnknown(updid)</label>
+			<nail x="-480" y="-30"/>
+			<nail x="-480" y="30"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-330" y="-90">!coherentC()</label>
+			<label kind="assignment" x="-330" y="-72">rejectUnified(0)</label>
+			<nail x="-200" y="-65"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="30" y="-165">coherentC()</label>
+			<label kind="assignment" x="30" y="-147">acceptCand(0)</label>
+			<nail x="30" y="-125"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="select" x="280" y="-265">pick : int[0,9]</label>
+			<label kind="guard" x="280" y="-247">csz &lt; MAX_R &amp;&amp; !inC(pick)</label>
+			<label kind="assignment" x="280" y="-229">candFillAdd(pick)</label>
+			<nail x="320" y="-160"/>
+			<nail x="480" y="-215"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="375" y="-155">coherentC()</label>
+			<label kind="assignment" x="375" y="-137">acceptCand(0)</label>
+			<nail x="400" y="-115"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="440" y="-65">!coherentC()</label>
+			<label kind="assignment" x="440" y="-47">rejectUnified(0)</label>
+			<nail x="410" y="-40"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id1"/>
+			<target ref="id4"/>
+			<label kind="select" x="200" y="255">slot : int[0,2], pick : int[0,9]</label>
+			<label kind="guard" x="200" y="273">slot &lt; csz &amp;&amp; pick != committed[slot] &amp;&amp; !inCexcept(pick, slot)</label>
+			<label kind="assignment" x="200" y="291">candFillUpd(slot, pick)</label>
+			<nail x="320" y="160"/>
+			<nail x="480" y="215"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="guard" x="375" y="130">coherentC()</label>
+			<label kind="assignment" x="375" y="148">acceptCand(1)</label>
+			<nail x="400" y="115"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="guard" x="440" y="40">!coherentC()</label>
+			<label kind="assignment" x="440" y="58">rejectUnified(1)</label>
+			<nail x="410" y="40"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="select" x="-40" y="-40">updid : int[0,9]</label>
+			<label kind="guard" x="-40" y="-22">!inC(updid)</label>
+			<label kind="assignment" x="-40" y="-4">onUnknown(updid)</label>
+			<nail x="105" y="-30"/>
+			<nail x="105" y="5"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="select" x="0" y="55">slot : int[0,2]</label>
+			<label kind="guard" x="0" y="73">slot &lt; csz</label>
+			<label kind="assignment" x="0" y="91">doRemoveC(slot)</label>
+			<nail x="125" y="55"/>
+			<nail x="165" y="65"/>
+		</transition>
+	</template>
+	<system>system Admin;
 </system>
+	<queries>
+		<option key="--search-order" value="0"/>
+		<option key="--statespace-consumption" value="1"/>
+		<query>
+			<formula>A[] coherent()</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:33:33 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] !deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:07 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] (lastOp != 2 || coherent())</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:35 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; cleanAccepted</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:40 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; rejP1</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:44 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; rejP2</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:46 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; rejP3</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:48 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; rejUnknownP4</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:51 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E[] coherent()</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-11-01 23:34:54 -0500">
+				<option key="--search-order" value="0"/>
+				<option key="--statespace-consumption" value="1"/>
+			</result>
+		</query>
+	</queries>
 </nta>
