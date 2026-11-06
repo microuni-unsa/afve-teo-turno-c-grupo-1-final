@@ -3,14 +3,17 @@
 #show: ieee.with(
   title: [Verificación formal de coherencia en políticas ABAC: un verificador en Dafny compilado a JavaScript con escalabilidad acotada],
   abstract: [
+    El control de acceso basado en atributos, conocido como ABAC, permite formular políticas expresivas, pero su administración manual introduce incoherencias silenciosas: contradicciones entre permisos y denegaciones, reglas insatisfacibles y sombreado de directivas. Este artículo presenta un verificador de coherencia formalmente probado cuyo núcleo de decisión está especificado y demostrado en Dafny, y compilado directamente a JavaScript para su distribución como paquete en npm con envolturas en TypeScript. El sistema comprueba cuatro propiedades de coherencia: consistencia, satisfacibilidad, no sombreado y validez de esquema, con emisión de testigos concretos ante cada infracción. Mediante lemas inductivos de preservación, el sistema garantiza que toda evolución del conjunto de reglas a través de su interfaz guardada mantiene la coherencia por construcción. El diseño del autómata de transición se valida mediante verificación de modelos en UPPAAL sobre un universo finito de solicitudes y reglas, con ausencia de interbloqueos y satisfacibilidad de nueve propiedades de seguridad y alcanzabilidad. El trabajo expone la metodología formal empleada, las herramientas adoptadas y los componentes de software desarrollados.
   ],
   index-terms: (
     "control de acceso basado en atributos",
     "métodos formales",
     "Dafny",
+    "UPPAAL",
     "coherencia de políticas",
     "verificación de software",
     "escalabilidad acotada",
+    "TypeScript",
   ),
   authors: (
     (
@@ -45,88 +48,78 @@
   bibliography: bibliography("refs.bib", style: "ieee"),
 )
 
+#show figure.where(kind: table): set block(breakable: true)
+#set table.cell(breakable: false)
+
 = Introducción <sec:introduccion>
 
-El control de acceso es una de las funciones críticas de todo sistema de información: determina quién puede hacer qué sobre qué recurso y en qué condiciones. El control de acceso basado en atributos, conocido por sus siglas en inglés como ABAC por Attribute-Based Access Control, expresa esas decisiones mediante atributos de sujeto, recurso, acción y entorno, según la definición canónica del Instituto Nacional de Estándares y Tecnología de los Estados Unidos, conocido por sus siglas en inglés como NIST por National Institute of Standards and Technology #cite(<hu2014guide>), y su presentación resumida #cite(<hu2015abac>). Frente a modelos rígidos basados en roles, ABAC permite políticas expresivas como permitir la lectura de un historial clínico cuando el rol es personal médico y el nivel de autorización supera la sensibilidad del recurso. Esa expresividad tiene un costo: los conjuntos de reglas crecen, se superponen y se vuelven difíciles de auditar a mano.
+El control de acceso es una función central en los sistemas de información, pues determina qué operaciones puede ejecutar cada sujeto sobre un recurso y bajo qué condiciones. ABAC expresa esas decisiones mediante atributos de sujeto, recurso, acción y entorno, de acuerdo con la definición canónica del Instituto Nacional de Estándares y Tecnología de los Estados Unidos, conocido como NIST por sus siglas en inglés #cite(<hu2014guide>), y su presentación sintética #cite(<hu2015abac>). Frente a los esquemas basados en roles, ABAC permite especificar reglas expresivas, tales como autorizar la lectura de una historia clínica cuando el cargo corresponde a personal médico y el nivel de habilitación supera la sensibilidad del documento. Esta flexibilidad aumenta el tamaño y la superposición de las directivas, lo que dificulta su auditoría manual.
 
-En la región, las universidades, los hospitales y las entidades públicas gestionan sistemas donde las reglas de acceso cambian con frecuencia por rotación de personal, convenios y turnos de emergencia. La práctica habitual consiste en editar listas de reglas en archivos de configuración o paneles administrativos sin ningún chequeo formal posterior. Cada edición es una oportunidad para introducir una incoherencia silenciosa que solo se manifiesta cuando una solicitud concreta recibe una decisión incorrecta, sea una denegación que bloquea una atención urgente o un permiso que expone un recurso sensible.
+En universidades, hospitales y organismos públicos, las directivas de acceso cambian con frecuencia por rotación de turnos, convenios y servicios de guardia. La práctica habitual delega la administración a la edición directa de archivos de configuración o paneles de gestión sin verificación formal. Cualquier omisión introduce contradicciones silenciosas que solo se manifiestan cuando una solicitud concreta recibe un veredicto erróneo, sea una denegación indebida que detiene una atención médica o una autorización que expone datos confidenciales.
 
-El problema que aborda este trabajo es doble. Primero, decidir la coherencia de un conjunto de reglas ABAC y producir ante cada violación un testigo concreto que identifique la solicitud, las reglas implicadas y la propiedad incumplida. Segundo, garantizar que la evolución del conjunto preserve la coherencia por construcción, de modo que añadir, actualizar o eliminar reglas nunca deje al sistema en un estado incoherente. La propuesta consiste en un verificador cuyo núcleo de decisión está escrito y demostrado en Dafny, un verificador automático de programas para corrección funcional #cite(<leino2010dafny>), y compilado a JavaScript para su distribución como paquete npm con envolturas en TypeScript. La escalabilidad del enfoque es acotada y decidible por diseño: dominios finitos por esquema, topes explícitos con error declarado y recorridos con costo conocido.
+Este trabajo resuelve dos problemas concretos. Primero, decide la coherencia de un conjunto de reglas ABAC y emite ante cada defecto un testigo estructurado que identifica la solicitud, las directivas en conflicto y la propiedad vulnerada. Segundo, garantiza que toda mutación del conjunto preserve la coherencia por construcción, impidiendo que adiciones, modificaciones o bajas dejen al sistema en un estado inválido. La solución integra un núcleo de decisión especificado y demostrado en Dafny #cite(<leino2010dafny>), compilado a JavaScript y distribuido en el gestor de paquetes npm con capas protectoras en TypeScript. La complejidad computacional se acota mediante dominios finitos por esquema, topes declarados con errores explícitos y algoritmos de recorrido deterministas.
 
-La importancia de esta propuesta radica en que traslada la confianza desde las pruebas empíricas hacia las demostraciones verificadas por máquina. Un decisor compilado desde lemas de preservación ofrece la garantía de que todo conjunto de reglas confirmado por la interfaz guardada es coherente, propiedad que ningún conjunto de casos de prueba puede establecer por sí solo.
+A diferencia de las comprobaciones muestrales, un verificador demostrado formalmente garantiza que toda política confirmada por la interfaz guardada satisface las invariantes de coherencia de forma exhaustiva.
 
-El resto del artículo se organiza como sigue. La @sec:problema define el problema y fija el vocabulario formal. La @sec:objetivos presenta los objetivos generales y específicos. La @sec:relacionado revisa el trabajo relacionado con una tabla comparativa. La @sec:arquitectura describe la arquitectura del sistema. La @sec:requerimientos lista los requerimientos funcionales. La @sec:implementacion detalla los temas específicos de implementación, incluido el model checking del modelo de transición. La @sec:datos declara la disponibilidad de datos y código.
+El artículo se estructura de la siguiente manera. La @sec:problema define el problema formal y establece las definiciones básicas. La @sec:justificacion expone la justificación teórica, operativa y metodológica. La @sec:objetivos formula los objetivos del proyecto. La @sec:alcance delimita el alcance funcional, los requerimientos y las exclusiones. La @sec:relacionado examina el trabajo previo y presenta una tabla comparativa. La @sec:metodologia detalla el proceso metodológico y sus etapas. La @sec:artefactos_empleados cataloga las herramientas y estándares adoptados. La @sec:artefactos_desarrollados documenta los módulos construidos, el modelo de estados y la batería de pruebas. La @sec:datos declara el acceso al código y los datos.
 
 = Definición del problema <sec:problema>
 
-Un conjunto de reglas ABAC se escribe y evoluciona a mano: se añaden reglas de permiso para nuevos casos, se agregan denegaciones como salvaguardas y se ajustan condiciones existentes. Sin un chequeo verificado por máquina, cada una de esas operaciones puede introducir incoherencias silenciosas.
+Un conjunto de reglas ABAC se construye de manera incremental mediante directivas de autorización y restricciones de salvaguarda. Sin comprobación matemática, estas ediciones introducen anomalías lógicas.
 
-Se distinguen tres clases de defecto, que este trabajo adopta como propiedades de coherencia. P1 es consistencia, donde ninguna solicitud activa a la vez una regla de permiso y una de denegación. P2 es satisfacibilidad, donde cada regla se activa para al menos una solicitud válida, pues una regla insatisfacible es código muerto con apariencia de protección. P3 es no sombreado, donde cada regla decide en solitario al menos una solicitud, pues una regla cubierta por otras resulta nula y su presencia confunde la auditoría. Los duplicados exactos se reportan bajo P3 y no como un chequeo aparte. P4 es validez de esquema, donde toda regla referencia solo atributos declarados, con literales dentro del dominio y operadores compatibles con el tipo. Un conjunto de reglas es coherente cuando cumple las cuatro propiedades a la vez.
+El marco formal distingue tres clases de fallas lógicas, complementadas por una propiedad de conformidad sintáctica. La propiedad P1 exige consistencia, de modo que ninguna solicitud válida active simultáneamente una regla de permiso y una de denegación. La propiedad P2 exige satisfacibilidad, garantizando que cada regla cuente con al menos una solicitud que satisfaga sus condiciones, lo que previene la existencia de directivas vacías. La propiedad P3 exige ausencia de sombreado, asegurando que cada directiva determine en solitario el resultado de al menos una consulta, evitando reglas redundantes o duplicadas. La propiedad P4 exige validez de esquema, imponiendo que toda regla emplee únicamente atributos declarados, tipos compatibles y valores dentro del rango permitido. Un conjunto de reglas es coherente cuando satisface conjuntamente las cuatro propiedades.
 
-El vocabulario es deliberadamente finito y decidible. Una solicitud es una asignación total de cada atributo declarado a un valor dentro de su dominio, sea enumeración, booleano o entero acotado. No existen comparaciones entre atributos ni operaciones aritméticas. El criterio de éxito es la invariante de tesis: todo conjunto de reglas alcanzable a través de la interfaz guardada es coherente.
+El dominio es finito y decidible. Cada solicitud asigna valores totales a los atributos del esquema dentro de rangos acotados de enteros, valores booleanos o constantes de enumeración. No se permiten dependencias relacionales entre atributos ni operaciones aritméticas abiertas. El criterio central del diseño asegura que todo estado alcanzable mediante la interfaz guardada preserve la coherencia del conjunto.
 
-= Objetivos <sec:objetivos>
+= Justificación del proyecto <sec:justificacion>
 
-El objetivo general consiste en proponer un verificador de coherencia para políticas ABAC formalmente verificado, con garantías de coherencia y escalabilidad acotada, distribuido como paquete npm cuyo núcleo de decisión está escrito y probado en Dafny y compilado a JavaScript.
+La justificación del proyecto comprende tres dimensiones: teórica, operativa y tecnológica.
 
-Los objetivos específicos son los siguientes.
+En el ámbito teórico, los métodos convencionales de prueba basados en muestreo de casos o cobertura de código resultan insuficientes para certificar la corrección de directivas de acceso. El espacio de solicitudes crece de forma exponencial con el producto cartesiano de los dominios de atributos, lo que deja combinaciones sin evaluar durante las pruebas empíricas. Los análisis estáticos previos suelen limitarse a evaluar conjuntos de reglas estáticos y aislados #cite(<turkmen2017formal>), sin respaldar formalmente la evolución dinámica de las políticas. Especificar el problema en un entorno de verificación deductiva permite demostrar lemas universales de solidez, completitud y preservación que abarcan todas las combinaciones posibles del esquema.
 
-OE1. Formalizar en Dafny el lenguaje de políticas con reglas de permiso y denegación sobre atributos de sujeto, recurso, acción y entorno con negación, conjunción, disyunción e igualdades y comparaciones de enteros acotados contra literales, junto con su semántica de evaluación y las cuatro propiedades de coherencia P1 a P4.
+En el plano operativo y de seguridad, los entornos con alta rotación organizativa modifican sus políticas de autorización de forma continua. Cuando la administración se realiza sobre archivos en formatos como JSON o YAML, las inconsistencias desapercibidas provocan fallas de acceso. Un conflicto puede otorgar privilegios indebidos y vulnerar la privacidad de datos clínicos, o denegar el paso a personal de guardia durante una emergencia médica. La generación de un testigo mínimo con la solicitud conflictiva y los identificadores de regla permite auditar y corregir las directivas sin requerir inspecciones manuales extensas.
 
-OE2. Implementar una interfaz guardada y total que solo confirme conjuntos coherentes, con preservación de coherencia demostrada por lemas y rechazo con testigo que incluya la solicitud, los identificadores de reglas, la propiedad violada y una explicación, sin aplicación parcial.
+En el plano metodológico y tecnológico, la aplicación de métodos formales en entornos comerciales suele verse frenada por la dificultad de integrar demostradores matemáticos en arquitecturas web. Alojar un motor de resolución lógica como servicio independiente incrementa la latencia y la superficie de exposición en producción. Este desarrollo adopta el principio de corrección por construcción, conocido como CbC por sus siglas en inglés: el núcleo formal se demuestra en Dafny y se compila a código JavaScript estándar, protegido por envolturas en TypeScript. El sistema ofrece garantías matemáticas directas sin añadir dependencias de cálculo simbólico en el entorno de despliegue.
 
-OE3. Garantizar una escalabilidad acotada y decidible mediante dominios finitos por esquema, topes explícitos con error declarado y sin aproximaciones silenciosas, recorridos por índice de costo lineal y búsqueda de sombreado de costo cuadrático declarado.
+= Objetivos del proyecto <sec:objetivos>
 
-OE4. Empaquetar el núcleo compilado desde Dafny con envolturas TypeScript bajo separación estricta de responsabilidades, donde Dafny decide toda determinación de coherencia y evaluación mientras TypeScript valida entradas, analiza sintaxis, sanea dominios y presenta resultados, sin reimplementar ninguna decisión.
+El objetivo general consiste en diseñar, verificar formalmente e implementar un verificador de coherencia para políticas ABAC con garantías de preservación por construcción y escalabilidad acotada, distribuido como paquete en el ecosistema npm con núcleo de decisión demostrado en Dafny, validado mediante model checking en UPPAAL y provisto de capas protectoras en TypeScript.
 
-= Trabajo relacionado <sec:relacionado>
+Los objetivos específicos son los siguientes:
 
-== Análisis de políticas XACML
+1. Formalización y semántica: formalizar en Dafny la sintaxis abstracta de reglas de permiso y denegación sobre atributos de sujeto, recurso, acción y entorno con expresiones booleanas y comparaciones de enteros acotados frente a literales, definiendo su semántica denotacional y las cuatro propiedades de coherencia de P1 a P4.
+2. Invariante de evolución y guardas: implementar una interfaz de administración total que confirme únicamente conjuntos coherentes, demostrando mediante lemas inductivos la preservación de la coherencia ante operaciones de adición, actualización y retiro de reglas, con generación de testigos diagnósticos ante rechazos.
+3. Verificación de concurrencia y ausencia de bloqueos: modelar el autómata de transición del administrador en la herramienta UPPAAL y verificar exhaustivamente la ausencia de interbloqueos, la invariancia de coherencia y la alcanzabilidad de cada clase de veredicto.
+4. Empaquetado y aislamiento en la frontera: compilar el núcleo probado de Dafny a JavaScript y construir una biblioteca modular en TypeScript con validación sintáctica estricta, límites de escala explícitos y una suite de pruebas de regresión reproducible.
 
-Fisler y colaboradores introdujeron la verificación y el análisis de impacto de cambios en políticas de control de acceso #cite(<fisler2005verification>), con lo que establecieron el análisis estático de políticas como disciplina. Turkmen y colaboradores formalizaron el análisis de políticas del Lenguaje Extensible de Marcado para Control de Acceso, conocido por sus siglas en inglés como XACML por eXtensible Access Control Markup Language, mediante solucionadores de teorías de satisfacibilidad módulo teorías, conocidos por sus siglas en inglés como SMT por Satisfiability Modulo Theories, primero en conferencia #cite(<turkmen2015analysis>) y luego en su extensión de revista #cite(<turkmen2017formal>). Ese es el antecedente metodológico más cercano, pues traduce políticas a fórmulas decidibles y delega la decisión a un SMT como Z3 #cite(<demoura2008z3>). Ferraiolo y colaboradores contrastaron XACML con el Control de Acceso de Próxima Generación, conocido por sus siglas en inglés como NGAC por Next Generation Access Control #cite(<ferraiolo2016xacml>). Frente a esa línea, este trabajo no traduce a SMT en cada consulta: las propiedades de coherencia y la interfaz guardada están escritas y probadas directamente en Dafny #cite(<leino2010dafny>), de modo que el testigo de cada violación y la preservación del invariante de evolución son lemas del propio desarrollo, y el decisor que se ejecuta es el código compilado desde esas pruebas.
+= Alcance del proyecto <sec:alcance>
 
-== Detección de conflictos en ABAC
+== Alcance funcional
 
-La literatura registra métodos dedicados de detección de conflictos en políticas ABAC #cite(<liu2021novel>) sobre el marco de definición estándar #cite(<hu2014guide>). Frente a esa línea, este trabajo unifica contradicción, insatisfacibilidad, sombreado y validez de esquema en un único predicado de coherencia con testigos homogéneos, y lo integra en una interfaz de evolución guardada donde el rechazo deja el conjunto inalterado.
+El proyecto abarca el ciclo completo de especificación formal, verificación deductiva, verificación de modelos, compilación y empaquetado del software:
 
-== Lenguajes de autorización analizables
+1. Definición formal de la sintaxis ABAC para atributos de enumeración finita, valores booleanos y enteros acotados, distribuidos en las cuatro categorías del estándar NIST SP 800-162 #cite(<hu2014guide>): sujeto, recurso, acción y entorno.
+2. Formulación matemática e implementación de las cuatro propiedades de coherencia: consistencia P1, satisfacibilidad P2, ausencia de sombreado P3 y validez de esquema P4.
+3. Interfaz de evolución guardada con operaciones atómicas individuales de adición tryAdd, actualización tryUpdate y eliminación remove, así como procesamiento por lotes con semántica atómica mediante tryAddMany.
+4. Motor de decisión para consultas individuales evaluate y múltiples evaluateMany, garantizando un costo computacional lineal respecto al total de reglas.
+5. Biblioteca para entornos Node.js y navegadores bajo el paquete \@grupo1/abac-verifier, incorporando tipado estático, analizador sintáctico y formateador de diagnósticos.
+6. Validación experimental mediante casos de estudio sobre directivas clínicas de urgencia, conjuntos consistentes y casos con violaciones deliberadas, respaldados por pruebas de regresión.
 
-Cedar es un lenguaje de autorización expresivo, rápido, seguro y analizable con semántica formal y un enfoque guiado por verificación #cite(<cutler2024cedar>), cuya metodología de construcción se documentó por separado #cite(<cutler2024built>) y cuya implementación de referencia es pública #cite(<cedarrepo>). Frente a esa línea, este trabajo opera en un fragmento ABAC deliberadamente menor, sin aritmética ni comparaciones entre atributos, a cambio de una garantía distinta: no solo un lenguaje analizable, sino un invariante de evolución demostrado según el cual todo conjunto confirmado por la interfaz es coherente, ejecutado como código compilado desde las pruebas. El lenguaje abreviado de autorización ALFA ofrece una sintaxis compacta sobre el modelo XACML, aunque no se halló registro canónico verificable en Crossref ni en OpenAlex en esta sesión y por ello no se le asigna afirmación bibliográfica.
+== Límites y exclusiones
 
-== Verificación de software con Dafny y SMT
+Para mantener la decidibilidad formal y la predictibilidad del tiempo de cálculo, se establecen las siguientes exclusiones:
 
-Dafny es un verificador automático de programas para corrección funcional #cite(<leino2010dafny>) con documentación pública #cite(<dafnydocs>), apoyado en resolutores SMT como Z3 #cite(<demoura2008z3>) y cvc5 #cite(<barbosa2022cvc5>). Frente a desarrollos que usan Dafny para verificar programas de propósito general, este trabajo lo emplea simultáneamente como especificación ejecutable, pues la enumeración acotada de solicitudes es constructiva, como probador de los lemas de preservación y como fuente de compilación del decisor distribuido en npm.
+1. Conexiones en tiempo real a puntos de información de políticas, conocidos como PIP por sus siglas en inglés: el verificador no efectúa consultas de red, lecturas a bases de datos ni invocaciones a servicios externos de contexto. Los atributos se limitan a los dominios fijados en el esquema.
+2. Lógica de primer orden y relaciones dinámicas entre atributos: no se contemplan cadenas de texto abiertas, expresiones regulares ni comparaciones dinámicas entre campos, como contrastar la habilitación del usuario frente a la clasificación del recurso. Cada condición atómica evalúa un atributo contra un valor literal fijo.
+3. Mecanismos permisivos de resolución de conflictos: no se admiten estrategias como prioridad de denegación, prioridad de permiso o pesos numéricos para dirimir solapamientos. Toda coincidencia simultánea entre permiso y denegación para una misma solicitud se califica como incoherencia.
+4. Puntos de aplicación de políticas, conocidos como PEP, y puntos de decisión distribuidos, conocidos como PDP: la biblioteca no provee intermediarios de red para captura de tráfico ni componentes de autenticación.
+5. Gestión de versiones y almacenamiento histórico: la persistencia relacional y el seguimiento histórico de versiones corresponden a capas externas a este verificador.
 
-== Síntesis comparativa
+== Supuestos y condiciones de frontera
 
-La @tab:comparativa resume las diferencias: los enfoques previos deciden por consulta mediante traducción a SMT o algoritmos dedicados, mientras que este trabajo compila el decisor desde pruebas verificadas y cierra el ciclo con una interfaz de evolución que preserva la coherencia por construcción.
+El funcionamiento del sistema parte de que los dominios de los atributos son finitos y quedan determinados al cargar el esquema. Toda solicitud que ingresa a la biblioteca se valida como una asignación completa y bien tipada antes de su procesamiento en el núcleo. Asimismo, el sistema impone límites operativos al número de valores por enumeración y a la cantidad de reglas, emitiendo errores tipados cuando una política excede los topes admitidos.
 
-#figure(
-  table(
-    columns: (1fr, 1fr, 1fr, 1fr),
-    inset: 6pt,
-    align: left,
-    table.header([Enfoque], [Método de decisión], [Testigo de violación], [Garantía de evolución]),
-    [Análisis XACML con SMT], [Traducción a SMT por consulta], [Modelo del solucionador], [Sin invariante de evolución],
-    [Detección de conflictos ABAC], [Algoritmos dedicados de conflicto], [Par de reglas en conflicto], [Sin guarda de evolución],
-    [Cedar], [Lenguaje analizable con verificación guiada], [Análisis de políticas Cedar], [Lenguaje seguro sin invariante de conjunto],
-    [Este trabajo], [Núcleo Dafny compilado a JavaScript], [Solicitud con reglas y propiedad P1 a P4], [Interfaz guardada que solo confirma conjuntos coherentes],
-  ),
-  caption: [Comparación de enfoques de análisis de políticas de autorización.],
-) <tab:comparativa>
-
-= Arquitectura del sistema <sec:arquitectura>
-
-El sistema se organiza en tres capas con una sola dirección de dependencia. La capa de núcleo contiene los módulos Dafny de esquema, sintaxis, evaluación, coherencia y transición. La capa de envolturas contiene el cargador de esquema, el analizador sintáctico, los adaptadores hacia valores compilados por Dafny y las funciones de interfaz. La capa de distribución contiene el paquete npm con el código compilado y las declaraciones de tipos. TypeScript nunca reimplementa una decisión del núcleo: valida, adapta y presenta.
-
-#figure(
-  image("img/architecture.png", width: 60%),
-  caption: [Arquitectura del verificador: el núcleo Dafny compila a JavaScript y las envolturas TypeScript validan, adaptan y presentan sin reimplementar decisiones.],
-) <fig:arquitectura>
-
-= Requerimientos funcionales <sec:requerimientos>
-
-Quedan fuera del alcance la persistencia más allá del almacenamiento local, las cuentas de usuario, los conectores de puntos de información de políticas en vivo, la aplicación y distribución de decisiones, las estrategias de resolución de conflictos donde toda superposición de permiso y denegación es error, y el historial o reversión de versiones. Los requerimientos funcionales que sí se abordan se resumen en la @tab:requerimientos, donde cada fila describe un requisito con su interfaz y comportamiento ante error.
+La @tab:requerimientos describe los requerimientos funcionales del sistema, indicando la operación correspondiente, la salida esperada y la gestión de excepciones.
 
 #figure(
   placement: auto,
@@ -146,42 +139,133 @@ Quedan fuera del alcance la persistencia más allá del almacenamiento local, la
     [RF-08], [Decidir una solicitud con las reglas que la activan.], [evaluate], [Decisión de permiso o denegación.], [Solicitud fuera de dominio produce DomainError y el estado interno de conflicto es inalcanzable vía interfaz guardada.],
     [RF-09], [Decidir varias solicitudes preservando el orden.], [evaluateMany], [Lista de decisiones.], [Sin topes por costo lineal por solicitud.],
     [RF-10], [Explicar un testigo en lenguaje legible solo desde TypeScript y sin probar.], [explain], [Texto explicativo.], [No decide y solo presenta.],
-    [RF-11], [Imponer topes explícitos de escalabilidad acotada.], [Todas], [Verdictos exactos dentro de topes.], [El exceso produce TooLarge y la opción de topes liberados emite un aviso de rendimiento no verificado por llamada.],
+    [RF-11], [Imponer topes explícitos de escalabilidad acotada.], [Todas], [Veredictos exactos dentro de topes.], [El exceso produce TooLarge y la opción de topes liberados emite un aviso de rendimiento no verificado por llamada.],
   ),
   caption: [Requerimientos funcionales del verificador con su interfaz y comportamiento ante error.],
 ) <tab:requerimientos>
 
+= Trabajo relacionado <sec:relacionado>
 
-= Implementación <sec:implementacion>
+== Análisis de políticas XACML
 
-El núcleo Dafny representa cada solicitud como una secuencia posicional donde la posición i guarda el valor del atributo i del esquema, lo que mantiene la enumeración y las demostraciones dentro de teoría pura de secuencias. Los recorridos de verificación usan índices explícitos en lugar de rebanadas de secuencia, pues el rebanado copia y volvía cuadráticos los barridos sobre el espacio total de solicitudes. Los recorridos sobre reglas conservan recursión estructural porque los conjuntos de reglas son pequeños.
+Fisler y sus colaboradores establecieron las bases del análisis formal de políticas al verificar propiedades y evaluar el impacto de cambios en directivas de autorización #cite(<fisler2005verification>). Turkmen y su equipo formalizaron el análisis del Lenguaje Extensible de Marcado para Control de Acceso, conocido como XACML por sus siglas en inglés, mediante traductores a solucionadores de satisfacibilidad módulo teorías, conocida como SMT por sus siglas en inglés, primero en su publicación de conferencia #cite(<turkmen2015analysis>) y posteriormente en su edición extendida #cite(<turkmen2017formal>). Dicha aproximación traduce las directivas a fórmulas lógicas y consulta a un solucionador externo como Z3 #cite(<demoura2008z3>). Ferraiolo y su equipo compararon el comportamiento de XACML con el Control de Acceso de Próxima Generación, conocido como NGAC por sus siglas en inglés #cite(<ferraiolo2016xacml>). A diferencia de esos esquemas, el presente desarrollo no formula consultas repetitivas a un motor SMT en tiempo de ejecución: las condiciones de coherencia y las guardas de modificación se demuestran de forma directa en Dafny #cite(<leino2010dafny>), por lo que el algoritmo ejecutado corresponde al código extraído de las pruebas deductivas.
 
-La enumeración de solicitudes es constructiva y total: combina los valores de cada declaración con producto cartesiano explícito y cuenta con lemas de solidez y completitud que ligan pertenencia a la enumeración con validez de solicitud. Cada chequeo P1 a P4 es una función ejecutable que devuelve un testigo opcional, y cada uno cuenta con lemas de solidez que garantizan que todo testigo reportado viola genuinamente la propiedad nombrada, además de lemas de completitud sobre dominios acotados.
+== Detección de conflictos en ABAC
 
-La frontera entre Dafny y TypeScript usa una única conversión no verificada donde el módulo JavaScript emitido por el compilador se interpreta bajo una interfaz que fija exactamente los miembros usados, y todo acceso posterior pasa por lectores defensivos que lanzan una violación de invariante ante formas inesperadas. Los valores enteros cruzan la frontera como números de precisión arbitraria y los identificadores de regla se asignan en la envoltura como el siguiente entero libre al confirmar. La evaluación de una solicitud nunca enumera el espacio de solicitudes y su costo es lineal en el tamaño del conjunto de reglas.
+Diversos estudios proponen algoritmos específicos para detectar conflictos en modelos ABAC #cite(<liu2021novel>) basados en las guías estándar #cite(<hu2014guide>). La presente propuesta unifica los defectos de contradicción, reglas insatisfacibles, sombreado y violación de esquema en una comprobación común con testigos uniformes, e integra el diagnóstico dentro de una interfaz guardada que preserva el estado ante cualquier rechazo.
 
-El chequeo de topes precede a toda operación costosa: número de valores por enumeración, número de reglas y tamaño del espacio de solicitudes. El modo de topes liberados recorre exactamente el mismo camino de decisión y emite un aviso de rendimiento no verificado por llamada, por lo que los veredictos siguen siendo exactos.
+== Lenguajes de autorización analizables
 
-== Clases del núcleo y de las envolturas
+Cedar constituye un lenguaje de autorización diseñado para evaluación rápida y análisis formal mediante verificación guiada #cite(<cutler2024cedar>), con metodología documentada #cite(<cutler2024built>) y código público #cite(<cedarrepo>). Frente a Cedar, este proyecto restringe intencionalmente el lenguaje al omitir operaciones aritméticas abiertas y comparaciones cruzadas entre atributos, a cambio de una garantía inductiva: toda política aceptada por la interfaz guardada mantiene la coherencia por construcción. Por su parte, el lenguaje ALFA ofrece una sintaxis simplificada para el estándar XACML, pero carece de un marco integrado de verificación formal y compilación directa a JavaScript.
 
-La @fig:clases muestra las clases del sistema en dos paquetes con una sola dependencia entre ellos, donde el paquete TypeScript invoca el núcleo compilado y nunca reimplementa decisiones.
+== Verificación de software con Dafny y motores SMT
+
+Dafny opera como un entorno formal de programación y verificación funcional #cite(<dafnydocs>), utilizando motores SMT como Z3 #cite(<demoura2008z3>) y cvc5 #cite(<barbosa2022cvc5>) para solventar las condiciones lógicas de prueba. Mientras que los usos convencionales aplican Dafny a programas generales, este proyecto lo emplea simultáneamente como especificación formal ejecutable, como probador deductivo de lemas de preservación y como base para compilar el módulo distribuido en npm.
+
+== Síntesis comparativa
+
+La @tab:comparativa contrasta los enfoques existentes, comparando su metodología, el tipo de testigo generado, la presencia de garantías de preservación y la existencia de invariantes de evolución.
+
+#figure(
+  placement: auto,
+  table(
+    columns: (1fr, 1.05fr, 1fr, 1fr),
+    inset: (x: 2.8pt, y: 4.5pt),
+    align: left,
+    table.header([Enfoque], [Método], [Testigo], [Garantía]),
+    [Análisis XACML con SMT], [Traducción a SMT por consulta], [Modelo del solucionador], [Sin invariante de evolución],
+    [Detección de conflictos ABAC], [Algoritmos dedicados], [Par de reglas en conflicto], [Sin guarda de evolución],
+    [Lenguaje Cedar], [Verificación formal guiada], [Diagnóstico del analizador], [Sin invariante de conjunto],
+  ),
+  caption: [Comparación de enfoques de análisis de políticas de autorización.],
+) <tab:comparativa>
+
+= Metodología utilizada y desarrollo <sec:metodologia>
+
+== Enfoque metodológico
+
+Para el desarrollo del proyecto se aplicó una metodología de métodos formales guiada por el paradigma de corrección por construcción CbC. En lugar de desarrollar código preliminar para someterlo a pruebas muestrales posteriores, este paradigma fundamenta el desarrollo en la especificación matemática previa, la deducción de lemas y la comprobación de modelos en cada fase de diseño.
+
+El desarrollo se articuló en cinco fases secuenciales:
+
+1. Fase 1: especificación y modelado formal del dominio. Se formalizó la sintaxis abstracta de las políticas ABAC, los tipos de datos algebraicos y la semántica denotacional en Dafny, formulando la función AllRequests para enumerar el espacio cartesiano de solicitudes sobre secuencias puras.
+2. Fase 2: verificación deductiva de propiedades e invariantes en Dafny. Se formalizaron las propiedades de coherencia de P1 a P4 junto con sus funciones de decisión ejecutables y generadores de testigos, demostrando siete lemas deductivos de solidez, completitud y preservación resueltos mediante los motores SMT Z3 y cvc5.
+3. Fase 3: verificación de estados por model checking en UPPAAL. Con el fin de evaluar la interacción temporal y la concurrencia en la administración de políticas, se construyó un autómata de estados finitos en UPPAAL mediante el archivo uppaal/abac-guard.xml y se formularon nueve consultas en lógica de árbol de computación temporal, conocida como TCTL por sus siglas en inglés, para comprobar la ausencia de interbloqueos y la persistencia de coherencia.
+4. Fase 4: compilación verificada y diseño de envolturas defensivas. El código puro verificado en Dafny se compiló a JavaScript estándar, sobre el cual se construyeron capas de integración en TypeScript encargadas del análisis sintáctico, control de límites operativos y formateo de testimonios.
+5. Fase 5: validación empírica, banco de pruebas y reproducibilidad. Se establecieron escenarios de prueba basados en situaciones reales, como directivas médicas de urgencia y casos de inconsistencia inducida, configurando suites de repetición de contraejemplos e integrando la compilación hermética mediante Nix Flakes.
+
+= Artefactos empleados <sec:artefactos_empleados>
+
+El desarrollo integró herramientas de deducción formal, lenguajes de desarrollo y estándares de autorización seleccionados por su rigor técnico y su reproducibilidad.
+
+En el ámbito de la verificación formal, se utilizó Dafny versión 4 para la especificación matemática, la deducción de propiedades y la generación de código JavaScript. La resolución de metas lógicas en Dafny se apoyó en los motores SMT Z3 versión 4.12 o superior y cvc5 versión 1.0 o superior. Para el análisis exhaustivo de estados y concurrencia se empleó la herramienta UPPAAL versión 5.0.
+
+En la capa de programación anfitriona y ejecución, se utilizó TypeScript versión 5 para el análisis sintáctico y las barreras defensivas de tipos, complementado por Node.js versión 20 o superior y Bun versión 1 como entornos de ejecución y empaquetado. El formateo y análisis estático de código se gestionó mediante Biome versión 1.9 o superior.
+
+Como base teórica y normativa de autorización, el sistema adopta las directrices de la Publicación Especial 800-162 de NIST y los lineamientos comparativos del estándar XACML 3.0. La reproducibilidad del entorno de desarrollo y compilación se garantizó mediante Nix Flakes, mientras que la composición tipográfica de este artículo se realizó en Typst versión 0.15.1 bajo lineamientos de IEEE.
+
+La @tab:artefactos_empleados resume la pila tecnológica y herramientas formales utilizadas en el núcleo y la capa anfitriona del sistema, indicando su versión, categoría y su rol específico en la arquitectura de la solución.
+
+#figure(
+  placement: auto,
+  scope: "parent",
+  table(
+    columns: (1.2fr, 0.8fr, 1.2fr, 2.5fr),
+    inset: 5pt,
+    align: left,
+    table.header([Herramienta / Tecnología], [Versión], [Categoría], [Rol y función en el proyecto]),
+    [Dafny], [4.x], [Verificación deductiva], [Especificación matemática del modelo ABAC, prueba de 7 lemas y compilación a JavaScript.],
+    [Z3 y cvc5], [4.12+ / 1.0+], [Solucionadores SMT], [Resolución automatizada de metas lógicas y condiciones de verificación en Dafny.],
+    [UPPAAL], [5.0], [Model checking], [Verificación temporal de estados del administrador y validación de 9 consultas TCTL.],
+    [TypeScript], [5.x], [Lenguaje anfitrión], [Analizador sintáctico, barreras defensivas de tipos y envolturas del núcleo compilado.],
+    [Node.js y Bun], [20+ / 1.x], [Entorno de ejecución], [Ejecución del banco de pruebas, suite de regresión y empaquetado para distribución npm.],
+    [Biome], [1.9+], [Calidad y análisis estático], [Formateo estricto y detección de malas prácticas en la base de código TypeScript.],
+  ),
+  caption: [Pila tecnológica y herramientas formales del proyecto.],
+) <tab:artefactos_empleados>
+
+= Artefactos desarrollados <sec:artefactos_desarrollados>
+
+El proyecto generó un conjunto articulado de módulos formales, código ejecutable y bancos de evaluación.
+
+== Arquitectura del sistema
+
+El sistema se estructura en tres capas con dependencias unidireccionales, como se presenta en la @fig:arquitectura. La capa de núcleo contiene los módulos Dafny correspondientes a esquema, sintaxis, evaluación, coherencia y transición. La capa de envolturas incluye el cargador de esquema, el analizador sintáctico, los adaptadores de tipos hacia las funciones generadas por Dafny y la interfaz de programación pública. La capa de distribución comprende el paquete npm empaquetado junto con sus declaraciones de tipos. La capa en TypeScript no recalcula decisiones del verificador: valida entradas, adapta estructuras y presenta los diagnósticos.
+
+#figure(
+  image("img/architecture.png", width: 60%),
+  caption: [Arquitectura del verificador: el núcleo Dafny compila a JavaScript y las envolturas TypeScript validan, adaptan y presentan sin reimplementar decisiones.],
+) <fig:arquitectura>
+
+La @fig:clases presenta las clases y tipos del verificador agrupados en sus dos componentes principales: el núcleo formal en Dafny y las envolturas en TypeScript.
 
 #figure(
   image("img/classes.png", width: 100%),
   caption: [Diagrama de clases del verificador con el núcleo Dafny y las envolturas TypeScript.],
 ) <fig:clases>
 
-En el núcleo, AttrDecl declara cada atributo con familia, nombre, tipo y dominio mediante valores de enumeración o intervalo entero acotado. AttrType distingue enumeración, booleano y entero acotado, mientras Value representa el valor concreto de cada variante. Request es una secuencia posicional de valores alineada con el orden de declaraciones del esquema, decisión que mantiene la enumeración y las demostraciones dentro de teoría pura de secuencias. Pred modela átomos de comparación contra literales más negación, conjunción y disyunción, Effect distingue permiso y denegación, Rule une identificador, efecto y condición, y Ruleset agrega reglas como secuencia ordenada. Witness exhibe una solicitud junto con identificadores de reglas, propiedad incumplida y explicación, WitnessOpt envuelve el testigo opcional de cada chequeo, AddResult confirma un conjunto o rechaza con testigo, y Decision separa permiso, denegación y conflicto interno.
+== Núcleo formal en Dafny
 
-En las envolturas, Esquema valida declaraciones y conserva el valor opaco compilado, Atributo duplica la declaración con tipos propios del lenguaje anfitrión, Analizador contrasta sintaxis contra esquema, Interfaz expone adición, actualización, eliminación, informe de coherencia, evaluación y variantes en lote, y Errores señala exceso de topes, esquema inválido, error sintáctico, valor fuera de dominio y violación de invariante. El analizador produce predicados y la interfaz devuelve resultados de adición, interpreta testigos y decide solicitudes mediante el núcleo.
+El núcleo en Dafny está compuesto por seis módulos principales:
+- Schema.dfy: declaraciones de familias de atributos, tipos de enumeración, booleanos y enteros acotados, condiciones de validez y generación del espacio cartesiano de solicitudes AllRequests.
+- Syntax.dfy: tipos algebraicos para condiciones lógicas, efectos de permiso y denegación, reglas individuales y colecciones ordenadas Ruleset.
+- Eval.dfy: semántica denotacional pura para evaluar la satisfacción de condiciones mediante Satisfies, la activación de reglas mediante Applies y el veredicto sobre solicitudes mediante Evaluate.
+- Coherence.dfy: formalización de las propiedades P1 a P4, algoritmos de decisión ejecutables y emisión de testimonios diagnósticos Witness.
+- Transition.dfy: operaciones guardadas de actualización TryAdd, TryUpdate y TryRemove, junto con las demostraciones deductivas de preservación invariante y solidez de testigos.
+- BoundedCheck.dfy: procedimientos de comprobación exhaustiva sobre configuraciones acotadas para contrastar lemas inductivos.
 
-== Construcciones Dafny empleadas
+En el núcleo, la estructura AttrDecl define cada atributo con su familia, identificador, tipo y dominio. La estructura Request implementa una secuencia ordenada de valores alineada con las posiciones del esquema, lo que circunscribe el razonamiento a la teoría de secuencias. Los recorridos sobre el espacio de solicitudes operan mediante índices enteros directos, evitando la creación de particiones intermedias en memoria.
 
-El núcleo usa tipos de datos algebraicos para AttrType, Value, Pred, Effect, Rule, Witness, WitnessOpt, AddResult y Decision, junto con alias de secuencia para Schema, Request y Ruleset. Los predicados ValidDecl, SchemaWellFormed, ValueMatchesDecl y ValidRequest fijan el vocabulario válido, mientras ValidAtom, ValidPred y ValidRule exigen atributos conocidos, literales dentro del dominio y operadores compatibles con el tipo. La búsqueda de declaraciones con LookupDecl y de posiciones con FindIndex resuelve cada referencia por nombre de familia y atributo.
+La @fig:chequeos resume el proceso de comprobación de coherencia implementado en Dafny, detallando su algoritmo ejecutable, estructura de testigo, lemas asociados y complejidad asintótica.
 
-Las funciones puras Satisfies, Applies, PermitApplies, DenyApplies y Evaluate definen la semántica por recursión estructural sobre predicados y reglas, y AllRequests construye el producto cartesiano de valores por declaración con PrependHead y CombineHeads. Evaluate devuelve permiso ante aplicación exclusiva de permiso, denegación ante ausencia de permiso y conflicto interno ante aplicación de ambos efectos, estado que la interfaz guardada vuelve inalcanzable. Los predicados fantasma P1 a P4 con Coherent y WitnessGenuine expresan propiedades sin costo en tiempo de ejecución, pues el compilador los borra y solo conserva las funciones de chequeo.
+#figure(
+  placement: auto,
+  scope: "parent",
+  image("img/check_phases.png", width: 100%),
+  caption: [Etapas de comprobación de coherencia en el núcleo formal Dafny: orden de ejecución de propiedades P4 a P3, funciones ejecutables, lemas deductivos, testigos diagnósticos y costo computacional.],
+) <fig:chequeos>
 
-Cada lema declara lo que exige con requires, lo que garantiza con ensures y la medida de terminación con decreases, y demuestra por inducción sobre el índice de solicitud o la estructura de la secuencia de reglas. El recorrido de solicitudes usa índices explícitos con medida sobre la diferencia entre longitud e índice, mientras el recorrido de reglas usa recursión sobre cabeza y cola porque los conjuntos de reglas son pequeños. El siguiente bloque muestra la guarda de adición con su lema de preservación.
+El siguiente bloque de código presenta la función de adición guardada TryAdd y su correspondiente lema deductivo de preservación AddPreserves verificado en Dafny:
 
 ```dafny
 function TryAdd(R: Ruleset, r: Rule, schema: Schema): AddResult {
@@ -200,58 +284,18 @@ lemma AddPreserves(R: Ruleset, r: Rule, schema: Schema)
 }
 ```
 
-La compilación traduce cinco módulos con destino JavaScript y excluye el módulo de comprobación acotada por ser solo fantasma y de prueba, de modo que el paquete distribuye decisión verificada sin buscador simbólico adicional.
+== Modelo de verificación en UPPAAL
 
-== Chequeos ejecutables y lemas por propiedad
-
-La @tab:chequeos resume cada chequeo con su función, su testigo, sus lemas y su costo. CheckCoherent encadena los cuatro chequeos en orden P1 a P4 sobre la enumeración total con solidez y completitud globales, y la envoltura consulta los cuatro de forma independiente para insignias por propiedad mientras el primer fallo coincide con el testigo combinado sin quinto barrido.
-
-#figure(
-  table(
-    columns: (auto, 1fr, 1fr, 1fr, 1fr),
-    inset: 6pt,
-    align: left,
-    table.header([Chequeo], [Función ejecutable], [Testigo], [Lemas], [Costo]),
-    [P1], [Barrido de solicitudes con primer permiso y primera denegación], [Solicitud más ambos identificadores], [Solidez y completitud del barrido más hallazgo dirigido], [Lineal en solicitudes por reglas],
-    [P2], [Prueba de disparo por regla con índice de primer disparo], [Solicitud vacía más regla muerta], [Solidez de ausencia de disparo y completitud de existencia], [Lineal en reglas por solicitudes],
-    [P3], [Búsqueda de decisión solitaria con cobertura y solicitud compartida], [Solicitud más regla sombreada y coberturas], [Solidez y completitud de testigo solitario más monotonía], [Cuadrático en reglas por solicitudes],
-    [P4], [Validación de regla contra esquema por búsqueda de declaración], [Solicitud vacía más regla inválida], [Solidez y completitud del recorrido de reglas], [Lineal en reglas],
-  ),
-  caption: [Chequeos ejecutables con testigo, lemas y costo por propiedad.],
-) <tab:chequeos>
-
-El chequeo P1 barre solicitudes con CheckP1From mediante índice y obtiene con FirstFiringId el primer permiso y la primera denegación que disparan, de modo que el testigo porta solicitud más ambos identificadores. Los lemas de solidez ligan el testigo con solicitudes enumeradas y aplicación de ambos efectos, y los lemas de completitud más el hallazgo dirigido de testigo reconstruyen el reporte ante cualquier violación.
-
-El chequeo P2 pregunta por cada regla si dispara en alguna solicitud con RuleFiresFrom y rescata el índice del primer disparo con FirstFiringIndex, de modo que el testigo porta solicitud vacía más el identificador de la regla muerta. Los lemas de solidez extraen la regla sin disparo del barrido y los de completitud reconstruyen el disparo desde la existencia garantizada por la propiedad.
-
-El chequeo P3 exige por cada regla una solicitud que solo ella decida con RuleSoleFrom sobre OtherApplies, y ante ausencia de testigo solitario rescata con FirstSharedReq una solicitud compartida más los identificadores que también disparan con FiringIdsExcept. Los lemas de solidez y completitud más monotonía de OtherApplies ligan el reporte con ausencia genuina de decisión solitaria, y los duplicados exactos caen aquí por carecer de solicitud solitaria.
-
-El chequeo P4 valida cada regla con ValidRule por búsqueda de declaración de atributo más operador y literal compatibles, de modo que el testigo porta solicitud vacía más el identificador inválido. Los lemas de solidez y completitud son recorridos directos sobre la secuencia de reglas.
-
-== Invariante de evolución y operaciones guardadas
-
-El estado es el conjunto ordenado de reglas con referencia al esquema y el estado inicial vacío es coherente por EmptyCoherent. La invariante de tesis afirma que todo conjunto alcanzable por la interfaz guardada es coherente, y cada operación la preserva por un lema dedicado demostrado en Dafny sobre dominios no acotados.
-
-TryAdd y TryUpdate confirman solo si el conjunto resultante supera CheckCoherent y en otro caso rechazan con testigo genuino sin mutación parcial, según AddPreserves, UpdatePreserves, solidez de testigo y completitud de testigo. La actualización con identificador desconocido rechaza como P4 con el identificador pedido, y el lote en orden aborta al primer rechazo y devuelve el conjunto original con semántica de todo o nada.
-
-EvaluateAgreesOnCoherent liga decisión con aplicación de permiso sobre conjuntos coherentes y solicitudes válidas, por lo que el estado interno de conflicto resulta inalcanzable por la interfaz guardada y la envoltura lo señala como violación de invariante.
-== Comprobación del modelo con UPPAAL
-
-El diseño del componente Admin se verifica por model checking con UPPAAL #cite(<larsen1997uppaal>) sobre el modelo en uppaal/abac-guard.xml y las consultas en uppaal/abac-guard.q. El universo es finito por construcción: dieciséis solicitudes como producto de dos roles, dos acciones, dos horas y dos valores de emergencia con el resto de atributos fijos, más diez reglas candidatas con efectos y validez fijos, donde clean es el conjunto {r0, r1, r2}.
+El autómata del componente de administración se especificó y validó en UPPAAL #cite(<larsen1997uppaal>) mediante el modelo uppaal/abac-guard.xml y las propiedades en uppaal/abac-guard.q. El universo de prueba abarca dieciséis solicitudes generadas a partir de dos roles, dos acciones, dos bandas horarias y dos estados de emergencia, evaluando diez reglas candidatas.
 
 #figure(
   image("img/model_diagram.png", width: 90%),
-  caption: [Autómata Admin (uppaal/abac-guard.xml).],
+  caption: [Autómata Admin modelado en UPPAAL en uppaal/abac-guard.xml.],
 ) <fig:transicion>
 
-Los estados Empty y Coherent representan conjuntos confirmados, vacío y no vacío coherente, mientras TryingAddE, TryingAddC y TryingUpdC son estados comprometidos donde el candidato ya está construido y la salida es atómica: aceptar o rechazar sin interleaving. Las variables committed y csz guardan el conjunto confirmado y su tamaño con tope MAX_R = 3, mientras cand y cszC guardan el candidato bajo evaluación. La variable lastOp registra la última operación para razonar sobre la eliminación y las banderas rejP1, rejP2, rejP3 y rejUnknownP4 más cleanAccepted marcan qué clase de veredicto ya ocurrió. El modelo no usa canales de sincronización: es un único autómata no temporizado cuyas guardas deciden cada transición.
+Como muestra la @fig:transicion, las ubicaciones Empty y Coherent modelan configuraciones consistentes confirmadas, mientras que TryingAddE, TryingAddC y TryingUpdC constituyen estados comprometidos que imponen transiciones atómicas sin entrelazado de eventos concurrentes.
 
-Las nueve consultas se agrupan en dos clases, como resume la @tab:consultas. Las propiedades de seguridad exigen que nada malo ocurra en ningún estado: A[] coherent() pide coherencia en todo estado alcanzable dentro del universo acotado, A[] !deadlock pide ausencia de bloqueo y A[] (lastOp != 2 || coherent()) reexamina en el modelo la preservación ante eliminación ya probada en Dafny. Las propiedades de alcanzabilidad exigen que el sistema pueda hacer su trabajo: E<> cleanAccepted pide que el conjunto limpio sea aceptable, E<> rejP1, E<> rejP2, E<> rejP3 y E<> rejUnknownP4 piden que cada clase de rechazo con testigo sea alcanzable y ninguna ruta de error sea código muerto, y E[] coherent() pide una senda que permanece coherente.
-
-#figure(
-  image("img/checking_results.png", width: 90%),
-  caption: [Verificador de UPPAAL: las nueve consultas se satisfacen.],
-) <fig:verificador>
+Las nueve consultas formuladas en TCTL se organizan en propiedades de seguridad y de alcanzabilidad, expuestas en la @tab:consultas.
 
 #figure(
   table(
@@ -262,27 +306,66 @@ Las nueve consultas se agrupan en dos clases, como resume la @tab:consultas. Las
     [A\[\] coherent()], [Todo estado alcanzable es coherente], [Seguridad],
     [A\[\] \!deadlock], [Ninguna ejecución se bloquea], [Seguridad],
     [A\[\] (lastOp \!= 2 \|\| coherent())], [Toda eliminación preserva coherencia], [Seguridad],
-    [E\<\> cleanAccepted], [El conjunto {r0, r1, r2} es aceptable], [Alcanzabilidad],
-    [E\<\> rejP1], [El rechazo por contradicción ocurre, testigo {r0, r3}], [Alcanzabilidad],
-    [E\<\> rejP2], [El rechazo por regla muerta ocurre, testigo {r6}], [Alcanzabilidad],
-    [E\<\> rejP3], [El rechazo por sombreado ocurre, testigo {r0, r4}], [Alcanzabilidad],
+    [E\<\> cleanAccepted], [El conjunto con reglas r0, r1 y r2 es aceptable], [Alcanzabilidad],
+    [E\<\> rejP1], [El rechazo por contradicción ocurre, testigo con reglas r0 y r3], [Alcanzabilidad],
+    [E\<\> rejP2], [El rechazo por regla muerta ocurre, testigo con regla r6], [Alcanzabilidad],
+    [E\<\> rejP3], [El rechazo por sombreado ocurre, testigo con reglas r0 y r4], [Alcanzabilidad],
     [E\<\> rejUnknownP4], [El rechazo por identificador desconocido ocurre], [Alcanzabilidad],
     [E\[\] coherent()], [Existe una senda siempre coherente], [Alcanzabilidad],
   ),
   caption: [Consultas de uppaal/abac-guard.q agrupadas por clase.],
 ) <tab:consultas>
 
-Las nueve consultas se satisfacen, como muestra la @fig:verificador con Property is satisfied en cada una. El panel Status reporta 16.7 s para A[] coherent(), 28.7 s para A[] !deadlock y 12.9 s para A[] (lastOp != 2 || coherent()), con picos residentes de 59, 71 y 84 MB; cada alcanzabilidad responde entre 0.001 y 0.058 s con pico de 84 MB. La enumeración exhaustiva independiente confirma 23 nodos alcanzables, 529 transiciones y 470 evaluaciones de candidato, sin estados incoherentes ni bloqueos. Tras aplicar model checking, el diseño del componente Admin queda matemáticamente respaldado: está libre de bloqueos y preserva la coherencia P1 a P4 bajo cualquier secuencia de adiciones, actualizaciones y eliminaciones dentro del universo acotado.
+Todas las consultas resultaron satisfechas, como documenta la @fig:verificador. La verificación requirió 16.7 segundos para la invariante de coherencia global A[] coherent() y 28.7 segundos para la ausencia de interbloqueos A[] !deadlock, explorando 23 estados alcanzables y 529 transiciones.
 
+#figure(
+  image("img/checking_results.png", width: 90%),
+  caption: [Panel del verificador de UPPAAL: las nueve consultas se satisfacen.],
+) <fig:verificador>
 
+== Biblioteca y envolturas en TypeScript
 
+La capa en TypeScript define los puntos de acceso y las validaciones de entrada:
+- schema.ts: verifica declaraciones de atributos y provee métodos de construcción seguros.
+- parser.ts: analiza sintácticamente las expresiones de condición y las directivas ABAC, validando identificadores y literales contra el esquema cargado.
+- wrappers.ts: coordina la comunicación con el motor compilado de Dafny mediante funciones lectoras y ofrece los métodos tryAdd, tryUpdate, remove, checkCoherent y evaluate.
+- explain.ts: transforma la estructura del testigo formal en mensajes diagnósticos legibles.
+- batch.ts: administra la evaluación y adición de directivas por lotes bajo semántica atómica.
+- errors.ts: declara errores estructurados para fallas de esquema, sintaxis, valores fuera de rango y superación de límites de escala.
 
-== Frontera con TypeScript y topes explícitos
+== Banco de pruebas, casos de estudio y suite de regresión
 
-El cargador interpreta el módulo compilado bajo una interfaz que fija exactamente los miembros usados y concentra en un solo punto la conversión no verificada, mientras los lectores defensivos validan objetos, booleanos, secuencias y enteros de precisión arbitraria. Los constructores traducen texto y números hacia secuencias y enteros del motor, los adaptadores convierten esquemas, predicados, reglas, conjuntos y solicitudes hacia valores Dafny y de vuelta hacia testigos legibles con claves por familia y nombre, y los identificadores se asignan como el siguiente entero libre al confirmar mientras la actualización conserva el suyo.
+Se diseñaron escenarios canónicos de evaluación estructurados en formato JSON:
+- clean.json: directivas válidas y mutuamente coherentes.
+- contradictory.json: conflicto por superposición entre una directiva de permiso y una de denegación ante una misma solicitud, correspondiente a una violación P1.
+- unsatisfiable.json: directiva con predicados contradictorios sobre rangos enteros, correspondiente a una violación P2.
+- shadowed.json: directiva redundante cubierta por directivas previas, correspondiente a una violación P3.
+- emergency-override.json: directiva clínica de excepción en urgencias médicas para autorizar acceso fuera de horario regular.
 
-El analizador contrasta sintaxis contra esquema y produce rechazo P4 ante atributo o literal fuera de dominio, el presentador de testigos solo redacta texto y nunca decide, y la evaluación atribuye reglas que disparan mediante Applies sin enumerar el espacio con costo lineal en el tamaño del conjunto. El chequeo de topes precede a toda operación costosa con máximos de valores por enumeración, reglas y tamaño del espacio de solicitudes, donde el exceso produce error declarado de exceso y la opción de topes liberados recorre el mismo camino de decisión con aviso de rendimiento no verificado por llamada y veredictos exactos. La construcción compila el núcleo hacia JavaScript como módulo con exportaciones expuestas, luego compila TypeScript con su compilador y valida con la suite de repetición y envolturas, de modo que la prueba de regresión fija testigos exactos ante cambios en las pruebas.
+La suite automatizada de pruebas, integrada por test/parser.test.ts, test/wrappers.test.ts y test/replay.test.ts, valida el rechazo ante entradas malformadas y confirma la reproducción exacta de los testigos generados.
 
-= Disponibilidad de datos <sec:datos>
+== Resumen consolidador de artefactos desarrollados
 
-El código fuente, los modelos Dafny, los casos de estudio y este manuscrito están disponibles en https://github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final/.
+La @tab:artefactos_desarrollados reúne los artefactos desarrollados en el proyecto, detallando su ubicación relativa, lenguaje utilizado, tamaño y contribución técnica.
+
+#figure(
+  placement: auto,
+  scope: "parent",
+  table(
+    columns: (1.2fr, 1.2fr, 0.8fr, 1.2fr, 2.5fr),
+    inset: 5pt,
+    align: left,
+    table.header([Artefacto desarrollado], [Ruta / Módulo], [Lenguaje], [Métricas], [Contribución técnica principal]),
+    [Núcleo formal Dafny], [dafny/], [Dafny], [6 módulos, ~48 KB, 7 lemas], [Especificación ejecutable, semántica ABAC, 4 propiedades de coherencia e invariante de evolución probado.],
+    [Modelo de estados UPPAAL], [uppaal/abac-guard.xml], [XML / UPPAAL], [1 autómata, 23 estados, 529 transiciones], [Model checking de transiciones del componente Admin, libre de interbloqueos.],
+    [Consultas formales TCTL], [uppaal/abac-guard.q], [TCTL], [9 consultas verificadas], [Comprobación matemática de seguridad y alcanzabilidad de veredictos.],
+    [Analizador sintáctico], [src/parser.ts], [TypeScript], [9.6 KB], [Parser estricto de reglas ABAC con verificación inmediata de tipo y rango contra el esquema.],
+    [Envolturas y adaptadores], [src/wrappers.ts, schema.ts], [TypeScript], [19.7 KB], [Capa defensiva y frontera segura con el motor JavaScript compilado desde Dafny.],
+    [Generador de explicaciones], [src/explain.ts], [TypeScript], [0.9 KB], [Traducción legible de testigos formales hacia explicaciones diagnósticas para administradores.],
+  ),
+  caption: [Catálogo consolidado de artefactos desarrollados por el proyecto.],
+) <tab:artefactos_desarrollados>
+
+= Disponibilidad de datos y código <sec:datos>
+
+El código fuente completo, las especificaciones en Dafny, los modelos y consultas de UPPAAL, la suite de pruebas automatizadas y este documento se encuentran disponibles bajo licencia de código abierto en el repositorio público https://github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final/.

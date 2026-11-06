@@ -1,0 +1,39 @@
+@startuml check_phases
+!theme plain
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 9
+skinparam roundCorner 4
+skinparam stateBorderThickness 1.1
+skinparam dpi 300
+
+[*] --> P4 : Entrada (R, Σ)
+
+state "Fase 1: Validez de Esquema (P4)\n--\n• Función: CheckP4Rules(R, Σ)\n• Comprobación: ValidRule(r, Σ)\n• Testigo: ([], [id], 'P4', ...)\n• Lema: CheckP4RulesGenuine\n• Costo: O(|R|)" as P4
+
+state "Fase 2: Satisfacibilidad (P2)\n--\n• Función: CheckP2Rules(R, reqs, Σ)\n• Comprobación: RuleFiresOnSome(r, reqs, Σ)\n• Testigo: ([], [id], 'P2', ...)\n• Lema: P2WitnessFound\n• Costo: O(|R| × |reqs|)" as P2
+
+state "Fase 3: Consistencia (P1)\n--\n• Función: CheckP1Reqs(reqs, R, Σ)\n• Comprobación: ¬(PermitApplies ∧ DenyApplies)\n• Testigo: (q_bad, [p_id, d_id], 'P1', ...)\n• Lema: CheckP1ReqsGenuine\n• Costo: O(|reqs| × |R|)" as P1
+
+state "Fase 4: No Sombreado (P3)\n--\n• Función: CheckP3Rules(R, R, reqs, Σ)\n• Comprobación: RuleHasSoleWitness(r, R, reqs, Σ)\n• Testigo: (q_shared, [r_id, ...], 'P3', ...)\n• Lema: CheckP3RulesGenuine\n• Costo: O(|R|² × |reqs|)" as P3
+
+state "Rechazo con Testigo Diagnóstico\n--\n• Retorno: Rejected(w) con Witness(req, ruleIds, prop, expl)\n• Transición guardada: R permanece intacto (sin mutación)" as Rejected
+
+state "Aceptación: Conjunto Coherente\n--\n• Retorno: Accepted(R) con NoWitness\n• Preservación: Invariante Coherent(R, Σ)\n• Lema deductivo: CheckCoherentSound" as Accepted
+
+P4 -right-> P2 : P4 Válida\n(NoWitness)
+P4 --> Rejected : Inválida (P4)
+
+P2 -right-> P1 : P2 Válida\n(NoWitness)
+P2 --> Rejected : Regla muerta (P2)
+
+P1 -right-> P3 : P1 Válida\n(NoWitness)
+P1 --> Rejected : Conflicto (P1)
+
+P3 --> Accepted : P3 Válida\n(NoWitness)
+P3 --> Rejected : Sombreada (P3)
+
+Accepted -right-> [*]
+
+@enduml

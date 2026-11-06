@@ -35,6 +35,8 @@
   // Tables & figures
   show figure: set block(spacing: 15.5pt)
   show figure: set place(clearance: 15.5pt)
+  show figure.where(kind: table): set block(breakable: true)
+  set table.cell(breakable: false)
   show figure.where(kind: table): set figure.caption(position: top, separator: [\ ])
   show figure.where(kind: table): set text(size: 8pt)
   show figure.where(kind: table): set figure(numbering: "I")
@@ -54,7 +56,7 @@
     // Wrap figure captions in block to prevent the creation of paragraphs. In
     // particular, this means `par.first-line-indent` does not apply.
     // See https://github.com/typst/templates/pull/73#discussion_r2112947947.
-    show figure.caption: it => block[#prefix~#numbers#it.separator#it.body]
+    show figure.caption: it => block(sticky: true)[#prefix~#numbers#it.separator#it.body]
     show figure.caption.where(kind: table): smallcaps
     fig
   }
