@@ -53,7 +53,7 @@
 
 = Introducción <sec:introduccion>
 
-El control de acceso es una función central en los sistemas de información, pues determina qué operaciones puede ejecutar cada sujeto sobre un recurso y bajo qué condiciones. ABAC expresa esas decisiones mediante atributos de sujeto, recurso, acción y entorno, de acuerdo con la definición canónica del Instituto Nacional de Estándares y Tecnología de los Estados Unidos, conocido como NIST por sus siglas en inglés #cite(<hu2014guide>), y su presentación sintética #cite(<hu2015abac>). Frente a los esquemas basados en roles, ABAC permite especificar reglas expresivas, tales como autorizar la lectura de una historia clínica cuando el cargo corresponde a personal médico y el nivel de habilitación supera la sensibilidad del documento. Esta flexibilidad aumenta el tamaño y la superposición de las directivas, lo que dificulta su auditoría manual.
+El control de acceso es una función central en los sistemas de información, pues determina qué operaciones puede ejecutar cada sujeto sobre un recurso y bajo qué condiciones. ABAC expresa esas decisiones mediante atributos de sujeto, recurso, acción y entorno, de acuerdo con la definición canónica del Instituto Nacional de Estándares y Tecnología de los Estados Unidos, conocido como NIST por sus siglas en inglés #cite(<hu2014guide>), y los lineamientos de verificación y prueba de políticas de autorización formalizados en el estándar NIST SP 800-192 #cite(<hu2017verification>). Frente a los esquemas basados en roles, ABAC permite especificar reglas expresivas, tales como autorizar la lectura de una historia clínica cuando el cargo corresponde a personal médico y el nivel de habilitación supera la sensibilidad del documento. Esta flexibilidad aumenta el tamaño y la superposición de las directivas, lo que dificulta su auditoría manual.
 
 En universidades, hospitales y organismos públicos, las directivas de acceso cambian con frecuencia por rotación de turnos, convenios y servicios de guardia. La práctica habitual delega la administración a la edición directa de archivos de configuración o paneles de gestión sin verificación formal. Cualquier omisión introduce contradicciones silenciosas que solo se manifiestan cuando una solicitud concreta recibe un veredicto erróneo, sea una denegación indebida que detiene una atención médica o una autorización que expone datos confidenciales.
 
@@ -79,7 +79,7 @@ En el ámbito teórico, los métodos convencionales de prueba basados en muestre
 
 En el plano operativo y de seguridad, los entornos con alta rotación organizativa modifican sus políticas de autorización de forma continua. Cuando la administración se realiza sobre archivos en formatos como JSON o YAML, las inconsistencias desapercibidas provocan fallas de acceso. Un conflicto puede otorgar privilegios indebidos y vulnerar la privacidad de datos clínicos, o denegar el paso a personal de guardia durante una emergencia médica. La generación de un testigo mínimo con la solicitud conflictiva y los identificadores de regla permite auditar y corregir las directivas sin requerir inspecciones manuales extensas.
 
-En el plano metodológico y tecnológico, la aplicación de métodos formales en entornos comerciales suele verse frenada por la dificultad de integrar demostradores matemáticos en arquitecturas web. Alojar un motor de resolución lógica como servicio independiente incrementa la latencia y la superficie de exposición en producción. Este desarrollo adopta el principio de corrección por construcción, conocido como CbC por sus siglas en inglés: el núcleo formal se demuestra en Dafny y se compila a código JavaScript estándar, protegido por envolturas en TypeScript. El sistema ofrece garantías matemáticas directas sin añadir dependencias de cálculo simbólico en el entorno de despliegue.
+En el plano metodológico y tecnológico, la aplicación de métodos formales en entornos comerciales suele verse frenada por la dificultad de integrar demostradores matemáticos en arquitecturas web. Alojar un motor de resolución lógica como servicio independiente incrementa la latencia y la superficie de exposición en producción. Este desarrollo adopta el principio de corrección por construcción, conocido como CbC por sus siglas en inglés #cite(<hall2002correctness>): el núcleo formal se demuestra en Dafny y se compila a código JavaScript estándar, protegido por envolturas en TypeScript. El sistema ofrece garantías matemáticas directas sin añadir dependencias de cálculo simbólico en el entorno de despliegue.
 
 = Objetivos del proyecto <sec:objetivos>
 
@@ -146,38 +146,61 @@ La @tab:requerimientos describe los requerimientos funcionales del sistema, indi
 
 = Trabajo relacionado <sec:relacionado>
 
-== Análisis de políticas XACML
+El aseguramiento y análisis de políticas de control de acceso comprende diversas líneas de investigación formal, que van desde la taxonomía de anomalías y el razonamiento estático mediante solucionadores lógicos, hasta la evolución guardada de directivas, los lenguajes analizables y la verificación temporal de administradores.
 
-Fisler y sus colaboradores establecieron las bases del análisis formal de políticas al verificar propiedades y evaluar el impacto de cambios en directivas de autorización #cite(<fisler2005verification>). Turkmen y su equipo formalizaron el análisis del Lenguaje Extensible de Marcado para Control de Acceso, conocido como XACML por sus siglas en inglés, mediante traductores a solucionadores de satisfacibilidad módulo teorías, conocida como SMT por sus siglas en inglés, primero en su publicación de conferencia #cite(<turkmen2015analysis>) y posteriormente en su edición extendida #cite(<turkmen2017formal>). Dicha aproximación traduce las directivas a fórmulas lógicas y consulta a un solucionador externo como Z3 #cite(<demoura2008z3>). Ferraiolo y su equipo compararon el comportamiento de XACML con el Control de Acceso de Próxima Generación, conocido como NGAC por sus siglas en inglés #cite(<ferraiolo2016xacml>). A diferencia de esos esquemas, el presente desarrollo no formula consultas repetitivas a un motor SMT en tiempo de ejecución: las condiciones de coherencia y las guardas de modificación se demuestran de forma directa en Dafny #cite(<leino2010dafny>), por lo que el algoritmo ejecutado corresponde al código extraído de las pruebas deductivas.
+== Taxonomía de anomalías y verificación de políticas ABAC
 
-== Detección de conflictos en ABAC
+El estudio sistemático de defectos en conjuntos de reglas tiene su origen en la formulación de anomalías para políticas de filtrado y cortafuegos establecida por Al-Shaer y Hamed #cite(<alshaer2004taxonomy>), quienes clasificaron los defectos en contradicción o conflicto, sombreado (_shadowing_), redundancia e irrelevancia o vacuidad. Esta taxonomía fue adaptada a modelos de autorización basados en atributos por el NIST en su estándar de métodos de prueba y verificación SP 800-192 #cite(<hu2017verification>).
 
-Diversos estudios proponen algoritmos específicos para detectar conflictos en modelos ABAC #cite(<liu2021novel>) basados en las guías estándar #cite(<hu2014guide>). La presente propuesta unifica los defectos de contradicción, reglas insatisfacibles, sombreado y violación de esquema en una comprobación común con testigos uniformes, e integra el diagnóstico dentro de una interfaz guardada que preserva el estado ante cualquier rechazo.
+En el ámbito de ABAC, diversos trabajos abordan la detección de anomalías y conflictos mediante representaciones lógicas y grafos dirigidos. Kolovski, Hendler y Parsia #cite(<kolovski2007analyzing>) formalizaron políticas de autorización mediante lógicas descriptivas, reduciendo la comprobación de consistencia y redundancia al razonamiento ontológico. Margheri y sus colaboradores #cite(<margheri2019rigorous>) desarrollaron un marco formal riguroso para la especificación, análisis estático y aplicación de políticas ABAC, formalizando la detección de anomalías en directivas con múltiples atributos. Por su parte, Liu y sus coautores #cite(<liu2021novel>) propusieron un método de detección de conflictos basado en particionamiento de atributos y grafos de decisión.
 
-== Lenguajes de autorización analizables
+A diferencia de los enfoques heurísticos o basados en representaciones ontológicas intermedias, nuestra aproximación formaliza de forma matemática y exhaustiva cuatro propiedades canónicas ($P_1$ a $P_4$) con semántica denotacional directa en Dafny #cite(<leino2010dafny>), integrando la detección de inconsistencias ($P_1$), reglas insatisfacibles ($P_2$), sombreado ($P_3$) e invalidez sintáctica o de tipos ($P_4$) bajo un generador de testigos diagnósticos uniformes que asocia la tupla mínima de contraejemplo.
 
-Cedar constituye un lenguaje de autorización diseñado para evaluación rápida y análisis formal mediante verificación guiada #cite(<cutler2024cedar>), con metodología documentada #cite(<cutler2024built>) y código público #cite(<cedarrepo>). Frente a Cedar, este proyecto restringe intencionalmente el lenguaje al omitir operaciones aritméticas abiertas y comparaciones cruzadas entre atributos, a cambio de una garantía inductiva: toda política aceptada por la interfaz guardada mantiene la coherencia por construcción. Por su parte, el lenguaje ALFA ofrece una sintaxis simplificada para el estándar XACML, pero carece de un marco integrado de verificación formal y compilación directa a JavaScript.
+== Razonamiento estático mediante solucionadores SMT y SAT
 
-== Verificación de software con Dafny y motores SMT
+El empleo de solucionadores de satisfacibilidad booleana (SAT) y satisfacibilidad módulo teorías (SMT) ha constituido la técnica predominante para el análisis estático de políticas de acceso. Hughes y Bultan #cite(<hughes2008automated>) fueron pioneros en traducir especificaciones de autorización a fórmulas proposicionales para verificar propiedades de seguridad y sintetizar contraejemplos mediante solucionadores SAT. Jayaraman y sus colaboradores #cite(<jayaraman2011automatic>) extendieron dicho principio al análisis automatizado de errores y generación de testigos diagnósticos en políticas empresariales utilizando solucionadores SMT.
 
-Dafny opera como un entorno formal de programación y verificación funcional #cite(<dafnydocs>), utilizando motores SMT como Z3 #cite(<demoura2008z3>) y cvc5 #cite(<barbosa2022cvc5>) para solventar las condiciones lógicas de prueba. Mientras que los usos convencionales aplican Dafny a programas generales, este proyecto lo emplea simultáneamente como especificación formal ejecutable, como probador deductivo de lemas de preservación y como base para compilar el módulo distribuido en npm.
+En el contexto del estándar XACML, Turkmen y su equipo #cite(<turkmen2017formal>) formalizaron un marco que traduce directivas compuestas y algoritmos de combinación a fórmulas en la teoría de arreglos y lógica de primer orden, delegando la resolución de consultas al motor Z3 #cite(<demoura2008z3>). A escala industrial en infraestructuras en la nube, Amazon Web Services diseñó el analizador Zelkova (Backes et al. #cite(<backes2018semantic>)) y la verificación de seguridad Block Public Access (Bouchet et al. #cite(<bouchet2020block>)), que transforman políticas de gestión de identidad (IAM) y control de acceso a cubos de almacenamiento S3 en consultas SMT masivas para auditar fugas de datos y configuraciones públicas indebidas.
+
+A pesar de su potencia expresiva, estos sistemas dependen de una invocación externa y repetitiva a solucionadores SMT en tiempo de despliegue o durante cada evaluación de consulta, lo que impone una sobrecarga de latencia, riesgos de agotamiento de memoria o tiempos de espera indefinidos (_timeouts_). Frente a ellos, nuestro desarrollo adopta el paradigma de corrección por construcción (CbC) #cite(<hall2002correctness>): los motores SMT Z3 #cite(<demoura2008z3>) y cvc5 #cite(<barbosa2022cvc5>) operan exclusivamente en tiempo de diseño para asistir la verificación deductiva de los lemas en Dafny #cite(<leino2010dafny>). El artefacto que se ejecuta en producción es código JavaScript puro extraído de las pruebas formales, prescindiendo por completo de dependencias de cálculo simbólico en tiempo de ejecución.
+
+== Evolución guardada de directivas y administración de acceso
+
+La administración dinámica de directivas de autorización introduce riesgos severos de regresión de seguridad durante su ciclo de vida. Fisler y sus colegas #cite(<fisler2005verification>) plantearon el análisis de impacto de cambios con la herramienta Margrave, contrastando versiones sucesivas de una política para alertar sobre permisos conferidos o revocados inadvertidamente. En el plano de la administración delegada, Sasturkar, Yang y Stoller #cite(<sasturkar2011policy>) investigaron la complejidad del análisis de seguridad en modelos administrativos (ARBAC), mientras que Jayaraman y sus colaboradores desarrollaron Mohawk #cite(<jayaraman2013mohawk>) para verificar la alcanzabilidad de privilegios indebidos ante transiciones de estado administrativo.
+
+No obstante, las herramientas previas efectúan análisis _a posteriori_ sobre estados que ya fueron modificados, o analizan transiciones hipotéticas sin proveer mecanismos que impidan atómicamente la transición a un estado defectuoso. Nuestro verificador supera esta limitación implementando una interfaz de mutación guardada (`tryAdd`, `tryUpdate`, `remove`) respaldada por el lema deductivo `AddPreserves`. Si una regla propuesta induce una contradicción, una regla muerta o un sombreado, el sistema aborta la operación de inmediato, preserva el estado previo intacto y emite un testigo mínimo con la solicitud infractora.
+
+== Lenguajes de autorización analizables y verificación guiada
+
+La búsqueda de lenguajes de políticas con garantías de verificación integradas condujo al desarrollo de Cedar por parte de Cutler y sus colaboradores #cite(<cutler2024cedar>), complementado por la metodología de desarrollo guiado por verificación descrita por Disselkoen et al. #cite(<cutler2024built>). Cedar se especifica formalmente en el asistente de demostración Lean y provee verificación estática con reducción a SMT. Sin embargo, en Cedar existe una separación arquitectónica entre el modelo formal en Lean y el motor de ejecución implementado en Rust, lo que demanda técnicas de comprobación diferencial para mitigar divergencias entre el modelo matemático y el código ejecutable. Además, Cedar carece de una guarda inductiva a nivel de interfaz de conjunto que impida confirmaciones conflictivas.
+
+Por otro lado, lenguajes como ALFA #cite(<oasis2015alfa>) ofrecen una sintaxis compacta y legible que compila al estándar XML de XACML, pero delegan el análisis de propiedades a motores externos y no garantizan preservación de invariantes ni proveen compilación nativa hacia entornos de navegador o Node.js. Nuestro diseño restringe intencionalmente el lenguaje a literales y comparaciones de intervalos acotados para garantizar la decidibilidad total del espacio AllRequests, logrando que el código ejecutable sea el resultado directo de la compilación verificada de Dafny.
+
+== Model checking de protocolos de administración de acceso
+
+El model checking ha sido aplicado al análisis de directivas de seguridad para certificar que un sistema interactivo satisface propiedades temporales. Zhang, Ryan y Guelev #cite(<zhang2008synthesising>) modelaron la evolución de sistemas de control de acceso y verificaron propiedades de seguridad mediante comprobación de modelos algorítmica.
+
+En nuestro trabajo, complementamos la deducción inductiva estática con la verificación temporal en UPPAAL #cite(<larsen1997uppaal>). El autómata de estados finitos del componente administrador valida 9 consultas en lógica TCTL, demostrando formalmente que el protocolo de transición no presenta interbloqueos, que los estados transitorios comprometidos ejecutan operaciones de adición y actualización atómicamente, y que la condición de coherencia global $A[] "coherent"()$ es un invariante estricto en todas las trayectorias de ejecución concurrentes.
 
 == Síntesis comparativa
 
-La @tab:comparativa contrasta los enfoques existentes, comparando su metodología, el tipo de testigo generado, la presencia de garantías de preservación y la existencia de invariantes de evolución.
+La @tab:comparativa contrasta nuestro trabajo frente a los principales enfoques de la literatura científica e industrial, evaluando el paradigma formal empleado, la dependencia de solucionadores en ejecución, el soporte de guardas de evolución con preservación inductiva, la presencia de testigos diagnósticos mínimos y el entorno de despliegue.
 
 #figure(
   placement: auto,
   table(
-    columns: (1fr, 1.05fr, 1fr, 1fr),
+    columns: (1.1fr, 0.9fr, 0.85fr, 0.8fr, 1.15fr, 1fr),
     inset: (x: 2.8pt, y: 4.5pt),
     align: left,
-    table.header([Enfoque], [Método], [Testigo], [Garantía]),
-    [Análisis XACML con SMT], [Traducción a SMT por consulta], [Modelo del solucionador], [Sin invariante de evolución],
-    [Detección de conflictos ABAC], [Algoritmos dedicados], [Par de reglas en conflicto], [Sin guarda de evolución],
-    [Lenguaje Cedar], [Verificación formal guiada], [Diagnóstico del analizador], [Sin invariante de conjunto],
+    table.header([Enfoque], [Paradigma formal], [SMT en ejecución], [Guarda de evolución], [Testigo diagnóstico], [Entorno de despliegue]),
+    [Análisis XACML (Turkmen #cite(<turkmen2017formal>))], [Traducción SMT], [Requerido (Z3)], [No], [Modelo del solucionador], [Servicio externo],
+    [Detección ABAC (Liu #cite(<liu2021novel>))], [Partición y grafos], [No], [No], [Par de reglas], [Algoritmo local],
+    [Zelkova / BPA (AWS #cite(<backes2018semantic>) #cite(<bouchet2020block>))], [Reducción SMT], [Requerido (Z3)], [No], [Contramodelo SMT], [Infraestructura nube],
+    [Lenguaje Cedar (Cutler #cite(<cutler2024cedar>) #cite(<cutler2024built>))], [Verificación guiada (Lean)], [Opcional (análisis)], [No], [Diagnóstico sintáctico], [Binario Rust / WASM],
+    [Mohawk / ARBAC (Jayaraman #cite(<jayaraman2013mohawk>))], [SMT / Reachability], [Requerido], [No (_a posteriori_)], [Traza de transición], [Herramienta CLI],
+    [Verificador propuesto], [CbC deductivo (Dafny) \ + UPPAAL TCTL], [Ninguno \ (Dafny $arrow.r$ JS)], [Sí \ (lema inductivo)], [Tupla mínima \ $("req", r_i, r_j)$], [Nativo npm \ (JS / Node / TS)],
   ),
-  caption: [Comparación de enfoques de análisis de políticas de autorización.],
+  caption: [Comparación sistemática del verificador propuesto frente a los enfoques de la literatura científica e industrial.],
 ) <tab:comparativa>
 
 = Metodología utilizada y desarrollo <sec:metodologia>

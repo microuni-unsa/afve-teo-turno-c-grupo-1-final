@@ -6,31 +6,36 @@
   number = {NIST Special Publication 800-162},
   doi = {10.6028/nist.sp.800-162},
 }
-@article{hu2015abac,
-  author = {Vincent C. Hu and D. Richard Kuhn and David F. Ferraiolo and Jeffrey M. Voas},
-  title = {Attribute-Based Access Control},
-  journal = {Computer},
-  year = {2015},
-  volume = {48},
-  number = {2},
-  pages = {85--88},
-  doi = {10.1109/mc.2015.33},
+
+@techreport{hu2017verification,
+  author = {Vincent C. Hu and D. Richard Kuhn and Dylan Yaga},
+  title = {Verification and Test Methods for Access Control Policies/Models},
+  institution = {National Institute of Standards and Technology},
+  year = {2017},
+  number = {NIST Special Publication 800-192},
+  doi = {10.6028/nist.sp.800-192},
 }
+
+@inproceedings{alshaer2004taxonomy,
+  author = {Ehab S. Al-Shaer and Hazem H. Hamed},
+  title = {Discovery of policy anomalies in distributed firewalls},
+  booktitle = {Proceedings of the 23rd Annual Joint Conference of the IEEE Computer and Communications Societies (INFOCOM)},
+  year = {2004},
+  volume = {4},
+  pages = {2605--2616},
+  doi = {10.1109/infcom.2004.1354680},
+}
+
 @inproceedings{fisler2005verification,
   author = {Kathryn Fisler and Shriram Krishnamurthi and Leo A. Meyerovich and Michael Carl Tschantz},
   title = {Verification and change-impact analysis of access-control policies},
   booktitle = {Proceedings of the 27th International Conference on Software Engineering (ICSE)},
   year = {2005},
   publisher = {IEEE},
+  pages = {196--205},
   doi = {10.1109/icse.2005.1553562},
 }
-@inproceedings{turkmen2015analysis,
-  author = {Fatih Turkmen and Jerry den Hartog and Silvio Ranise and Nicola Zannone},
-  title = {Analysis of XACML Policies with SMT},
-  booktitle = {Principles of Security and Trust (POST), Lecture Notes in Computer Science},
-  year = {2015},
-  doi = {10.1007/978-3-662-46666-7_7},
-}
+
 @article{turkmen2017formal,
   author = {Fatih Turkmen and Jerry den Hartog and Silvio Ranise and Nicola Zannone},
   title = {Formal analysis of XACML policies using SMT},
@@ -40,6 +45,47 @@
   pages = {185--203},
   doi = {10.1016/j.cose.2017.01.009},
 }
+
+@inproceedings{kolovski2007analyzing,
+  author = {Vladimir Kolovski and James Hendler and Bijan Parsia},
+  title = {Analyzing web access control policies},
+  booktitle = {Proceedings of the 16th International Conference on World Wide Web (WWW)},
+  year = {2007},
+  pages = {677--686},
+  doi = {10.1145/1242572.1242664},
+}
+
+@article{hughes2008automated,
+  author = {Graham Hughes and Tevfik Bultan},
+  title = {Automated verification of access control policies using a SAT solver},
+  journal = {International Journal on Software Tools for Technology Transfer},
+  year = {2008},
+  volume = {10},
+  number = {6},
+  pages = {503--520},
+  doi = {10.1007/s10009-008-0087-9},
+}
+
+@inproceedings{jayaraman2011automatic,
+  author = {Karthick Jayaraman and Vijay Ganesh and Mahesh Tripunitara and Martin Rinard and Steve J. Chapin},
+  title = {Automatic error finding in access-control policies},
+  booktitle = {Proceedings of the 18th ACM Conference on Computer and Communications Security (CCS)},
+  year = {2011},
+  pages = {163--174},
+  doi = {10.1145/2046707.2046727},
+}
+
+@article{margheri2019rigorous,
+  author = {Andrea Margheri and Massimiliano Masi and Rosario Pugliese and Francesco Tiezzi},
+  title = {A Rigorous Framework for Specification, Analysis and Enforcement of Access Control Policies},
+  journal = {IEEE Transactions on Software Engineering},
+  year = {2019},
+  volume = {45},
+  number = {1},
+  pages = {2--33},
+  doi = {10.1109/tse.2017.2765640},
+}
+
 @article{liu2021novel,
   author = {Gang Liu and Wenxian Pei and Yumin Tian and Chen Liu and Shancang Li},
   title = {A novel conflict detection method for ABAC security policies},
@@ -49,6 +95,25 @@
   pages = {100200},
   doi = {10.1016/j.jii.2021.100200},
 }
+
+@inproceedings{backes2018semantic,
+  author = {John Backes and Pauline Bolignano and Byron Cook and Catherine Dodge and Andrew Gacek and Kasper S{\o}e Luckow and Neha Rungta and Oksana Tkachuk and Carsten Varming},
+  title = {Semantic-based Automated Reasoning for AWS Access Policies using SMT},
+  booktitle = {Proceedings of the 18th Conference on Formal Methods in Computer-Aided Design (FMCAD)},
+  year = {2018},
+  pages = {1--9},
+  doi = {10.23919/fmcad.2018.8602994},
+}
+
+@inproceedings{bouchet2020block,
+  author = {Malik Bouchet and Byron Cook and Bryant Cutler and Anna Druzkina and Andrew Gacek and Liana Hadarean and Ranjit Jhala and Brad Marshall and Dan Peebles and Neha Rungta and Cole Schlesinger and Chriss Stephens and Carsten Varming and Andy Warfield},
+  title = {Block public access: trust safety verification of access control policies},
+  booktitle = {Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering (ESEC/FSE)},
+  year = {2020},
+  pages = {281--291},
+  doi = {10.1145/3368089.3409728},
+}
+
 @article{cutler2024cedar,
   author = {Joseph W. Cutler and Craig Disselkoen and Aaron Eline and Shaobo He and Kyle Headley and Michael Hicks and Kesha Hietala and Eleftherios Ioannidis and John Kastner and Anwar Mamat and Darin McAdams and Matt McCutchen and Neha Rungta and Emina Torlak and Andrew M. Wells},
   title = {Cedar: A New Language for Expressive, Fast, Safe, and Analyzable Authorization},
@@ -59,59 +124,102 @@
   pages = {670--697},
   doi = {10.1145/3649835},
 }
+
+@inproceedings{cutler2024built,
+  author = {Craig Disselkoen and Aaron Eline and Shaobo He and Kyle Headley and Michael Hicks and Kesha Hietala and John Kastner and Anwar Mamat and Matt McCutchen and Neha Rungta and Bhakti Shah and Emina Torlak and Andrew M. Wells},
+  title = {How We Built Cedar: A Verification-Guided Approach},
+  booktitle = {Companion Proceedings of the 32nd ACM International Conference on the Foundations of Software Engineering (FSE)},
+  year = {2024},
+  pages = {351--357},
+  doi = {10.1145/3663529.3663854},
+}
+
+@article{sasturkar2011policy,
+  author = {Amit Sasturkar and Ping Yang and Scott D. Stoller},
+  title = {Policy analysis for Administrative Role-Based Access Control},
+  journal = {Theoretical Computer Science},
+  year = {2011},
+  volume = {412},
+  number = {44},
+  pages = {6234--6249},
+  doi = {10.1016/j.tcs.2011.05.009},
+}
+
+@article{jayaraman2013mohawk,
+  author = {Karthick Jayaraman and Mahesh Tripunitara and Vijay Ganesh and Martin Rinard and Steve J. Chapin},
+  title = {Mohawk: Verification of Administrative Access Control Policies},
+  journal = {ACM Transactions on Information and System Security},
+  year = {2013},
+  volume = {16},
+  number = {1},
+  pages = {1--38},
+  doi = {10.1145/2445566.2445570},
+}
+
+@article{zhang2008synthesising,
+  author = {Nan Zhang and Mark Dermot Ryan and Dimitar P. Guelev},
+  title = {Synthesising verified access control systems through model checking},
+  journal = {Journal of Computer Security},
+  year = {2008},
+  volume = {16},
+  number = {1},
+  pages = {1--61},
+  doi = {10.3233/jcs-2008-16101},
+}
+
+@article{hall2002correctness,
+  author = {Anthony Hall and Roderick Chapman},
+  title = {Correctness by construction: Developing a commercial secure system},
+  journal = {IEEE Software},
+  year = {2002},
+  volume = {19},
+  number = {1},
+  pages = {18--25},
+  doi = {10.1109/52.976937},
+}
+
+@techreport{oasis2015alfa,
+  author = {Pablo Giambiagi and Mohammad Nurul Alam},
+  title = {ALFA v1.0: Abbreviated Language for Authorization Version 1.0},
+  institution = {OASIS},
+  year = {2015},
+  number = {OASIS Committee Specification 01},
+}
+
 @inproceedings{leino2010dafny,
   author = {K. Rustan M. Leino},
   title = {Dafny: An Automatic Program Verifier for Functional Correctness},
   booktitle = {Logic for Programming, Artificial Intelligence, and Reasoning (LPAR), Lecture Notes in Computer Science},
   year = {2010},
+  pages = {348--370},
   doi = {10.1007/978-3-642-17511-4_20},
 }
+
 @inproceedings{demoura2008z3,
   author = {Leonardo de Moura and Nikolaj Bj{\o}rner},
   title = {Z3: An Efficient SMT Solver},
   booktitle = {Tools and Algorithms for the Construction and Analysis of Systems (TACAS), Lecture Notes in Computer Science},
   year = {2008},
+  pages = {337--340},
   doi = {10.1007/978-3-540-78800-3_24},
 }
-@misc{dafnydocs,
-  title = {Dafny Programming and Verification Language},
-  howpublished = {\url{https://dafny.org/}},
-  note = {Consultado el 2026-10-08},
-}
-@misc{cedarrepo,
-  title = {Cedar Policy Language},
-  howpublished = {\url{https://github.com/cedar-policy/cedar}},
-  note = {Consultado el 2026-10-08},
-}
-@inproceedings{ferraiolo2016xacml,
-  author = {David Ferraiolo and Ramaswamy Chandramouli and Rick Kuhn and Vincent Hu},
-  title = {Extensible Access Control Markup Language (XACML) and Next Generation Access Control (NGAC)},
-  booktitle = {Proceedings of the 2016 ACM International Workshop on Attribute Based Access Control},
-  year = {2016},
-  publisher = {ACM},
-  doi = {10.1145/2875491.2875496},
-}
-@inproceedings{cutler2024built,
-  author = {Joseph W. Cutler and Craig Disselkoen and Aaron Eline and Shaobo He and Kyle Headley and Michael Hicks and Kesha Hietala and Eleftherios Ioannidis and John Kastner and Anwar Mamat and Darin McAdams and Matt McCutchen and Neha Rungta and Emina Torlak and Andrew M. Wells},
-  title = {How We Built Cedar: A Verification-Guided Approach},
-  booktitle = {Companion Proceedings of the 32nd ACM International Conference on the Foundations of Software Engineering},
-  year = {2024},
-  doi = {10.1145/3663529.3663854},
-}
+
 @inproceedings{barbosa2022cvc5,
-  author = {Haniel Barbosa and Clark Barrett and Martin Brain and Gereon Kremer and Hanna Lachnitt and Makai Mann and Abdalrhman Mohamed and Mudathir Mohamed and Aina Niemetz and Andres N{\"o}tzli and Alex Ozdemir and Mathias Preiner and Andrew Reynolds and Ying Sheng and Cesare Tinelli and Yoni Zohar},
+  author = {Haniel Barbosa and Clark Barrett and Martin Brain and Gereon Kremer and Hanna Lachnitt and Makai Mann and Abdalrhman Mohamed and Mudathir Mohamed and Aina Niemetz and Andres N{"o}tzli and Alex Ozdemir and Mathias Preiner and Andrew Reynolds and Ying Sheng and Cesare Tinelli and Yoni Zohar},
   title = {cvc5: A Versatile and Industrial-Strength SMT Solver},
   booktitle = {Tools and Algorithms for the Construction and Analysis of Systems (TACAS), Lecture Notes in Computer Science},
   year = {2022},
+  pages = {415--442},
   doi = {10.1007/978-3-030-99524-9_24},
 }
-@inproceedings{larsen1997uppaal,
+
+@article{larsen1997uppaal,
   author = {Kim G. Larsen and Paul Pettersson and Wang Yi},
   title = {UPPAAL in a Nutshell},
-  booktitle = {International Journal on Software Tools for Technology Transfer},
+  journal = {International Journal on Software Tools for Technology Transfer},
   year = {1997},
   volume = {1},
   number = {1--2},
   pages = {134--152},
   doi = {10.1007/s10009-497-0006-x},
-}
+}\n
