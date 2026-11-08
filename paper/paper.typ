@@ -215,7 +215,7 @@ El desarrollo se articuló en cinco fases secuenciales:
 2. Fase 2: verificación deductiva de propiedades e invariantes en Dafny. Se formalizaron las propiedades de coherencia de P1 a P4 junto con sus funciones de decisión ejecutables y generadores de testigos, demostrando siete lemas deductivos de solidez, completitud y preservación resueltos mediante los motores SMT Z3 y cvc5.
 3. Fase 3: verificación de estados por model checking en UPPAAL. Con el fin de evaluar la interacción temporal y la concurrencia en la administración de políticas, se construyó un autómata de estados finitos en UPPAAL mediante el archivo uppaal/abac-guard.xml y se formularon nueve consultas en lógica de árbol de computación temporal, conocida como TCTL por sus siglas en inglés, para comprobar la ausencia de interbloqueos y la persistencia de coherencia.
 4. Fase 4: compilación verificada y diseño de envolturas defensivas. El código puro verificado en Dafny se compiló a JavaScript estándar, sobre el cual se construyeron capas de integración en TypeScript encargadas del análisis sintáctico, control de límites operativos y formateo de testimonios.
-5. Fase 5: validación empírica, banco de pruebas y reproducibilidad. Se establecieron escenarios de prueba basados en situaciones reales, como directivas médicas de urgencia y casos de inconsistencia inducida, configurando suites de repetición de contraejemplos e integrando la compilación hermética mediante Nix Flakes.
+5. Fase 5: validación empírica, banco de pruebas y reproducibilidad. Se establecieron escenarios de prueba basados en situaciones reales, como directivas médicas de urgencia y casos de inconsistencia inducida, configurando suites de repetición de contraejemplos y asegurando la reproducibilidad mediante pruebas automatizadas continuas.
 
 = Artefactos empleados <sec:artefactos_empleados>
 
@@ -225,7 +225,7 @@ En el ámbito de la verificación formal, se utilizó Dafny versión 4 para la e
 
 En la capa de programación anfitriona y ejecución, se utilizó TypeScript versión 5 para el análisis sintáctico y las barreras defensivas de tipos, complementado por Node.js versión 20 o superior y Bun versión 1 como entornos de ejecución y empaquetado. El formateo y análisis estático de código se gestionó mediante Biome versión 1.9 o superior.
 
-Como base teórica y normativa de autorización, el sistema adopta las directrices de la Publicación Especial 800-162 de NIST y los lineamientos comparativos del estándar XACML 3.0. La reproducibilidad del entorno de desarrollo y compilación se garantizó mediante Nix Flakes, mientras que la composición tipográfica de este artículo se realizó en Typst versión 0.15.1 bajo lineamientos de IEEE.
+Como base teórica y normativa de autorización, el sistema adopta las directrices de la Publicación Especial 800-162 de NIST y los lineamientos comparativos del estándar XACML 3.0. La reproducibilidad del entorno de desarrollo y ejecución se sustentó en los estándares de Node.js y TypeScript, mientras que la composición tipográfica de este artículo se realizó en Typst versión 0.15.1 bajo lineamientos de IEEE.
 
 La @tab:artefactos_empleados resume la pila tecnológica y herramientas formales utilizadas en el núcleo y la capa anfitriona del sistema, indicando su versión, categoría y su rol específico en la arquitectura de la solución.
 
