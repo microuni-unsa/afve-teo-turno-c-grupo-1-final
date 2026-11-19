@@ -1,17 +1,24 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "frontend-slides": {
       "source": "zarazhangrui/frontend-slides",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "000d3359f7e63d5671f76270d7db249bc0593e6610fdbf601c3cf656e8f603b5"
+      "computedHash": "1c6781287ffc504332ec81a61bc7766d2fcee8d2c99d76a463e53bba4c55b840"
     },
     "humanizer": {
       "source": "blader/humanizer",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "1e67c3a4a675bd0c961b1fd8ebb718174f9a61a547d9bedad2ade5eb99cce831"
+      "computedHash": "62d4eba31b0be2589d17b27fd211fd80fb9e19cd5046be47ff985807fc4636ca"
+    },
+    "peer-review": {
+      "source": "K-Dense-AI/scientific-agent-skills",
+      "commit": "ec59a29a03d5c40f73ab40878df04860bc00e876",
+      "sourceType": "github",
+      "skillPath": "skills/peer-review/SKILL.md",
+      "computedHash": "b626fbbbb2de1eabc016c9426481a7abfb87d76753fd41fd5b143a26d8059ca1"
     }
   }
 }

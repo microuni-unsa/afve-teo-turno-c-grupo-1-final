@@ -145,7 +145,7 @@
       it.body
     } else if it.level == 2 {
       // Second-level headings are run-ins.
-      set text(style: "italic")
+      set text(weight: "bold")
       show: block.with(spacing: 10pt, sticky: true)
       if it.numbering != none {
         numbering("A.", deepest)
@@ -158,7 +158,7 @@
         numbering("a)", deepest)
         [ ]
       }
-      _#(it.body):_
+      #strong(it.body):
     ]
   }
 
@@ -194,10 +194,10 @@
           ..slice.map(author => align(center, {
             text(size: 11pt, author.name)
             if "department" in author [
-              \ #emph(author.department)
+              \ #author.department
             ]
             if "organization" in author [
-              \ #emph(author.organization)
+              \ #author.organization
             ]
             if "location" in author [
               \ #author.location
@@ -224,13 +224,13 @@
   // Display abstract and index terms.
   if abstract != none {
     set par(spacing: 0.45em, leading: 0.45em)
-    set text(9pt, weight: 700, spacing: 150%)
+    set text(9pt, spacing: 150%)
 
-    [_Resumen_---#h(weak: true, 0pt)#abstract]
+    [#strong[Resumen]---#h(weak: true, 0pt)#abstract]
 
     if index-terms != () {
       parbreak()
-      [_Palabras clave_---#h(weak: true, 0pt)#index-terms.join[, ]]
+      [#strong[Palabras clave]---#h(weak: true, 0pt)#index-terms.join[, ]]
     }
     v(2pt)
   }
