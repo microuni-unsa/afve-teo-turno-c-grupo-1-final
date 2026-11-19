@@ -145,7 +145,7 @@
       it.body
     } else if it.level == 2 {
       // Second-level headings are run-ins.
-      set text(weight: "bold")
+      set text(style: "italic", weight: "regular")
       show: block.with(spacing: 10pt, sticky: true)
       if it.numbering != none {
         numbering("A.", deepest)
@@ -224,13 +224,13 @@
   // Display abstract and index terms.
   if abstract != none {
     set par(spacing: 0.45em, leading: 0.45em)
-    set text(9pt, spacing: 150%)
+    set text(9pt, weight: "bold", style: "italic", spacing: 150%)
 
-    [#strong[Resumen]---#h(weak: true, 0pt)#abstract]
+    [Resumen---#h(weak: true, 0pt)#abstract]
 
     if index-terms != () {
       parbreak()
-      [#strong[Palabras clave]---#h(weak: true, 0pt)#index-terms.join[, ]]
+      [Palabras clave---#h(weak: true, 0pt)#index-terms.join[, ]]
     }
     v(2pt)
   }
