@@ -25,33 +25,24 @@
           inherit system;
           config.allowUnfree = true;
         };
-        shellPkgs = pkgs.lib.flatten [
-          (with pkgs; [
-            dafny
-            bun
-            nodejs
-            uppaal
-          ])
-          (with unstable; [
-            typst
-            typstyle
-          ])
-        ];
-        ldPkgs = with pkgs; [
-          stdenv.cc.cc
-          zlib
-          glib
-          libxcb
-          libglvnd
-        ];
       in
       {
         devShells.default = pkgs.mkShell {
-          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath ldPkgs;
           packages = pkgs.lib.flatten [
-            shellPkgs
+            (with pkgs; [
+              dafny
+              bun
+              nodejs
+              uppaal
+            ])
+            (with unstable; [
+              typst
+              typstyle
+            ])
           ];
-          shellHook = "";
+          shellHook = ''
+            unset SOURCE_DATE_EPOCH
+          '';
           buildInputs = [ pkgs.bashInteractive ];
         };
       }
