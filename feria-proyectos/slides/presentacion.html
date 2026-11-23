@@ -375,6 +375,19 @@
             background: #f8fafc;
         }
 
+        .tpl-table.compact {
+            font-size: 24px;
+            line-height: 1.14;
+        }
+
+        .tpl-table.compact tr th {
+            padding: 7px 10px;
+        }
+
+        .tpl-table.compact tr td {
+            padding: 6px 10px;
+        }
+
         .tpl-table tr.row-highlight td {
             background: #fff7ed;
             font-weight: 700;
@@ -427,6 +440,58 @@
             border-top: 2px solid var(--theme-gray);
             font-size: 40px; /* 20 pt (lvl3) */
             line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        /* Tarjetas compactas para ejemplos ABAC y trazas guiadas */
+        .abac-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--theme-navy);
+            padding: 14px 18px;
+            font-size: 31px;
+            line-height: 1.28;
+            color: #000000;
+        }
+
+        .abac-card-title {
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--theme-navy);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .trace-panel {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--accent-orange);
+            padding: 16px 20px;
+            font-size: 30px;
+            line-height: 1.28;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trace-panel.navy {
+            border-left-color: var(--theme-navy);
+        }
+
+        .trace-step {
+            padding-left: 10px;
+            border-left: 3px solid #cbd5e1;
+        }
+
+        .metric-chip {
+            background: #fff7ed;
+            border: 1px solid var(--accent-orange);
+            padding: 10px 14px;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
             color: var(--text-primary);
         }
 
@@ -632,27 +697,44 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 2: PROBLEMA Y JUSTIFICACIÓN
+                 SLIDE 2: ¿QUÉ ES ABAC Y POR QUÉ FALLA MANUALMENTE?
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Problema y justificación</h1>
+                <h1 class="tpl-title">¿Qué es ABAC y por qué falla manualmente?</h1>
                 <div class="tpl-body">
-                    <ul class="tpl-list">
-                        <li>
-                            <strong>Entornos críticos dinámicos:</strong> hospitales y entidades públicas rotan turnos y guardias continuamente.
-                            <ul class="tpl-sublist">
-                                <li>La edición manual introduce fallas silenciosas: bloqueos en urgencias o filtración de datos.</li>
+                    <div class="two-col" style="grid-template-columns: 0.96fr 1.04fr; gap: 44px;">
+                        <div class="col-block">
+                            <h2 class="col-heading">Modelo ABAC (NIST SP 800-162)</h2>
+                            <div class="abac-card">
+                                <div class="abac-card-title">Solicitud concreta q (4 familias de atributos)</div>
+                                <div><strong>Sujeto:</strong> <code>role=medic</code>, <code>dept=er</code>, <code>clearance=3</code></div>
+                                <div><strong>Recurso:</strong> <code>type=record</code>, <code>sensitivity=4</code></div>
+                                <div><strong>Acción:</strong> <code>name=read</code></div>
+                                <div><strong>Entorno:</strong> <code>hour=22</code>, <code>emergency=true</code></div>
+                            </div>
+                            <div class="abac-card">
+                                <div class="abac-card-title">Directivas (Permit / Deny where condición)</div>
+                                <div><code>Permit where subject.role == medic &amp;&amp; subject.clearance &gt;= 4 &amp;&amp; resource.sensitivity &lt;= 3 &amp;&amp; action.name == read</code></div>
+                                <div style="margin-top: 8px;"><code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code></div>
+                            </div>
+                        </div>
+                        <div class="col-block">
+                            <h2 class="col-heading">Tres escenarios reales de falla manual</h2>
+                            <ul class="tpl-list lvl4" style="gap: 16px;">
+                                <li>
+                                    <strong>1. Emergencia vs turno nocturno (Contradicción):</strong> una guardia permite <code>environment.emergency == true</code> mientras otra regla deniega <code>environment.hour &gt;= 18</code>; a las 22:00 en urgencias chocan.
+                                </li>
+                                <li>
+                                    <strong>2. Umbrales imposibles (Regla muerta):</strong> editar <code>subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code> sobre el rango <code>[1..5]</code> crea una regla que jamás se activa.
+                                </li>
+                                <li>
+                                    <strong>3. Directiva cubierta (Sombreado):</strong> agregar <code>role == medic &amp;&amp; dept == cardio</code> cuando ya existe <code>role == medic</code> vuelve nula la regla específica.
+                                </li>
                             </ul>
-                        </li>
-                        <li>
-                            <strong>Explosión combinatoria (NIST SP 800-162):</strong> 64 800 solicitudes en el esquema v1 superan al muestreo empírico.
-                        </li>
-                        <li>
-                            <strong>Brecha SMT (NIST SP 800-192):</strong> invocar resolvedores en producción añade latencia y timeouts.
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                     <div class="summary-line">
-                        <strong>Propuesta (CbC):</strong> núcleo demostrado en Dafny y compilado a JS puro, sin SMT en ejecución.
+                        <strong>Problema central:</strong> en <code>schema-v1</code> existen <strong>64 800</strong> solicitudes posibles; el muestreo manual deja fallas ocultas hasta producción.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -662,27 +744,31 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 3: PROPIEDADES DE COHERENCIA (P1–P4)
+                 SLIDE 3: PROPIEDADES FORMALES DE COHERENCIA (P1–P4)
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Propiedades de coherencia (P1–P4)</h1>
+                <h1 class="tpl-title">Propiedades formales de coherencia (P1–P4)</h1>
                 <div class="tpl-body">
-                    <ul class="tpl-list">
+                    <ul class="tpl-list compact-l1" style="gap: 20px;">
                         <li>
-                            <strong>P1 — Consistencia:</strong> ninguna solicitud válida activa simultáneamente una regla de permiso y una de denegación.
+                            <strong>P1 — Consistencia:</strong> ∀ q ∈ AllRequests · ¬(PermitApplies(q) ∧ DenyApplies(q)).<br>
+                            Ninguna solicitud válida activa permiso y denegación simultáneamente (evita choques como emergencia vs horario).
                         </li>
                         <li>
-                            <strong>P2 — Satisfacibilidad:</strong> cada regla cuenta con al menos una solicitud válida que la activa (sin reglas muertas o vacías).
+                            <strong>P2 — Satisfacibilidad:</strong> ∀ r ∈ R · ∃ q ∈ AllRequests · Applies(q, r).<br>
+                            Toda regla dispara sobre al menos una solicitud válida (descarta reglas muertas o rangos imposibles).
                         </li>
                         <li>
-                            <strong>P3 — No sombreado:</strong> cada regla determina en solitario al menos una solicitud (previene redundancias y duplicadas).
+                            <strong>P3 — No sombreado:</strong> ∀ r ∈ R · ∃ q ∈ AllRequests · (Applies(q, r) ∧ ∀ r' ≠ r, ¬Applies(q, r')).<br>
+                            Cada directiva decide por sí sola al menos una consulta (detecta coberturas y duplicadas exactas).
                         </li>
                         <li>
-                            <strong>P4 — Validez de esquema:</strong> toda regla usa atributos declarados, operadores compatibles y literales dentro de rango.
+                            <strong>P4 — Validez de esquema:</strong> ∀ r ∈ R · ValidRule(r, Σ).<br>
+                            Solo atributos declarados, operadores compatibles con el tipo y literales dentro de dominio.
                         </li>
                     </ul>
                     <div class="summary-line">
-                        <strong>Invariante canónico:</strong> Coherent(R) ≜ P1(R) ∧ P2(R) ∧ P3(R) ∧ P4(R) sobre dominio finito y decidible.
+                        <strong>Invariante de tesis:</strong> <code>Coherent(R) ≜ P1(R) ∧ P2(R) ∧ P3(R) ∧ P4(R)</code> se preserva inductivamente en cada transición guardada.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -692,27 +778,28 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 4: OBJETIVOS Y ALCANCE ACOTADO
+                 SLIDE 4: OBJETIVOS Y ALCANCE DEL PROYECTO
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Objetivos y alcance acotado</h1>
+                <h1 class="tpl-title">Objetivos y alcance del proyecto</h1>
                 <div class="tpl-body">
                     <div class="two-col">
                         <div class="col-block">
-                            <h2 class="col-heading">Objetivos y escalabilidad acotada</h2>
-                            <ul class="tpl-list lvl3">
-                                <li><strong>Meta general:</strong> diseñar, verificar e implementar un verificador ABAC en Dafny → JS con preservación inductiva, validado en UPPAAL y empaquetado en npm.</li>
-                                <li><strong>Interfaz guardada:</strong> <code>tryAdd</code>, <code>tryUpdate</code>, <code>remove</code>, <code>tryAddMany</code> y evaluación lineal <code>evaluate</code> / <code>evaluateMany</code>.</li>
-                                <li><strong>Límites explícitos (<code>TooLarge</code>):</strong> máx. 16 valores por enum, máx. 64 reglas verificadas y 1 000 000 solicitudes en espacio cartesiano.</li>
+                            <h2 class="col-heading">Objetivos formales</h2>
+                            <ul class="tpl-list lvl3" style="gap: 16px;">
+                                <li><strong>Objetivo general:</strong> diseñar y verificar formalmente un verificador ABAC con preservación de coherencia por construcción en Dafny y validación de estados en UPPAAL.</li>
+                                <li><strong>OE1 — Semántica y propiedades:</strong> formalizar la sintaxis ABAC, la evaluación determinista y las propiedades P1 a P4 sobre dominios finitos.</li>
+                                <li><strong>OE2 — Invariante inductivo:</strong> demostrar preservación de <code>Coherent(R)</code> en <code>TryAdd</code>, <code>TryUpdate</code> y <code>TryRemove</code> con testigos mínimos auténticos.</li>
+                                <li><strong>OE3 — Model checking:</strong> comprobar en UPPAAL ausencia de bloqueos y 9 consultas TCTL sobre un caso concreto acotado.</li>
                             </ul>
                         </div>
                         <div class="col-block">
-                            <h2 class="col-heading">Límites y exclusiones explícitas</h2>
-                            <ul class="tpl-list lvl3">
-                                <li><strong>Sin PIP en vivo:</strong> sin consultas de red, bases de datos ni relojes externos; atributos acotados al esquema.</li>
-                                <li><strong>Sin lógica abierta:</strong> sin cadenas libres, regex ni comparaciones entre dos atributos (solo atributo vs literal).</li>
-                                <li><strong>Sin resolución laxa:</strong> no hay prioridades tipo deny-overrides; todo solapamiento es error P1.</li>
-                                <li><strong>Sin PEP/PDP ni historial:</strong> enfocado exclusivamente en decisión y coherencia.</li>
+                            <h2 class="col-heading">Alcance y fragmento decidible</h2>
+                            <ul class="tpl-list lvl3" style="gap: 16px;">
+                                <li><strong>Modelo ABAC cubierto:</strong> atributos <code>Enum</code>, <code>Bool</code> y <code>BoundedInt</code> en las 4 familias NIST SP 800-162 con conectivos booleanos contra literales.</li>
+                                <li><strong>Operaciones del núcleo:</strong> adición (<code>TryAdd</code>), actualización (<code>TryUpdate</code>), baja (<code>TryRemove</code>), lotes atómicos y evaluación lineal <code>Evaluate</code>.</li>
+                                <li><strong>Extracción sin SMT:</strong> compilación del núcleo verificado hacia JavaScript ejecutable con frontera ligera de análisis y validación de dominios.</li>
+                                <li><strong>Delimitación por decidibilidad:</strong> esquemas discretos cerrados (sin PIP en vivo ni aritmética abierta) y cotas de protección configurables (<code>TooLarge</code>).</li>
                             </ul>
                         </div>
                     </div>
@@ -737,7 +824,7 @@
                                 <th>SMT en ejecución</th>
                                 <th>Guarda inductiva</th>
                                 <th>Testigo</th>
-                                <th>Despliegue</th>
+                                <th>Ejecución</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -784,10 +871,10 @@
                             <tr class="row-highlight">
                                 <td>Verificador propuesto</td>
                                 <td>CbC (Dafny + UPPAAL)</td>
-                                <td>Ninguno (Dafny → JS)</td>
+                                <td>Ninguno</td>
                                 <td>Sí (AddPreserves)</td>
                                 <td>Tupla (req, rᵢ, rⱼ)</td>
-                                <td>Nativo npm (JS / TS)</td>
+                                <td>JS compilado desde Dafny</td>
                             </tr>
                         </tbody>
                     </table>
@@ -799,30 +886,30 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 6: METODOLOGÍA Y ARTEFACTOS
+                 SLIDE 6: METODOLOGÍA CBC Y HERRAMIENTAS FORMALES
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Metodología y artefactos</h1>
+                <h1 class="tpl-title">Metodología CbC y herramientas formales</h1>
                 <div class="tpl-body">
                     <div class="two-col">
                         <div class="col-block">
                             <h2 class="col-heading">Metodología CbC en 5 fases</h2>
-                            <ul class="tpl-list lvl4">
-                                <li><strong>Fase 1 — Modelado:</strong> sintaxis abstracta, semántica y espacio <code>AllRequests</code>.</li>
-                                <li><strong>Fase 2 — Deducción:</strong> propiedades P1–P4 y 7 lemas con Z3 y cvc5.</li>
-                                <li><strong>Fase 3 — Model checking:</strong> autómata Admin y 9 consultas TCTL en UPPAAL.</li>
-                                <li><strong>Fase 4 — Compilación:</strong> síntesis a JS puro y frontera TypeScript.</li>
-                                <li><strong>Fase 5 — Validación:</strong> fixtures clínicos y regresión automatizada.</li>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li><strong>Fase 1 — Modelado formal:</strong> sintaxis abstracta, semántica denotacional y enumeración <code>AllRequests</code> en Dafny.</li>
+                                <li><strong>Fase 2 — Prueba deductiva:</strong> propiedades P1–P4, teoremas de preservación/solidez/completitud y <code>BoundedCheck</code>.</li>
+                                <li><strong>Fase 3 — Model checking:</strong> autómata finito <code>Admin</code> sobre caso fijo y 9 consultas TCTL en UPPAAL.</li>
+                                <li><strong>Fase 4 — Extracción ejecutable:</strong> compilación directa Dafny → JS detrás de una frontera mínima de entrada.</li>
+                                <li><strong>Fase 5 — Evaluación guiada:</strong> trazado paso a paso de casos clínicos y conformidad en frontera.</li>
                             </ul>
                         </div>
                         <div class="col-block">
-                            <h2 class="col-heading">Herramientas y estándares</h2>
-                            <ul class="tpl-list lvl4">
-                                <li><strong>Dafny 4.11 + Z3 / cvc5:</strong> especificación, prueba deductiva y compilación JS.</li>
-                                <li><strong>UPPAAL 5.0:</strong> verificación temporal de estados y ausencia de deadlocks.</li>
-                                <li><strong>TypeScript 5.x + Node 20+ / Bun 1.x:</strong> tipado, pruebas y paquete npm.</li>
-                                <li><strong>Biome 1.9+:</strong> formateo y análisis estático sin errores.</li>
-                                <li><strong>Estándares:</strong> NIST SP 800-162, NIST SP 800-192, XACML 3.0 y IEEE.</li>
+                            <h2 class="col-heading">Herramientas formales y estándares</h2>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li><strong>Dafny 4.11:</strong> especificación matemática, prueba de 114 obligaciones (59 lemas) y síntesis a JS.</li>
+                                <li><strong>Z3 (4.12+) y cvc5 (1.0+):</strong> solucionadores SMT usados únicamente en tiempo de diseño.</li>
+                                <li><strong>UPPAAL 5.0:</strong> exploración exhaustiva de estados y verificación de 9 propiedades TCTL.</li>
+                                <li><strong>Estándares ABAC:</strong> NIST SP 800-162, NIST SP 800-192 y referencia OASIS XACML 3.0.</li>
+                                <li><strong>Frontera anfitriona (TS / Node / Bun):</strong> análisis sintáctico de entrada y ejecución del núcleo extraído.</li>
                             </ul>
                         </div>
                     </div>
@@ -834,25 +921,25 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 7: ARQUITECTURA EN TRES CAPAS
+                 SLIDE 7: ARQUITECTURA Y FRONTERA DE EJECUCIÓN
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Arquitectura en tres capas</h1>
+                <h1 class="tpl-title">Arquitectura y frontera de ejecución</h1>
                 <div class="tpl-body">
                     <div class="media-split">
                         <div class="img-frame">
-                            <img src="img/architecture.svg" alt="Arquitectura unidireccional entre Núcleo Dafny y Envolturas TypeScript">
+                            <img src="img/architecture.svg" alt="Arquitectura unidireccional entre Núcleo Dafny y Frontera de entrada">
                         </div>
                         <div class="col-block">
-                            <ul class="tpl-list lvl3" style="gap: 24px;">
+                            <ul class="tpl-list lvl3" style="gap: 22px;">
                                 <li>
-                                    <strong>1. Capa de núcleo (Dafny):</strong> seis módulos formales (<code>Schema</code>, <code>Syntax</code>, <code>Eval</code>, <code>Coherence</code>, <code>Transition</code>, <code>BoundedCheck</code>) compilados a JavaScript.
+                                    <strong>1. Núcleo formal (Dafny):</strong> los 5 módulos operacionales (<code>Schema</code>, <code>Syntax</code>, <code>Eval</code>, <code>Coherence</code>, <code>Transition</code>) compilan a JS; <code>BoundedCheck</code> queda como verificación finita en tiempo de prueba.
                                 </li>
                                 <li>
-                                    <strong>2. Capa de envolturas (TypeScript):</strong> carga de esquema, analizador, adaptadores, control de topes y explicaciones sin recalcular decisiones lógicas.
+                                    <strong>2. Frontera mínima de entrada:</strong> valida el esquema, desazucara <code>in</code> / <code>between</code> y formatea testigos (<code>explain</code>). <strong>No reimplementa ninguna decisión lógica.</strong>
                                 </li>
                                 <li>
-                                    <strong>3. Capa de distribución (npm):</strong> paquete <code>@grupo1/abac-verifier</code> con tipos para Node.js y navegadores.
+                                    <strong>3. Ejecución sin SMT externo:</strong> toda evaluación y guarda en producción ejecuta directamente el código extraído desde las pruebas en Dafny.
                                 </li>
                             </ul>
                         </div>
@@ -874,7 +961,7 @@
                         <img src="img/check_phases.svg" alt="Etapas secuenciales de verificación P1 a P4 en Coherence.dfy">
                     </div>
                     <div class="summary-line">
-                        <strong>Orden determinista en <code>CheckCoherent</code>:</strong> evalúa secuencialmente P1 → P2 → P3 → P4 y retorna el primer testigo mínimo; <code>parseRule</code> valida sintaxis y esquema en la frontera TypeScript.
+                        <strong>Orden determinista en <code>CheckCoherent</code>:</strong> evalúa secuencialmente P1 → P2 → P3 → P4 y retorna el primer testigo mínimo; <code>parseRule</code> y <code>TryUpdate</code> aseguran validez P4.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -884,12 +971,12 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 9: NÚCLEO FORMAL EN DAFNY
+                 SLIDE 9: VERIFICACIÓN DEDUCTIVA EN DAFNY
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Núcleo formal en Dafny</h1>
+                <h1 class="tpl-title">Verificación deductiva en Dafny</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 1.05fr 0.95fr; align-items: start;">
+                    <div class="two-col" style="grid-template-columns: 1.02fr 0.98fr; align-items: start;">
                         <div class="code-panel">
                             <div class="code-panel-title">Transition.dfy — Guarda e invariante inductivo</div>
 <span class="kw">function</span> <span class="fn">TryAdd</span>(R: Ruleset, r: Rule, schema: Schema): AddResult {
@@ -909,13 +996,13 @@
   }
 }</div>
                         <div class="col-block">
-                            <h2 class="col-heading">7 lemas (114 metas, 0 errores)</h2>
-                            <ul class="tpl-list lvl4" style="gap: 10px;">
-                                <li><strong>EmptyCoherent:</strong> conjunto vacío vacuamente coherente.</li>
-                                <li><strong>AddPreserves y UpdatePreserves:</strong> toda confirmación vía <code>TryAdd</code> / <code>TryUpdate</code> preserva <code>Coherent</code>.</li>
-                                <li><strong>RemovePreservesCoherent:</strong> <code>TryRemove</code> preserva coherencia por monotonía.</li>
-                                <li><strong>EvaluateAgreesOnCoherent:</strong> en estados coherentes, <code>Conflict</code> es inalcanzable.</li>
-                                <li><strong>WitnessSoundness y Completeness:</strong> todo rechazo da testigo real y toda falla es rechazada.</li>
+                            <h2 class="col-heading">114 obligaciones verificadas (0 errores)</h2>
+                            <ul class="tpl-list lvl4" style="gap: 12px;">
+                                <li><strong>Invariante de estado:</strong> <code>EmptyCoherent</code> (caso base) y <code>AddPreserves</code> / <code>UpdatePreserves</code> aseguran <code>Coherent(R)</code> en toda aceptación.</li>
+                                <li><strong>Monotonía ante bajas:</strong> <code>RemovePreservesCoherent</code> demuestra que retirar una regla nunca rompe P1–P4.</li>
+                                <li><strong>Ausencia de conflicto:</strong> <code>EvaluateAgreesOnCoherent</code> prueba que <code>Decision.Conflict</code> es inalcanzable vía interfaz guardada.</li>
+                                <li><strong>Testigos auténticos:</strong> <code>WitnessSoundness</code> y <code>WitnessCompleteness</code> ligan rechazo y violación real.</li>
+                                <li><strong>Comprobación finita:</strong> <code>BoundedCheck.dfy</code> verifica exhaustivamente <strong>259</strong> conjuntos (hasta longitud 3).</li>
                             </ul>
                         </div>
                     </div>
@@ -927,26 +1014,27 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 10: MODEL CHECKING EN UPPAAL
+                 SLIDE 10: MODEL CHECKING EN UPPAAL: MODELO Y CASO FIJO
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Model checking en UPPAAL</h1>
+                <h1 class="tpl-title">Model checking en UPPAAL: modelo y caso fijo</h1>
                 <div class="tpl-body">
                     <div class="media-split-wide-img">
-                        <div style="display: flex; flex-direction: column; gap: 18px; height: 100%; justify-content: center;">
-                            <div class="img-frame" style="max-height: 360px; padding: 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 14px; height: 100%; justify-content: center;">
+                            <div class="img-frame" style="max-height: 620px; padding: 10px;">
                                 <img src="img/model_diagram.png" alt="Autómata Admin modelado en UPPAAL">
                             </div>
-                            <div class="img-frame" style="max-height: 360px; padding: 10px;">
-                                <img src="img/checking_results.png" alt="Panel de UPPAAL con 9 consultas TCTL satisfechas">
+                            <div class="metric-chip">
+                                Exploración exhaustiva: 23 nodos estables · 470 evaluaciones · 529 transiciones · 0 bloqueos
                             </div>
                         </div>
                         <div class="col-block">
-                            <h2 class="col-heading">9 consultas TCTL satisfechas</h2>
-                            <ul class="tpl-list lvl3">
-                                <li><strong>Modelo acotado:</strong> 16 solicitudes, 10 reglas candidatas (máx. 3), <strong>23 estados</strong> y <strong>529 transiciones</strong>.</li>
-                                <li><strong>Seguridad:</strong> <code>A[] coherent()</code> (16.7 s), <code>A[] !deadlock</code> (28.7 s) y preservación ante bajas <code>lastOp == 2</code>.</li>
-                                <li><strong>Alcanzabilidad:</strong> <code>cleanAccepted</code>, <code>E[] coherent()</code> y rechazos <code>rejP1</code>, <code>rejP2</code>, <code>rejP3</code> y <code>rejUnknownP4</code>.</li>
+                            <h2 class="col-heading">Validación de caso concreto en Admin</h2>
+                            <ul class="tpl-list lvl4" style="gap: 12px;">
+                                <li><strong>Propósito:</strong> complementar los lemas de Dafny validando exhaustivamente el protocolo dinámico sobre una <strong>instancia fija y concreta</strong> (autómata discreto sin relojes ni canales).</li>
+                                <li><strong>Microuniverso (NREQ = 16):</strong> 2 roles × 2 acciones × 2 horas <code>{8, 18}</code> × 2 emergencias (máx. 3 reglas activas).</li>
+                                <li><strong>Repertorio fijo (r0..r9):</strong> <code>r0..r2</code> codifican la política limpia; <code>r3</code> y <code>r7+r8</code> fuerzan choques P1; <code>r6</code> prueba regla muerta P2; <code>r4..r5</code> sombreado P3; <code>r9</code> invalidez P4.</li>
+                                <li><strong>Estados comprometidos (<code>Trying*</code>):</strong> evalúan <code>coherentC()</code> y confirman o rechazan atómicamente sin alterar <code>committed</code>.</li>
                             </ul>
                         </div>
                     </div>
@@ -958,23 +1046,78 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 11: ENVOLTURAS EN TYPESCRIPT
+                 SLIDE 11: MODEL CHECKING EN UPPAAL: 9 CONSULTAS TCTL
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Envolturas en TypeScript</h1>
+                <h1 class="tpl-title">Model checking en UPPAAL: 9 consultas TCTL</h1>
                 <div class="tpl-body">
-                    <div class="media-split">
-                        <div class="img-frame">
-                            <img src="img/classes.png" alt="Diagrama de clases entre envolturas TypeScript y núcleo Dafny">
-                        </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Frontera modular (@grupo1/abac-verifier)</h2>
-                            <ul class="tpl-list lvl4">
-                                <li><strong><code>schema.ts</code>:</strong> carga segura (<code>loadSchema</code>), verificación de topes (<code>checkCaps</code>) y marshalling hacia Dafny.</li>
-                                <li><strong><code>parser.ts</code>:</strong> análisis sintáctico estricto con azúcar sintáctico (<code>in</code>, <code>between</code>).</li>
-                                <li><strong><code>wrappers.ts</code> y <code>batch.ts</code>:</strong> <code>tryAdd</code>, <code>tryUpdate</code>, <code>remove</code>, <code>checkCoherent</code>, <code>evaluate</code>, <code>tryAddMany</code> y <code>evaluateMany</code>.</li>
-                                <li><strong><code>explain.ts</code> y <code>errors.ts</code>:</strong> explicación legible del testigo sin decidir y 5 errores tipados (<code>TooLarge</code>, <code>SchemaError</code>, <code>ParseError</code>, <code>DomainError</code>, <code>InvariantViolation</code>).</li>
-                            </ul>
+                    <div class="media-split" style="grid-template-columns: 1.38fr 0.62fr; gap: 28px; align-items: start;">
+                        <table class="tpl-table compact">
+                            <thead>
+                                <tr>
+                                    <th>Consulta TCTL</th>
+                                    <th>Clase</th>
+                                    <th>Qué valida y por qué es necesaria</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>A[] coherent()</code></td>
+                                    <td>Seguridad</td>
+                                    <td>Todo estado alcanzable (incluidos <code>Trying*</code>) mantiene <code>committed</code> coherente; impide mutación parcial.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>A[] !deadlock</code></td>
+                                    <td>Seguridad</td>
+                                    <td>Las guardas complementarias y transiciones de frontera aseguran que el autómata jamás queda atrapado.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>A[] (lastOp != 2 || coherent())</code></td>
+                                    <td>Seguridad</td>
+                                    <td>Aísla la operación <code>doRemoveC</code> para probar en el modelo que retirar reglas sin re-chequear preserva coherencia.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E&lt;&gt; cleanAccepted</code></td>
+                                    <td>Alcance</td>
+                                    <td>Prueba de no vacuidad: valida que el caso fijo limpio <code>{r0, r1, r2}</code> sí es alcanzable y aceptado.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E&lt;&gt; rejP1</code></td>
+                                    <td>Alcance</td>
+                                    <td>Confirma detección de contradicción P1 frente a pares incompatibles (<code>r0/r3</code> y <code>r7/r8</code>).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E&lt;&gt; rejP2</code></td>
+                                    <td>Alcance</td>
+                                    <td>Confirma detección de regla insatisfacible P2 cuando se propone <code>r6</code> (<code>cl &gt; 5 &amp;&amp; cl &lt; 2</code>).</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E&lt;&gt; rejP3</code></td>
+                                    <td>Alcance</td>
+                                    <td>Confirma detección de sombreado P3 cuando <code>r4</code> o <code>r5</code> cubren a <code>r0</code> pasando P1 y P2.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E&lt;&gt; rejUnknownP4</code></td>
+                                    <td>Alcance</td>
+                                    <td>Verifica que actualizar un identificador inexistente dispara rechazo P4 en <code>Empty</code> y <code>Coherent</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>E[] coherent()</code></td>
+                                    <td>Alcance</td>
+                                    <td>Asegura la existencia de una traza infinita siempre coherente de evolución continua.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div class="img-frame" style="max-height: 290px; padding: 8px;">
+                                <img src="img/query_list.png" alt="Lista de 9 consultas TCTL satisfechas en UPPAAL">
+                            </div>
+                            <div class="img-frame" style="max-height: 330px; padding: 8px;">
+                                <img src="img/status_log_1.png" alt="Resultados de verificación UPPAAL">
+                            </div>
+                            <div class="metric-chip" style="font-size: 26px;">
+                                9 / 9 propiedades satisfechas (16.7 s en <code>A[] coherent()</code>, 28.7 s en <code>A[] !deadlock</code>)
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -985,32 +1128,62 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 12: CASOS DE ESTUDIO Y VALIDACIÓN
+                 SLIDE 12: EVALUACIÓN GUIADA (I): CONFLICTO Y CORRECCIÓN
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Casos de estudio y validación</h1>
+                <h1 class="tpl-title">Evaluación guiada (I): conflicto y corrección</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 1.08fr 0.92fr;">
-                        <div class="terminal-panel">
-                            <div class="code-panel-title">Ejecución real sobre fixtures clínicos (<code>bun test</code>)</div>
-                            <p style="margin-bottom: 14px;">
-                                <strong>1. Conflicto en emergencia (<code>emergency-override.json</code>):</strong><br>
-                                <code>Permit where environment.emergency == true</code><br>
-                                <code>Deny where environment.hour &gt;= 18</code><br>
-                                <span class="st-err">→ Rejected (P1, reglas [1, 2]):</span> Permit rule #1 and Deny rule #2 both fire when …, environment.hour=18, environment.emergency=true.
-                            </p>
-                            <p>
-                                <strong>2. Política acotada coherente (<code>clean.json</code>):</strong><br>
-                                <span class="st-ok">→ Accepted (ids [1, 2, 3])</span> · <code>evaluate()</code>: 0.08 ms (costo lineal O(|R|), <code>{"decision":"Permit","firingRuleIds":[3]}</code>).
-                            </p>
+                    <div class="two-col">
+                        <div class="trace-panel">
+                            <div class="code-panel-title">Caso 1: Conflicto en emergencia (<code>emergency-override.json</code>)</div>
+                            <div class="trace-step"><strong>1. Estado inicial R₀ = []:</strong> coherente por <code>EmptyCoherent</code>.</div>
+                            <div class="trace-step"><strong>2. TryAdd(R₀, r₁):</strong> <code>Permit where environment.emergency == true</code>.<br>Supera P1–P4 (dispara en índice 0 de <code>AllRequests</code>) → <span class="st-ok">Accepted([r₁]), id=1</span>.</div>
+                            <div class="trace-step"><strong>3. TryAdd(R₁, r₂):</strong> <code>Deny where environment.hour &gt;= 18</code>.<br><code>CheckP1From</code> recorre <code>AllRequests</code> hasta hallar la primera solicitud con <code>hour=18</code> y <code>emergency=true</code>:<br><code>(medic, cardio, 1, record, 1, read, 18, true)</code> donde disparan <code>r₁</code> y <code>r₂</code>.</div>
+                            <div class="trace-step"><strong>4. Veredicto:</strong> <span class="st-err">Rejected(P1, [1, 2])</span>. Por <code>AddPreserves</code>, <strong>R₁ queda inalterado</strong>.</div>
+                        </div>
+                        <div class="trace-panel navy">
+                            <div class="code-panel-title">Caso 2: Remediación coherente (<code>clean.json</code>) y <code>Evaluate</code></div>
+                            <div class="trace-step"><strong>1. r₁':</strong> <code>Permit where subject.role == medic &amp;&amp; action.name == read</code> → <span class="st-ok">Accepted([1])</span>.</div>
+                            <div class="trace-step"><strong>2. r₂':</strong> <code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code> → acción disjunta (<code>write</code> vs <code>read</code>) → <span class="st-ok">Accepted([1, 2])</span>.</div>
+                            <div class="trace-step"><strong>3. r₃':</strong> <code>Permit where environment.emergency == true &amp;&amp; action.name == read</code>.<br>Coincide con <code>r₁'</code> solo en <code>Permit</code> (P1 OK) y decide en solitario urgencias de <code>nurse</code>/<code>admin</code> (P3 OK) → <span class="st-ok">Accepted([1, 2, 3])</span>.</div>
+                            <div class="trace-step"><strong>4. Evaluate:</strong> <code>(nurse, er, 5, record, 1, read, 3, true)</code> → <span class="st-ok">Permit (regla #3)</span>, sin <code>Conflict</code> posible.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
+            </section>
+
+            <!-- =========================================================
+                 SLIDE 13: EVALUACIÓN GUIADA (II): TRAZAS P2–P4 Y SÍNTESIS
+                 ========================================================= -->
+            <section class="slide">
+                <h1 class="tpl-title">Evaluación guiada (II): P2–P4 y síntesis formal</h1>
+                <div class="tpl-body">
+                    <div class="two-col" style="grid-template-columns: 1.06fr 0.94fr;">
+                        <div class="trace-panel">
+                            <div class="code-panel-title">Trazas guiadas de anomalías P2, P3 y P4</div>
+                            <div class="trace-step">
+                                <strong>• P2 — <code>unsatisfiable.json</code>:</strong> <code>Permit where subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code>.<br>
+                                P1 pasa (sin <code>Deny</code>); <code>RuleFiresOnSome</code> agota <code>[1..5]</code> en las 64 800 solicitudes con 0 disparos → <span class="st-err">Rejected(P2, [1])</span>.
+                            </div>
+                            <div class="trace-step">
+                                <strong>• P3 — <code>shadowed.json</code>:</strong> <code>r₁: Permit where subject.role == medic</code> (aceptada) → <code>TryAdd(r₂: role == medic &amp;&amp; dept == cardio)</code>.<br>
+                                P1 y P2 pasan, pero <code>RuleHasSoleWitness</code> detecta que <code>r₁</code> siempre dispara junto a <code>r₂</code> → <span class="st-err">Rejected(P3, [2, 1])</span> en <code>medic/cardio</code>.
+                            </div>
+                            <div class="trace-step">
+                                <strong>• P4 — Esquema / ID ausente:</strong> <code>TryUpdate(R, 99, r)</code> rechaza directamente con <span class="st-err">Witness([], [99], "P4")</span> sin mutar <code>R</code>; <code>parseRule</code> rechaza literales fuera de rango.
+                            </div>
                         </div>
                         <div class="col-block">
-                            <h2 class="col-heading">Métricas verificadas</h2>
-                            <ul class="tpl-list lvl4">
-                                <li><strong>Núcleo Dafny:</strong> 6 módulos (~48 KB), 7 lemas principales, 114 metas verificadas.</li>
-                                <li><strong>UPPAAL:</strong> 23 estados, 529 transiciones, 9/9 consultas TCTL, 0 interbloqueos.</li>
-                                <li><strong>Suite automatizada:</strong> <code>parser.test.ts</code>, <code>wrappers.test.ts</code> y <code>replay.test.ts</code> (27/27 pruebas, 86 aserciones).</li>
-                                <li><strong>5 fixtures JSON:</strong> <code>clean</code>, <code>contradictory</code> (P1), <code>unsatisfiable</code> (P2), <code>shadowed</code> (P3) y <code>emergency-override</code> (P1).</li>
+                            <h2 class="col-heading">Síntesis de garantías formales</h2>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li><strong>Autoridad en Dafny:</strong> <code>114</code> obligaciones verificadas (<code>0</code> errores), <code>7</code> teoremas centrales de preservación/solidez/completitud y <code>259</code> conjuntos en <code>BoundedCheck</code>.</li>
+                                <li><strong>Autoridad en UPPAAL:</strong> <code>23</code> nodos estables, <code>529</code> transiciones, <code>9/9</code> consultas TCTL satisfechas, <code>0</code> bloqueos.</li>
+                                <li><strong>Complejidad decidible:</strong> P1/P2 en <code>O(|AllRequests| · |R|)</code>, P3 en <code>O(|AllRequests| · |R|²)</code> y <code>Evaluate</code> en <code>O(|R|)</code>.</li>
+                                <li><strong>Conformidad en frontera:</strong> las pruebas de replay sobre los 5 fixtures confirman que el JS compilado reproduce los testigos formales (sin sustituir la prueba matemática).</li>
                             </ul>
                         </div>
                     </div>
@@ -1022,7 +1195,7 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 13: ÚLTIMA PÁGINA (Plantilla slide10.xml)
+                 SLIDE 14: ÚLTIMA PÁGINA (Plantilla slide10.xml)
                  ========================================================= -->
             <section class="slide">
                 <h1 class="thanks-title">Gracias…</h1>
@@ -1047,7 +1220,7 @@
 
     <nav class="deck-controls" aria-label="Controles de diapositivas">
         <button type="button" class="deck-btn" id="prevBtn" aria-label="Anterior">◀</button>
-        <span id="slideCounter">1 / 13</span>
+        <span id="slideCounter">1 / 14</span>
         <button type="button" class="deck-btn" id="nextBtn" aria-label="Siguiente">▶</button>
     </nav>
 
