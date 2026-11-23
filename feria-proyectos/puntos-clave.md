@@ -1,6 +1,6 @@
 # Puntos Clave de la Presentación — Feria de Proyectos UNSA 2026
 
-Este documento sintetiza los requerimientos normativos de las bases del concurso y su correlación exacta con los componentes técnicos reales del proyecto **ABAC Coherence Verifier**, sirviendo como guía de referencia continua.
+Este documento sintetiza los requerimientos normativos de las bases del concurso y su correlación exacta con los componentes técnicos reales del proyecto **ABAC Coherence Verifier**, alineado con el artículo en `paper/paper.typ` y la plantilla oficial `plantilla-presentacion.pptx`.
 
 ---
 
@@ -8,79 +8,67 @@ Este documento sintetiza los requerimientos normativos de las bases del concurso
 
 - **Evento**: Feria de Proyectos 2026 — Escuela Profesional de Ingeniería de Sistemas (EPIS), UNSA.
 - **Categoría**: **Categoría II – Intermedio** (Estudiantes de 3er y 4to año académico).
+- **Asesoría**: Docente asesor — **Molina Barriga, Maribel**.
 - **Formato del Entregable**:
   - Video MP4 de **7 minutos de duración máxima**.
-  - Presentación visual basada en la plantilla institucional (estilo minimalista, logos oficiales, encabezados y pies de página formales).
-  - Artículo científico en formato IEEE.
+  - Presentación visual basada estrictamente en la plantilla institucional (`plantilla-presentacion.pptx`: portada con logos UNSA/EPIS arriba, cuerpo limpio con pie `#ED7D31`, tipografía **Arimo** y tamaños de plantilla, y última lámina `Gracias…`).
+  - Artículo científico en formato IEEE (`paper/paper.typ`, compilado con Typst 0.15.1).
 - **Equipo (4 integrantes)**:
-  1. Yenaro Joel Noa Camino (Presenta en cámara)
-  2. Luis Gustavo Sequeiros Condori (Presenta en cámara)
-  3. Christian Raul Mestas Zegarra (Presenta en cámara)
-  4. Mariel Alisson Jara Mamani (Presenta en narración / voz en off)
+  1. Jara Mamani, Mariel Alisson
+  2. Sequeiros Condori, Luis Gustavo
+  3. Noa Camino, Yenaro Joel
+  4. Mestas Zegarra, Christian Raul
 
 ---
 
-## 2. Sistema de Calificación (Rubric Categoría II — 100 Puntos)
+## 2. Sistema de Calificación (Rúbrica Categoría II — 100 Puntos)
 
 | Criterio | Puntaje Máximo | Descripción de las Bases | Correlación con el Proyecto |
 |---|:---:|---|---|
-| **1. Objetivos del Proyecto** | **10 pts** | Resultados previstos alcanzables en plazo determinado. | • **General**: Diseñar, verificar formalmente e implementar un verificador de coherencia ABAC con garantías de preservación por construcción.<br>• **Específicos**: Formalización semántica en Dafny, invariante de evolución guardada, model checking en UPPAAL, y empaquetado seguro en npm/TypeScript. |
-| **2. Alcance del Proyecto** | **10 pts** | Tareas, recursos, plazos y límites de funcionamiento. | • **En alcance**: 4 propiedades canónicas (P1 a P4), 4 familias NIST SP 800-162, dominios finitos acotados, guardas atómicas (`tryAdd`, `tryUpdate`, `remove`), generación de testigos mínimos.<br>• **Exclusiones**: Sin PIP en vivo, sin lógica de primer orden no acotada, sin resolución laxa de conflictos (cualquier choque es error). |
-| **3. Justificación del Proyecto** | **15 pts** | Necesidad, valor e impacto (responsabilidad social, seguridad de datos). | • **Teórica**: Insuﬁciencia del muestreo empírico ante la explosión combinatoria del espacio cartesiano de solicitudes.<br>• **Operativa / Social**: En hospitales y organismos públicos, reglas contradictorias bloquean atención de emergencias o exponen historiales confidenciales.<br>• **Tecnológica**: Paradigma CbC que elimina la dependencia de motores SMT pesados en producción. |
-| **4. Metodología Utilizada** | **15 pts** | Conjunto de técnicas y procedimientos (2-3 fases o más). | Metodología formal de **Corrección por Construcción (CbC)** en 5 fases:<br>1. Especificación formal denotacional.<br>2. Verificación deductiva e invariantes en Dafny.<br>3. Verificación temporal de estados en UPPAAL.<br>4. Compilación verificada a JavaScript y envolturas TypeScript.<br>5. Validación empírica con fixtures y regresión. |
-| **5. Artefactos Empleados** | **20 pts** | Herramientas y estándares que determinan la calidad del producto. | • **Dafny 4.x**: Verificación deductiva y síntesis a JavaScript.<br>• **Z3 (4.12+) & cvc5 (1.0+)**: Solucionadores SMT automáticos.<br>• **UPPAAL 5.0**: Model checking de sistemas de transición temporizados.<br>• **TypeScript 5.x, Node.js 20, Bun 1.x**: Entorno anfitrión tipado y empaquetado.<br>• **Biome**: Aseguramiento estático y calidad de código TypeScript.<br>• **Estándares**: NIST SP 800-162 y NIST SP 800-192. |
-| **6. Artefactos Desarrollados** | **30 pts** | Productos tangibles construidos por el equipo. | • **Núcleo Dafny** (`dafny/`): 6 módulos formales, 7 lemas matemáticos de solidez, completitud y preservación inductiva (`AddPreserves`).<br>• **Modelo de Autómata UPPAAL** (`uppaal/`): 23 estados, 529 transiciones, 9 consultas TCTL satisfechas sin deadlock.<br>• **Biblioteca TypeScript** (`src/`): Analizador sintáctico estricto (`parser.ts`), adaptadores seguros (`wrappers.ts`), explicador de testigos (`explain.ts`), operaciones en lote (`batch.ts`).<br>• **Paquete npm**: `@grupo1/abac-verifier` ejecutable en navegador y Node.js.<br>• **Fixtures y Banco de Pruebas** (`fixtures/`, `test/`): Casos reales de urgencia médica, pruebas de regresión y reproducción de contraejemplos. |
+| **1. Objetivos del Proyecto** | **10 pts** | Resultados previstos alcanzables en plazo determinado. | • **General**: Diseñar, verificar formalmente e implementar un verificador ABAC con preservación por construcción y escalabilidad acotada (`Dafny → JS` + `UPPAAL` + `TypeScript/npm`).<br>• **Específicos**: Formalización semántica P1–P4, interfaz guardada con preservación inductiva, model checking en UPPAAL, y frontera defensiva empaquetada. |
+| **2. Alcance del Proyecto** | **10 pts** | Tareas, recursos, plazos y límites de funcionamiento. | • **En alcance**: Propiedades P1–P4 en orden secuencial `P1 → P2 → P3 → P4` en `CheckCoherent`, 4 familias NIST SP 800-162, guardas atómicas (`tryAdd`, `tryUpdate`, `remove`, `tryAddMany`), evaluación lineal (`evaluate`, `evaluateMany`), topes explícitos (`MAX_ENUM_VALUES=16`, `MAX_RULES_CHECKED=64`, `MAX_REQUEST_SPACE=1,000,000` con error `TooLarge`).<br>• **Exclusiones**: Sin PIP en vivo, sin lógica de primer orden abierta ni comparación entre atributos, sin resolución laxa de conflictos, sin PEP/PDP ni historial. |
+| **3. Justificación del Proyecto** | **15 pts** | Necesidad, valor e impacto (responsabilidad social, seguridad de datos). | • **Teórica**: Insuficiencia del muestreo empírico frente a 64 800 solicitudes en `schema-v1.json`.<br>• **Operativa / Social**: En hospitales y organismos públicos, reglas contradictorias bloquean atención de urgencias o exponen historiales confidenciales.<br>• **Tecnológica**: Paradigma CbC que elimina solucionadores SMT pesados en producción y supera las limitaciones de herramientas previas (XACML/Z3, AWS Zelkova, Cedar, Mohawk). |
+| **4. Metodología Utilizada** | **15 pts** | Conjunto de técnicas y procedimientos (2–3 fases o más). | Metodología de **Corrección por Construcción (CbC)** en 5 fases:<br>1. Especificación formal denotacional y espacio `AllRequests`.<br>2. Verificación deductiva de P1–P4 y 7 lemas en Dafny.<br>3. Model checking temporal de estados en UPPAAL.<br>4. Compilación verificada a JS puro y envolturas defensivas TS.<br>5. Validación empírica con fixtures clínicos y suite de regresión. |
+| **5. Artefactos Empleados** | **20 pts** | Herramientas y estándares que determinan la calidad del producto. | • **Dafny 4.11**: Verificación deductiva (114 metas, 0 errores) y síntesis a JavaScript.<br>• **Z3 (4.12+) & cvc5 (1.0+)**: Solucionadores SMT en tiempo de diseño.<br>• **UPPAAL 5.0**: Model checking temporal.<br>• **TypeScript 5.x, Node.js 20+, Bun 1.x**: Entorno anfitrión y pruebas.<br>• **Biome 1.9+**: Formateo y análisis estático.<br>• **Estándares**: NIST SP 800-162, NIST SP 800-192, XACML 3.0 y IEEE (Typst 0.15.1). |
+| **6. Artefactos Desarrollados** | **30 pts** | Productos tangibles construidos por el equipo. | • **Núcleo Dafny** (`dafny/`): 6 módulos (~48 KB: `Schema`, `Syntax`, `Eval`, `Coherence`, `Transition`, `BoundedCheck`), 7 lemas principales (incluyendo `EvaluateAgreesOnCoherent`).<br>• **Modelo UPPAAL** (`uppaal/`): 23 estados, 529 transiciones, 9/9 consultas TCTL satisfechas sin deadlock.<br>• **Biblioteca TypeScript** (`src/`): `schema.ts`, `parser.ts`, `wrappers.ts`, `batch.ts`, `explain.ts`, `errors.ts` (5 errores tipados).<br>• **Paquete npm**: `@grupo1/abac-verifier` para Node.js y navegadores.<br>• **Fixtures y Pruebas** (`fixtures/`, `test/`): 5 fixtures JSON (`clean`, `contradictory`, `unsatisfiable`, `shadowed`, `emergency-override`) y 27 pruebas en 3 suites (`parser`, `wrappers`, `replay`). |
 
 ---
 
-## 3. Estrategia Narrativa y Descomposición MECE
+## 3. Estrategia Narrativa y Coherencia Lógica
 
-Para que la audiencia y el jurado comprendan de forma inmediata y empaticen con el valor del proyecto, la narrativa sigue la estructura recomendada:
-
-```
-[1. Dolor Humano y Operativo]
-       │
-       ▼
-[2. La Solución por Construcción]
-       │
-       ▼
-[3. Descomposición MECE del Problema y Coherencia]
-       ├── P1: Consistencia (Sin contradicción Permiso vs Denegación)
-       ├── P2: Satisfacibilidad (Sin directivas vacías o muertas)
-       ├── P3: No-Sombreado (Sin directivas redundantes o enmascaradas)
-       └── P4: Validez de Esquema (Tipos, identificadores y rangos acotados)
-       │
-       ▼
-[4. Demostración y Garantías Matemáticas (Dafny + UPPAAL + TypeScript)]
-       │
-       ▼
-[5. Impacto y Conclusiones]
-```
+1. **Problema y justificación** (Slide 2)
+2. **Propiedades de coherencia P1–P4** (Slide 3)
+3. **Objetivos y alcance acotado** (Slide 4)
+4. **Comparativa con trabajo previo** (Slide 5)
+5. **Metodología CbC y artefactos** (Slide 6)
+6. **Arquitectura en 3 capas** (Slide 7)
+7. **Fases de verificación `P1 → P2 → P3 → P4`** (Slide 8)
+8. **Núcleo formal en Dafny** (Slide 9)
+9. **Model checking en UPPAAL** (Slide 10)
+10. **Envolturas en TypeScript** (Slide 11)
+11. **Casos de estudio (`emergency-override.json` rechazado P1 vs `clean.json` aceptado) y validación** (Slide 12)
+12. **Cierre `Gracias…` con lema de Hall & Chapman y repositorio** (Slide 13)
 
 ---
 
-## 4. Lineamientos de Diseño de Diapositivas
+## 4. Lineamientos de Diseño de Diapositivas (Plantilla Oficial PPTX)
 
-1. **Minimalismo riguroso**:
-   - Fondo blanco puro con toques de gris suave (`#E7E6E6`).
-   - Encabezado institucional en azul marino formal (`#44546A`) con logos oficiales de EPIS y UNSA.
-   - Pie de página sobrio con título del proyecto y numeración de página.
-   - Acentos cromáticos controlados: azul institucional (`#5B9BD5`) y naranja de alerta/énfasis (`#ED7D31`).
-2. **Baja densidad de texto**:
-   - Cero texto amontonado. Una sola idea de alto impacto por diapositiva.
-   - Prohibido el uso de etiquetas diagnósticas o explicaciones entre paréntesis en las diapositivas.
-   - Tipografía limpia, moderna y legible (DM Sans + JetBrains Mono).
-3. **Autocontención**:
-   - Cada diapositiva debe entenderse por sí misma mediante diagramas visuales y relaciones directas.
-4. **Dominio de diagramas y visuales reales**:
-   - Uso de diagramas arquitectónicos, autómatas, fases de comprobación y capturas de consola del proyecto real.
+1. **Fidelidad a `plantilla-presentacion.pptx`**:
+   - Lienzo `1920 × 1080` (`960 pt × 540 pt`, escala exacta `1 pt = 2 px`).
+   - Fondo blanco puro (`#FFFFFF`), texto negro (`#000000`), acentos tomados del tema de Office (`#ED7D31` en línea divisoria del pie, `#44546A` marino en encabezados de tabla/código).
+   - Portada sin pie de página con logo UNSA arriba a la izquierda y logo EPIS arriba a la derecha.
+   - Páginas interiores sin barra superior: solo título a `44 pt` (`88 px`), contenido y pie con línea `#ED7D31`, logo UNSA a la izquierda, título del proyecto centrado a `20 pt` (`40 px`) y logo EPIS a la derecha.
+   - Última página con `Gracias…` a `138 pt` (`276 px`), viñeta de lema (`28 pt` / `56 px`) y repositorio.
+2. **Tipografía y tamaños exactos**:
+   - Fuente única: **Arimo** (cargada desde Google Fonts).
+   - Tamaños: `44 pt` (`88 px`) títulos, `28 pt` (`56 px`) nivel 1, `24 pt` (`48 px`) nivel 2 y encabezados de columna, `20 pt` (`40 px`) nivel 3 y pie, `18 pt` (`36 px`) / `16 pt` (`32 px`) nivel 4 y tablas.
 
 ---
 
 ## 5. Distribución del Video (7 Minutos — 4 Personas)
 
-- **Total disponible**: 420 segundos (7:00 minutos).
-- **Segmento 1 (Mariel Jara — ~100 s)**: El Dolor en entornos críticos (salud, educación), fallas silenciosas en políticas ABAC, y formulación del problema.
-- **Segmento 2 (Luis Sequeiros — ~105 s)**: La Solución por construcción (CbC), arquitectura integral en 3 capas, y descomposición MECE (las 4 propiedades de coherencia P1–P4).
-- **Segmento 3 (Yenaro Noa — ~110 s)**: Demostración deductiva en Dafny (lemas de preservación) y verificación de concurrencia y ausencia de bloqueos en UPPAAL (9 consultas TCTL).
-- **Segmento 4 (Christian Mestas — ~105 s)**: Capa defensiva en TypeScript, paquete npm `@grupo1/abac-verifier`, demostración en vivo con casos de urgencia médica y conclusiones.
+- **Total disponible**: ~420 segundos (7:00 minutos).
+- **Segmento 1 (Mariel Jara — Slides 1–3)**: Contexto crítico, explosión combinatoria (NIST SP 800-162/192) y definición del problema.
+- **Segmento 2 (Luis Sequeiros — Slides 4–8)**: Comparativa con trabajo previo, objetivos, alcance acotado, las 4 propiedades P1–P4, arquitectura en 3 capas y fases `P1 → P2 → P3 → P4`.
+- **Segmento 3 (Yenaro Noa — Slides 9–10)**: Núcleo Dafny (6 módulos, 7 lemas, 114 metas) y model checking en UPPAAL (23 estados, 529 transiciones, 9 consultas TCTL).
+- **Segmento 4 (Christian Mestas — Slides 11–13)**: Frontera TypeScript (`@grupo1/abac-verifier`), demostración sobre `emergency-override.json` vs `clean.json`, métricas reales (27 pruebas, `evaluate()` en 0.08 ms) y cierre.

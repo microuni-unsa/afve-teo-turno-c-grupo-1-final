@@ -3,60 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificación Formal de Coherencia en Políticas ABAC — Feria de Proyectos UNSA 2026</title>
+    <title>Verificación formal de coherencia en políticas ABAC — Feria de Proyectos UNSA 2026</title>
 
-    <!-- Tipografía Institucional: Plus Jakarta Sans y JetBrains Mono -->
+    <!-- Tipografía solicitada: Arimo (Google Fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 
     <style>
-        /* ===========================================
-           VARIABLES CROMÁTICAS Y DE DISEÑO
-           Identidad Institucional UNSA — Guinda y Neutros
-           =========================================== */
+        /* =====================================================================
+           PLANTILLA OFICIAL UNSA / EPIS (12192000 x 6858000 EMU = 960pt x 540pt)
+           Escala exacta sobre escenario 1920x1080 px: 1 pt = 2 px
+           Paleta base del tema Office:
+             Fondo: #FFFFFF | Texto: #000000 | Naranja footer (accent2): #ED7D31
+             Marino (dk2): #44546A | Gris suave (lt2): #E7E6E6 | Azul (accent1): #5B9BD5
+           ===================================================================== */
         :root {
-            --stage-bg: #0f141c;
+            --stage-bg: #1f2937;
             --slide-bg: #ffffff;
-            
-            /* Paleta Institucional UNSA */
-            --unsa-guinda: #63061f;
-            --unsa-guinda-dark: #4a0417;
-            --unsa-guinda-light: #7c0b29;
-            --unsa-guinda-subtle: #fcf4f6;
-            --unsa-guinda-border: rgba(99, 6, 31, 0.16);
-            
-            /* Escala de Grises y Neutros de Alta Legibilidad */
-            --slate-900: #0f172a;
-            --slate-800: #1e293b;
-            --slate-700: #334155;
-            --slate-600: #475569;
-            --slate-500: #64748b;
-            --slate-400: #94a3b8;
-            --slate-300: #cbd5e1;
-            --slate-200: #e2e8f0;
-            --slate-100: #f1f5f9;
-            --slate-50: #f8fafc;
-
-            /* Tipografía */
-            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-
-            /* Animaciones */
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --transition-speed: 0.4s;
+            --text-primary: #000000;
+            --text-muted: #333333;
+            --accent-orange: #ed7d31;
+            --theme-navy: #44546a;
+            --theme-blue: #5b9bd5;
+            --theme-gray: #e7e6e6;
+            --font-main: 'Arimo', Arial, sans-serif;
+            --font-mono: 'Arimo', Arial, sans-serif;
         }
 
-        /* Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* ===========================================
-           FIXED 16:9 STAGE: MANDATORY BASE STYLES
-           =========================================== */
         html,
         body {
             width: 100%;
@@ -65,7 +45,7 @@
             overflow: hidden;
             background: var(--stage-bg);
             font-family: var(--font-main);
-            color: var(--slate-800);
+            color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
         }
 
@@ -84,8 +64,15 @@
             height: 1080px;
             overflow: hidden;
             transform-origin: 0 0;
+            transform: var(--stage-transform, none);
             background: var(--slide-bg);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        code,
+        pre {
+            font-family: var(--font-main);
+            font-weight: 700;
         }
 
         .slide {
@@ -94,13 +81,11 @@
             width: 1920px;
             height: 1080px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
             visibility: hidden;
             opacity: 0;
             pointer-events: none;
             background: var(--slide-bg);
-            transition: opacity 0.35s ease, visibility 0.35s ease;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
         }
 
         .slide.active,
@@ -111,268 +96,250 @@
             z-index: 1;
         }
 
-        img, video, canvas, svg {
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        /* ===========================================
-           ESTRUCTURA INSTITUCIONAL: HEADER Y FOOTER
-           =========================================== */
-        .slide-header {
-            width: 100%;
-            height: 100px;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 80px;
-            border-bottom: 4px solid var(--unsa-guinda);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .header-brand-left {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .header-logo-epis {
-            height: 56px;
+        /* =====================================================================
+           SLIDE 1: PORTADA (slide1.xml)
+           ===================================================================== */
+        .cover-logo-unsa {
+            position: absolute;
+            left: 17px;
+            top: 31px;
+            width: 488px;
+            height: 176px;
             object-fit: contain;
         }
 
-        .header-titles {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-title-uni {
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: var(--unsa-guinda);
-        }
-
-        .header-subtitle-school {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--slate-600);
-        }
-
-        .header-brand-right {
-            display: flex;
-            align-items: center;
-        }
-
-        .header-logo-unsa {
-            height: 56px;
+        .cover-logo-epis {
+            position: absolute;
+            left: 1320px;
+            top: 0px;
+            width: 600px;
+            height: 248px;
             object-fit: contain;
         }
 
-        .slide-body {
-            flex: 1;
-            padding: 40px 80px;
+        .cover-center-box {
+            position: absolute;
+            left: 17px;
+            top: 207px;
+            width: 1903px;
+            height: 858px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .slide-footer {
-            width: 100%;
-            height: 48px;
-            background: #ffffff;
-            border-top: 1px solid var(--slate-200);
-            display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 80px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--slate-500);
-            flex-shrink: 0;
+            justify-content: flex-start;
+            text-align: center;
+            color: var(--text-primary);
+            padding: 6px 24px 0 24px;
         }
 
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .footer-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--unsa-guinda);
-            border-radius: 50%;
-        }
-
-        .footer-center {
-            font-weight: 600;
-            color: var(--slate-700);
-        }
-
-        .footer-counter {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            color: var(--unsa-guinda);
-            background: var(--unsa-guinda-subtle);
-            padding: 4px 14px;
-            border-radius: 6px;
-            border: 1px solid var(--unsa-guinda-border);
-        }
-
-        /* ===========================================
-           TIPOGRAFÍA Y TITULARES DE DIAPOSITIVA
-           =========================================== */
-        .slide-headline {
-            margin-bottom: 28px;
-        }
-
-        .slide-kicker {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--unsa-guinda);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .slide-title {
-            font-size: 42px;
-            font-weight: 800;
-            color: var(--slate-900);
-            line-height: 1.18;
-            letter-spacing: -0.5px;
-        }
-
-        .slide-subtitle {
-            font-size: 22px;
-            font-weight: 500;
-            color: var(--slate-600);
-            margin-top: 6px;
-            line-height: 1.4;
-        }
-
-        /* ===========================================
-           COMPONENTES Y MARCOS DE IMAGEN LIMPIOS
-           (Sin exceso de cuadros ni bordes innecesarios)
-           =========================================== */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            align-items: stretch;
-            flex: 1;
-            min-height: 0;
-        }
-
-        .grid-2-wide-img {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            align-items: stretch;
-            flex: 1;
-            min-height: 0;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 36px;
-            align-items: stretch;
-            flex: 1;
-            min-height: 0;
-        }
-
-        /* Paneles minimalistas sin acumulación de bordes */
-        .panel {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .panel-bordered {
-            background: var(--slate-50);
-            border-left: 4px solid var(--unsa-guinda);
-            padding: 28px 32px;
-            border-radius: 8px;
-        }
-
-        .panel-title {
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--slate-900);
-            margin-bottom: 12px;
-            line-height: 1.3;
-        }
-
-        .panel-text {
-            font-size: 21px;
-            color: var(--slate-600);
-            line-height: 1.55;
-            font-weight: 450;
-        }
-
-        /* Listas de puntos con acento guinda */
-        .feature-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 12px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        .feature-bullet {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            background: var(--unsa-guinda);
-            margin-top: 8px;
-            flex-shrink: 0;
-        }
-
-        .feature-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--slate-900);
+        .cover-faculty {
+            font-size: 64px; /* 32 pt */
+            font-weight: 400;
+            line-height: 1.1;
             margin-bottom: 4px;
         }
 
-        .feature-desc {
-            font-size: 20px;
-            color: var(--slate-600);
-            line-height: 1.45;
+        .cover-school {
+            font-size: 88px; /* 44 pt */
+            font-weight: 400;
+            line-height: 1.08;
+            max-width: 1620px;
+            margin-bottom: 18px;
         }
 
-        /* Marco de imagen profesional */
-        .image-display {
-            background: #ffffff;
-            border: 1px solid var(--slate-200);
-            border-radius: 10px;
-            padding: 16px;
+        .cover-event {
+            font-size: 72px; /* 36 pt */
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 18px;
+        }
+
+        .cover-project-title {
+            font-size: 72px; /* 36 pt */
+            font-weight: 700;
+            line-height: 1.1;
+            max-width: 1760px;
+            margin-bottom: 18px;
+        }
+
+        .cover-authors {
+            font-size: 54px; /* 27 pt */
+            font-weight: 400;
+            line-height: 1.14;
+            margin-bottom: 16px;
+        }
+
+        .cover-advisor {
+            font-size: 54px; /* 27 pt */
+            font-weight: 400;
+            line-height: 1.12;
+        }
+
+        /* =====================================================================
+           SLIDES 2..12: PÁGINAS DE CONTENIDO (slide2.xml + slideMaster1.xml)
+           ===================================================================== */
+        .tpl-title {
+            position: absolute;
+            left: 132px;
+            top: 22px;
+            width: 1656px;
+            height: 142px;
+            display: flex;
+            align-items: center;
+            font-size: 88px; /* 44 pt */
+            font-weight: 400;
+            line-height: 1.05;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .tpl-body {
+            position: absolute;
+            left: 132px;
+            top: 187px;
+            width: 1656px;
+            height: 782px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+
+        /* Viñetas fieles a slideMaster1.xml bodyStyle */
+        .tpl-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .tpl-list > li {
+            position: relative;
+            padding-left: 44px;
+            font-size: 56px; /* 28 pt (lvl1) */
+            font-weight: 400;
+            line-height: 1.12;
+            color: var(--text-primary);
+        }
+
+        .tpl-list > li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1em;
+            line-height: inherit;
+        }
+
+        .tpl-sublist {
+            list-style: none;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tpl-sublist > li {
+            position: relative;
+            padding-left: 38px;
+            font-size: 48px; /* 24 pt (lvl2) */
+            line-height: 1.14;
+            color: var(--text-primary);
+        }
+
+        .tpl-sublist > li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .tpl-list.compact-l1 {
+            gap: 16px;
+        }
+
+        .tpl-list.compact-l1 > li {
+            font-size: 48px; /* 24 pt (lvl2) */
+            line-height: 1.16;
+            padding-left: 38px;
+        }
+
+        .tpl-list.lvl3 {
+            gap: 14px;
+        }
+
+        .tpl-list.lvl3 > li {
+            font-size: 40px; /* 20 pt (lvl3) */
+            line-height: 1.18;
+            padding-left: 34px;
+        }
+
+        .tpl-list.lvl4 {
+            gap: 12px;
+        }
+
+        .tpl-list.lvl4 > li {
+            font-size: 36px; /* 18 pt (lvl4) */
+            line-height: 1.18;
+            padding-left: 30px;
+        }
+
+        /* =====================================================================
+           COMPOSICIONES DE PLANTILLA (Comparación / Imagen con título)
+           ===================================================================== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            height: 100%;
+            align-items: start;
+        }
+
+        .col-block {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .col-heading {
+            font-size: 48px; /* 24 pt bold (slideLayout5) */
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--text-primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        .media-split {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 48px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .media-split-wide-img {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 44px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .img-frame {
+            width: 100%;
+            height: 100%;
+            max-height: 750px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-            height: 100%;
-            max-height: 100%;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            padding: 14px;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
-        .image-display img {
+        .img-frame img {
             max-width: 100%;
             max-height: 100%;
             width: auto;
@@ -380,170 +347,165 @@
             object-fit: contain;
         }
 
-        /* Contenedor de Código */
-        .code-box {
-            background: #181e29;
-            color: #f8fafc;
-            border-radius: 10px;
-            padding: 28px;
-            font-family: var(--font-mono);
-            font-size: 20px;
-            line-height: 1.6;
-            overflow: hidden;
-            border-left: 4px solid var(--unsa-guinda);
-            height: 100%;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .code-keyword { color: #f472b6; font-weight: 600; }
-        .code-func { color: #60a5fa; font-weight: 600; }
-        .code-type { color: #34d399; }
-        .code-op { color: #fbbf24; }
-        .code-comment { color: #94a3b8; font-style: italic; }
-
-        /* Fila de Métricas sobria */
-        .metrics-strip {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 28px;
-            margin-top: 24px;
-        }
-
-        .metric-item {
-            border-top: 3px solid var(--unsa-guinda);
-            padding: 20px 10px;
-            background: var(--slate-50);
-            text-align: center;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .metric-num {
-            font-size: 46px;
-            font-weight: 800;
-            color: var(--unsa-guinda);
-            line-height: 1;
-            margin-bottom: 8px;
-            font-family: var(--font-mono);
-        }
-
-        .metric-desc {
-            font-size: 16px;
-            color: var(--slate-700);
-            font-weight: 600;
-        }
-
-        /* Banner de nota formal inferior */
-        .note-strip {
-            margin-top: 20px;
-            background: var(--unsa-guinda-subtle);
-            border-left: 4px solid var(--unsa-guinda);
-            padding: 14px 24px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-        }
-
-        .note-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--unsa-guinda-dark);
-            line-height: 1.45;
-        }
-
-        /* ===========================================
-           SLIDE 1: PORTADA
-           =========================================== */
-        .cover-body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            height: 100%;
-            padding: 10px 40px 16px 40px;
-            box-sizing: border-box;
-        }
-
-        .cover-center-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        /* Tabla limpia con tamaño lvl4 (18 pt = 36px, compacta 16 pt = 32px en celdas) */
+        .tpl-table {
             width: 100%;
-            max-width: 1400px;
-        }
-
-        .cover-dept-kicker {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--unsa-guinda);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 24px;
-        }
-
-        .cover-main-title {
-            font-size: 58px;
-            font-weight: 800;
-            color: var(--slate-900);
+            border-collapse: collapse;
+            font-size: 32px; /* 16 pt (slideLayout8) */
             line-height: 1.16;
-            letter-spacing: -1px;
-            margin-bottom: 22px;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        .cover-sub-title {
-            font-size: 26px;
-            color: var(--slate-600);
-            font-weight: 500;
-            margin-bottom: 32px;
-            max-width: 1300px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.4;
-        }
-
-        .cover-bar {
-            width: 120px;
-            height: 5px;
-            background: var(--unsa-guinda);
-            margin: 0 auto;
-        }
-
-        .cover-team-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 36px;
-            width: 100%;
-            max-width: 1400px;
-            margin-top: 0;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-        }
-
-        .team-box {
-            border-top: 3px solid var(--unsa-guinda);
-            padding: 16px 8px;
-        }
-
-        .team-box-name {
-            font-size: 20px;
+        .tpl-table th {
+            background: var(--theme-navy);
+            color: #ffffff;
             font-weight: 700;
-            color: var(--slate-900);
-            margin-bottom: 4px;
+            text-align: left;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
         }
 
-        .team-box-meta {
-            font-size: 16px;
-            color: var(--slate-500);
-            font-weight: 500;
+        .tpl-table td {
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            color: var(--text-primary);
         }
 
-        /* Barra de progreso */
+        .tpl-table tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .tpl-table tr.row-highlight td {
+            background: #fff7ed;
+            font-weight: 700;
+            border-top: 2px solid var(--accent-orange);
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        /* Bloque de código / salida terminal en Arimo */
+        .code-panel {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--theme-navy);
+            padding: 14px 18px;
+            font-family: var(--font-mono);
+            font-size: 27px; /* 13.5 pt para que el lema completo entre sin recortes */
+            line-height: 1.2;
+            color: #000000;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+
+        .code-panel-title {
+            font-size: 34px; /* 17 pt */
+            font-weight: 700;
+            color: var(--theme-navy);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .terminal-panel {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--accent-orange);
+            padding: 20px 24px;
+            font-size: 32px; /* 16 pt */
+            line-height: 1.32;
+            color: #000000;
+            overflow: hidden;
+        }
+
+        .kw { color: #1d4ed8; font-weight: 700; }
+        .fn { color: #0f766e; font-weight: 700; }
+        .st-ok { color: #15803d; font-weight: 700; }
+        .st-err { color: #b91c1c; font-weight: 700; }
+
+        .summary-line {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 2px solid var(--theme-gray);
+            font-size: 40px; /* 20 pt (lvl3) */
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        /* =====================================================================
+           PIE DE PÁGINA OFICIAL DE LA PLANTILLA (slide2.xml .. slide10.xml)
+           ===================================================================== */
+        .tpl-footer-line {
+            position: absolute;
+            left: 0;
+            top: 991px;
+            width: 1920px;
+            height: 2px;
+            background: var(--accent-orange);
+        }
+
+        .tpl-footer-unsa {
+            position: absolute;
+            left: 20px;
+            top: 1002px;
+            width: 185px;
+            height: 67px;
+            object-fit: contain;
+        }
+
+        .tpl-footer-title {
+            position: absolute;
+            left: 240px;
+            top: 1013px;
+            width: 1440px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 40px; /* 20 pt */
+            font-weight: 400;
+            color: var(--text-primary);
+        }
+
+        .tpl-footer-epis {
+            position: absolute;
+            left: 1698px;
+            top: 991px;
+            width: 220px;
+            height: 91px;
+            object-fit: contain;
+        }
+
+        /* =====================================================================
+           SLIDE 13: ÚLTIMA PÁGINA (slide10.xml)
+           ===================================================================== */
+        .thanks-title {
+            position: absolute;
+            left: 132px;
+            top: 22px;
+            width: 1656px;
+            height: 447px;
+            display: flex;
+            align-items: flex-start;
+            font-size: 276px; /* 138 pt */
+            font-weight: 400;
+            line-height: 1.05;
+            color: var(--text-primary);
+        }
+
+        .thanks-body {
+            position: absolute;
+            left: 132px;
+            top: 560px;
+            width: 1656px;
+            height: 360px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* =====================================================================
+           CONTROLES EN PANTALLA (ocultos al imprimir/exportar PDF)
+           ===================================================================== */
         .progress-bar-container {
             position: fixed;
             top: 0;
@@ -557,108 +519,84 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: var(--unsa-guinda);
-            transition: width 0.3s ease;
+            background: var(--accent-orange);
+            transition: width 0.25s ease;
         }
 
-        /* Controles de Navegación */
         .deck-controls {
             position: fixed;
             left: 50%;
-            bottom: 60px;
+            bottom: 18px;
             transform: translateX(-50%);
             z-index: 1000;
             display: flex;
-            gap: 10px;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            padding: 4px 12px;
+            align-items: center;
+            gap: 12px;
+            background: rgba(17, 24, 39, 0.85);
+            padding: 6px 16px;
             border-radius: 20px;
+            color: #ffffff;
+            font-size: 15px;
         }
 
         .deck-btn {
             background: transparent;
             border: none;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
             padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: background 0.2s ease;
+            border-radius: 10px;
         }
 
         .deck-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.18);
         }
 
-        /* Modo de Edición Minimalista */
-        .edit-hotzone {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 60px;
-            height: 60px;
-            z-index: 10000;
-            cursor: pointer;
-        }
-
-        .edit-toggle {
-            position: fixed;
-            top: 18px;
-            left: 18px;
-            background: var(--unsa-guinda);
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            width: 36px;
-            height: 36px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            z-index: 10001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .edit-toggle.show,
-        .edit-toggle.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Print Style */
         @media print {
-            html, body {
+            @page {
+                size: 1920px 1080px;
+                margin: 0;
+            }
+            html,
+            body {
                 width: 1920px;
                 height: auto;
                 overflow: visible;
-                background: #fff;
+                background: #ffffff;
             }
             .deck-viewport {
                 position: static;
                 overflow: visible;
+                background: #ffffff;
             }
-            .deck-stage {
+            body .deck-viewport .deck-stage {
                 position: static;
-                transform: none !important;
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                transform: none;
+                box-shadow: none;
             }
-            .slide {
+            body .deck-viewport .deck-stage .slide {
                 position: relative;
-                display: flex !important;
-                visibility: visible !important;
-                opacity: 1 !important;
+                display: block;
+                visibility: visible;
+                opacity: 1;
+                pointer-events: auto;
                 width: 1920px;
                 height: 1080px;
                 break-after: page;
                 page-break-after: always;
             }
-            .deck-controls, .edit-hotzone, .edit-toggle, .progress-bar-container {
-                display: none !important;
+            body .deck-viewport .deck-stage .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+            body .progress-bar-container,
+            body .deck-controls {
+                display: none;
             }
         }
     </style>
@@ -669,789 +607,450 @@
         <div class="progress-bar" id="progressBar"></div>
     </div>
 
-    <!-- Hotzone de edición -->
-    <div class="edit-hotzone" id="editHotzone"></div>
-    <button class="edit-toggle" id="editToggle" title="Modo edición (E)">TXT</button>
-
     <div class="deck-viewport">
         <main class="deck-stage" id="deckStage">
 
-            <!-- ==========================================
-                 SLIDE 1: PORTADA INSTITUCIONAL
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 1: PORTADA (Plantilla slide1.xml)
+                 ========================================================= -->
             <section class="slide active">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas — FIPS</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
+                <img src="img/logo2.png" alt="Logo UNSA" class="cover-logo-unsa">
+                <img src="img/logo1.png" alt="Logo EPIS" class="cover-logo-epis">
 
-                <div class="slide-body">
-                    <div class="cover-body">
-                        <div class="cover-center-content">
-                            <div class="cover-dept-kicker">EPIS · Universidad Nacional de San Agustín · 2026</div>
-                            <h1 class="cover-main-title">Verificación formal de coherencia en políticas ABAC</h1>
-                            <p class="cover-sub-title">Garantías matemáticas para evitar bloqueos indebidos y filtraciones de datos en sistemas de autorización</p>
-                            <div class="cover-bar"></div>
-                        </div>
+                <div class="cover-center-box">
+                    <div class="cover-faculty">Facultad de Ingeniería de Producción y Servicios</div>
+                    <div class="cover-school">Escuela Profesional de Ingeniería de Sistemas</div>
+                    <div class="cover-event">FERIA DE PROYECTOS 2026</div>
+                    <div class="cover-project-title">“Verificación formal de coherencia en políticas ABAC”</div>
+                    <div class="cover-authors">
+                        Presentado por:<br>
+                        Jara Mamani, Mariel Alisson &nbsp;·&nbsp; Sequeiros Condori, Luis Gustavo<br>
+                        Noa Camino, Yenaro Joel &nbsp;·&nbsp; Mestas Zegarra, Christian Raul
+                    </div>
+                    <div class="cover-advisor">Docente asesor: Molina Barriga, Maribel</div>
+                </div>
+            </section>
 
-                        <div class="cover-team-row">
-                            <div class="team-box">
-                                <div class="team-box-name">Yenaro Joel Noa Camino</div>
-                                <div class="team-box-meta">Ingeniería de Sistemas · 4to año</div>
-                            </div>
-                            <div class="team-box">
-                                <div class="team-box-name">Luis Gustavo Sequeiros Condori</div>
-                                <div class="team-box-meta">Ingeniería de Sistemas · 4to año</div>
-                            </div>
-                            <div class="team-box">
-                                <div class="team-box-name">Christian Raul Mestas Zegarra</div>
-                                <div class="team-box-meta">Ingeniería de Sistemas · 4to año</div>
-                            </div>
-                            <div class="team-box">
-                                <div class="team-box-name">Mariel Alisson Jara Mamani</div>
-                                <div class="team-box-meta">Ingeniería de Sistemas · 4to año</div>
-                            </div>
+            <!-- =========================================================
+                 SLIDE 2: PROBLEMA Y JUSTIFICACIÓN
+                 ========================================================= -->
+            <section class="slide">
+                <h1 class="tpl-title">Problema y justificación</h1>
+                <div class="tpl-body">
+                    <ul class="tpl-list">
+                        <li>
+                            <strong>Entornos críticos dinámicos:</strong> hospitales y entidades públicas rotan turnos y guardias continuamente.
+                            <ul class="tpl-sublist">
+                                <li>La edición manual introduce fallas silenciosas: bloqueos en urgencias o filtración de datos.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Explosión combinatoria (NIST SP 800-162):</strong> 64 800 solicitudes en el esquema v1 superan al muestreo empírico.
+                        </li>
+                        <li>
+                            <strong>Brecha SMT (NIST SP 800-192):</strong> invocar resolvedores en producción añade latencia y timeouts.
+                        </li>
+                    </ul>
+                    <div class="summary-line">
+                        <strong>Propuesta (CbC):</strong> núcleo demostrado en Dafny y compilado a JS puro, sin SMT en ejecución.
+                    </div>
+                </div>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
+            </section>
+
+            <!-- =========================================================
+                 SLIDE 3: PROPIEDADES DE COHERENCIA (P1–P4)
+                 ========================================================= -->
+            <section class="slide">
+                <h1 class="tpl-title">Propiedades de coherencia (P1–P4)</h1>
+                <div class="tpl-body">
+                    <ul class="tpl-list">
+                        <li>
+                            <strong>P1 — Consistencia:</strong> ninguna solicitud válida activa simultáneamente una regla de permiso y una de denegación.
+                        </li>
+                        <li>
+                            <strong>P2 — Satisfacibilidad:</strong> cada regla cuenta con al menos una solicitud válida que la activa (sin reglas muertas o vacías).
+                        </li>
+                        <li>
+                            <strong>P3 — No sombreado:</strong> cada regla determina en solitario al menos una solicitud (previene redundancias y duplicadas).
+                        </li>
+                        <li>
+                            <strong>P4 — Validez de esquema:</strong> toda regla usa atributos declarados, operadores compatibles y literales dentro de rango.
+                        </li>
+                    </ul>
+                    <div class="summary-line">
+                        <strong>Invariante canónico:</strong> Coherent(R) ≜ P1(R) ∧ P2(R) ∧ P3(R) ∧ P4(R) sobre dominio finito y decidible.
+                    </div>
+                </div>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
+            </section>
+
+            <!-- =========================================================
+                 SLIDE 4: OBJETIVOS Y ALCANCE ACOTADO
+                 ========================================================= -->
+            <section class="slide">
+                <h1 class="tpl-title">Objetivos y alcance acotado</h1>
+                <div class="tpl-body">
+                    <div class="two-col">
+                        <div class="col-block">
+                            <h2 class="col-heading">Objetivos y escalabilidad acotada</h2>
+                            <ul class="tpl-list lvl3">
+                                <li><strong>Meta general:</strong> diseñar, verificar e implementar un verificador ABAC en Dafny → JS con preservación inductiva, validado en UPPAAL y empaquetado en npm.</li>
+                                <li><strong>Interfaz guardada:</strong> <code>tryAdd</code>, <code>tryUpdate</code>, <code>remove</code>, <code>tryAddMany</code> y evaluación lineal <code>evaluate</code> / <code>evaluateMany</code>.</li>
+                                <li><strong>Límites explícitos (<code>TooLarge</code>):</strong> máx. 16 valores por enum, máx. 64 reglas verificadas y 1 000 000 solicitudes en espacio cartesiano.</li>
+                            </ul>
+                        </div>
+                        <div class="col-block">
+                            <h2 class="col-heading">Límites y exclusiones explícitas</h2>
+                            <ul class="tpl-list lvl3">
+                                <li><strong>Sin PIP en vivo:</strong> sin consultas de red, bases de datos ni relojes externos; atributos acotados al esquema.</li>
+                                <li><strong>Sin lógica abierta:</strong> sin cadenas libres, regex ni comparaciones entre dos atributos (solo atributo vs literal).</li>
+                                <li><strong>Sin resolución laxa:</strong> no hay prioridades tipo deny-overrides; todo solapamiento es error P1.</li>
+                                <li><strong>Sin PEP/PDP ni historial:</strong> enfocado exclusivamente en decisión y coherencia.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Control de Acceso Basado en Atributos</div>
-                    <div class="footer-counter">01 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 2: EL DOLOR EN ENTORNOS CRÍTICOS
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 5: COMPARATIVA CON TRABAJO PREVIO
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">¿Por qué este problema es crítico en el mundo real?</div>
-                        <h2 class="slide-title">El dolor en entornos críticos: salud y organizaciones públicas</h2>
-                        <p class="slide-subtitle">La administración manual de directivas de acceso introduce fallas lógicas que comprometen vidas y datos reservados</p>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="panel panel-bordered">
-                            <h3 class="panel-title">Escenario de Urgencia Hospitalaria</h3>
-                            <p class="panel-text" style="margin-bottom: 24px;">
-                                En un centro médico, las autorizaciones dependen de turnos, guardias y condiciones de emergencia. Una contradicción inadvertida entre directivas puede bloquear el acceso de un cirujano a un expediente clínico crítico en plena intervención quirúrgica.
-                            </p>
-                            <div style="border-top: 1px solid var(--slate-200); padding-top: 18px;">
-                                <span style="font-weight: 700; color: var(--unsa-guinda); font-size: 17px; display: block; margin-bottom: 6px;">Impacto Operativo Crítico</span>
-                                <span style="font-size: 17px; color: var(--slate-700);">Denegaciones indebidas que paralizan atenciones de urgencia o permisos involuntarios que filtran datos confidenciales.</span>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-bordered" style="background: #ffffff; border-left-color: var(--slate-700);">
-                            <h3 class="panel-title">La Causa Raíz: Crecimiento y Explosión Combinatoria</h3>
-                            <p class="panel-text" style="margin-bottom: 24px;">
-                                El estándar NIST SP 800-162 formula directivas sobre cuatro familias de atributos: sujeto, recurso, acción y entorno. Con múltiples atributos discretos, el espacio cartesiano de solicitudes posibles supera con rapidez las decenas de miles de combinaciones.
-                            </p>
-                            <div style="border-top: 1px solid var(--slate-200); padding-top: 18px;">
-                                <span style="font-weight: 700; color: var(--slate-900); font-size: 17px; display: block; margin-bottom: 6px;">Insuficiencia del Muestreo Empírico</span>
-                                <span style="font-size: 17px; color: var(--slate-700);">Las pruebas tradicionales por muestreo dejan zonas ciegas en el espacio de solicitudes. Solo la verificación deductiva provee garantías totales.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="note-strip">
-                        <span class="note-text">NIST SP 800-192 formaliza la necesidad de verificar exhaustivamente conjuntos de políticas de acceso.</span>
-                    </div>
+                <h1 class="tpl-title">Comparativa con trabajo previo</h1>
+                <div class="tpl-body">
+                    <table class="tpl-table">
+                        <thead>
+                            <tr>
+                                <th>Enfoque</th>
+                                <th>Paradigma formal</th>
+                                <th>SMT en ejecución</th>
+                                <th>Guarda inductiva</th>
+                                <th>Testigo</th>
+                                <th>Despliegue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>XACML (Turkmen)</td>
+                                <td>Traducción SMT</td>
+                                <td>Requerido (Z3)</td>
+                                <td>No</td>
+                                <td>Modelo SMT</td>
+                                <td>Servicio externo</td>
+                            </tr>
+                            <tr>
+                                <td>ABAC (Liu et al.)</td>
+                                <td>Partición y grafos</td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Par de reglas</td>
+                                <td>Algoritmo local</td>
+                            </tr>
+                            <tr>
+                                <td>AWS Zelkova / BPA</td>
+                                <td>Reducción SMT</td>
+                                <td>Requerido (Z3)</td>
+                                <td>No</td>
+                                <td>Contramodelo SMT</td>
+                                <td>Nube AWS</td>
+                            </tr>
+                            <tr>
+                                <td>Cedar (Cutler)</td>
+                                <td>Verificación (Lean)</td>
+                                <td>Opcional</td>
+                                <td>No</td>
+                                <td>Diagnóstico sintáctico</td>
+                                <td>Binario Rust / WASM</td>
+                            </tr>
+                            <tr>
+                                <td>Mohawk / ARBAC</td>
+                                <td>SMT / Reachability</td>
+                                <td>Requerido</td>
+                                <td>No (a posteriori)</td>
+                                <td>Traza de transición</td>
+                                <td>Herramienta CLI</td>
+                            </tr>
+                            <tr class="row-highlight">
+                                <td>Verificador propuesto</td>
+                                <td>CbC (Dafny + UPPAAL)</td>
+                                <td>Ninguno (Dafny → JS)</td>
+                                <td>Sí (AddPreserves)</td>
+                                <td>Tupla (req, rᵢ, rⱼ)</td>
+                                <td>Nativo npm (JS / TS)</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Vulnerabilidades en Políticas de Autorización</div>
-                    <div class="footer-counter">02 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 3: LAS TRES ANOMALÍAS CANÓNICAS
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 6: METODOLOGÍA Y ARTEFACTOS
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
+                <h1 class="tpl-title">Metodología y artefactos</h1>
+                <div class="tpl-body">
+                    <div class="two-col">
+                        <div class="col-block">
+                            <h2 class="col-heading">Metodología CbC en 5 fases</h2>
+                            <ul class="tpl-list lvl4">
+                                <li><strong>Fase 1 — Modelado:</strong> sintaxis abstracta, semántica y espacio <code>AllRequests</code>.</li>
+                                <li><strong>Fase 2 — Deducción:</strong> propiedades P1–P4 y 7 lemas con Z3 y cvc5.</li>
+                                <li><strong>Fase 3 — Model checking:</strong> autómata Admin y 9 consultas TCTL en UPPAAL.</li>
+                                <li><strong>Fase 4 — Compilación:</strong> síntesis a JS puro y frontera TypeScript.</li>
+                                <li><strong>Fase 5 — Validación:</strong> fixtures clínicos y regresión automatizada.</li>
+                            </ul>
                         </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">¿Qué puede salir mal al redactar reglas de acceso?</div>
-                        <h2 class="slide-title">Tres fallas silenciosas que los tests tradicionales no logran detectar</h2>
-                        <p class="slide-subtitle">Clasificación canónica de defectos lógicos en políticas de control de acceso</p>
-                    </div>
-
-                    <div class="grid-3">
-                        <div class="panel panel-bordered">
-                            <div style="font-family: var(--font-mono); font-size: 18px; font-weight: 800; color: var(--unsa-guinda); margin-bottom: 12px;">ANOMALÍA 01</div>
-                            <h3 class="panel-title">Contradicción</h3>
-                            <p class="panel-text">
-                                Una misma solicitud concreta activa simultáneamente una regla de Permiso y una de Denegación. Al carecer de resolución matemática, el veredicto en producción queda a merced del orden de evaluación o la implementación del motor.
-                            </p>
-                        </div>
-
-                        <div class="panel panel-bordered">
-                            <div style="font-family: var(--font-mono); font-size: 18px; font-weight: 800; color: var(--unsa-guinda); margin-bottom: 12px;">ANOMALÍA 02</div>
-                            <h3 class="panel-title">Regla Insatisfacible</h3>
-                            <p class="panel-text">
-                                Directiva con condiciones mutuamente incompatibles sobre los rangos del esquema. La regla no puede activarse bajo ninguna combinación válida de atributos, constituyendo código muerto dentro de la política.
-                            </p>
-                        </div>
-
-                        <div class="panel panel-bordered">
-                            <div style="font-family: var(--font-mono); font-size: 18px; font-weight: 800; color: var(--unsa-guinda); margin-bottom: 12px;">ANOMALÍA 03</div>
-                            <h3 class="panel-title">Sombreado</h3>
-                            <p class="panel-text">
-                                Directiva completamente cubierta y anulada por reglas preexistentes de mayor generalidad. No existe ninguna solicitud en el sistema donde esta directiva decida en solitario, acumulando redundancia oculta.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="note-strip">
-                        <span class="note-text">Nuestro verificador detecta las tres anomalías y sintetiza un testigo diagnóstico con la tupla mínima infractora.</span>
-                    </div>
-                </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Defectos Estructurales en Reglas ABAC</div>
-                    <div class="footer-counter">03 / 12</div>
-                </footer>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 4: LA SOLUCIÓN: CORRECCIÓN POR CONSTRUCCIÓN
-                 ========================================== -->
-            <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">Nuestra propuesta: solucionar la causa raíz antes de ejecutar</div>
-                        <h2 class="slide-title">Seguridad por construcción: certificar antes de desplegar</h2>
-                        <p class="slide-subtitle">Demostración matemática en tiempo de diseño frente a la fragilidad del análisis en tiempo de ejecución</p>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="panel panel-bordered" style="background: #ffffff; border-left-color: var(--slate-400);">
-                            <div style="font-size: 14px; font-weight: 700; color: var(--slate-500); text-transform: uppercase; margin-bottom: 8px;">Enfoque Convencional en Producción</div>
-                            <h3 class="panel-title">Invocación Externa a Solucionadores SMT</h3>
-                            <p class="panel-text" style="margin-bottom: 24px;">
-                                Los esquemas industriales tradicionales traducen consultas a solucionadores SMT en vivo durante cada petición o mediante análisis a posteriori sobre políticas ya desplegadas.
-                            </p>
-                            <div class="feature-list">
-                                <div class="feature-item">
-                                    <div class="feature-bullet" style="background: var(--slate-400);"></div>
-                                    <div>
-                                        <div class="feature-title">Sobrecarga de Latencia</div>
-                                        <div class="feature-desc">Retardo significativo en servidores de autorización en tiempo real.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet" style="background: var(--slate-400);"></div>
-                                    <div>
-                                        <div class="feature-title">Riesgo de Timeouts</div>
-                                        <div class="feature-desc">Tiempos de espera indefinidos o agotamiento de memoria en el resolvedor.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel panel-bordered">
-                            <div style="font-size: 14px; font-weight: 700; color: var(--unsa-guinda); text-transform: uppercase; margin-bottom: 8px;">Nuestra Propuesta Formal</div>
-                            <h3 class="panel-title">Núcleo Compilado y Guardas Inductivas</h3>
-                            <p class="panel-text" style="margin-bottom: 24px;">
-                                Los motores SMT Z3 y cvc5 operan únicamente en tiempo de desarrollo para certificar los lemas deductivos en Dafny. El artefacto final es JavaScript puro ejecutándose sin motores externos.
-                            </p>
-                            <div class="feature-list">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Cero Motores en Producción</div>
-                                        <div class="feature-desc">Código determinista ejecutado directamente en Node.js o el navegador.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Preservación Inductiva</div>
-                                        <div class="feature-desc">Cada mutación verifica la coherencia antes de confirmar el nuevo estado.</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-block">
+                            <h2 class="col-heading">Herramientas y estándares</h2>
+                            <ul class="tpl-list lvl4">
+                                <li><strong>Dafny 4.11 + Z3 / cvc5:</strong> especificación, prueba deductiva y compilación JS.</li>
+                                <li><strong>UPPAAL 5.0:</strong> verificación temporal de estados y ausencia de deadlocks.</li>
+                                <li><strong>TypeScript 5.x + Node 20+ / Bun 1.x:</strong> tipado, pruebas y paquete npm.</li>
+                                <li><strong>Biome 1.9+:</strong> formateo y análisis estático sin errores.</li>
+                                <li><strong>Estándares:</strong> NIST SP 800-162, NIST SP 800-192, XACML 3.0 y IEEE.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Paradigma de Corrección por Construcción (CbC)</div>
-                    <div class="footer-counter">04 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 5: ARQUITECTURA DEL SISTEMA
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 7: ARQUITECTURA EN TRES CAPAS
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
+                <h1 class="tpl-title">Arquitectura en tres capas</h1>
+                <div class="tpl-body">
+                    <div class="media-split">
+                        <div class="img-frame">
+                            <img src="img/architecture.svg" alt="Arquitectura unidireccional entre Núcleo Dafny y Envolturas TypeScript">
                         </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">¿Cómo conectamos la teoría formal con una aplicación real?</div>
-                        <h2 class="slide-title">Arquitectura del sistema en tres capas integradas</h2>
-                        <p class="slide-subtitle">Aislamiento estricto y dependencias unidireccionales entre especificación formal y entorno anfitrión</p>
-                    </div>
-
-                    <div class="grid-2-wide-img" style="grid-template-columns: 0.9fr 1.3fr; gap: 40px;">
-                        <div class="image-display" style="padding: 16px; height: 100%; max-height: 640px;">
-                            <img src="img/architecture.svg" alt="Diagrama de Arquitectura de 3 Capas">
-                        </div>
-
-                        <div class="panel">
-                            <div class="feature-list" style="gap: 32px;">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">1. Núcleo Formal en Dafny</div>
-                                        <div class="feature-desc">Módulos de esquema, sintaxis abstracta, semántica denotacional, comprobación de coherencia y operaciones de transición guardada con 7 lemas probados.</div>
-                                    </div>
-                                </div>
-
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">2. Código JavaScript Extraído</div>
-                                        <div class="feature-desc">Compilación directa de las funciones funcionales puras de Dafny a JavaScript estándar, garantizando equivalencia semántica total y ejecución inmediata.</div>
-                                    </div>
-                                </div>
-
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">3. Frontera Defensiva en TypeScript</div>
-                                        <div class="feature-desc">Analizador sintáctico estricto, cargador de esquema, adaptador de tipos, formateador de diagnósticos y distribución en el paquete npm @grupo1/abac-verifier.</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-block">
+                            <ul class="tpl-list lvl3" style="gap: 24px;">
+                                <li>
+                                    <strong>1. Capa de núcleo (Dafny):</strong> seis módulos formales (<code>Schema</code>, <code>Syntax</code>, <code>Eval</code>, <code>Coherence</code>, <code>Transition</code>, <code>BoundedCheck</code>) compilados a JavaScript.
+                                </li>
+                                <li>
+                                    <strong>2. Capa de envolturas (TypeScript):</strong> carga de esquema, analizador, adaptadores, control de topes y explicaciones sin recalcular decisiones lógicas.
+                                </li>
+                                <li>
+                                    <strong>3. Capa de distribución (npm):</strong> paquete <code>@grupo1/abac-verifier</code> con tipos para Node.js y navegadores.
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Arquitectura de Capas Unidireccionales</div>
-                    <div class="footer-counter">05 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 6: DESCOMPOSICIÓN MECE: FASES DE COHERENCIA
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 8: FASES DE VERIFICACIÓN (P1 A P4)
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
+                <h1 class="tpl-title">Fases de verificación (P1 a P4)</h1>
+                <div class="tpl-body">
+                    <div class="img-frame" style="max-height: 620px; margin-bottom: 18px;">
+                        <img src="img/check_phases.svg" alt="Etapas secuenciales de verificación P1 a P4 en Coherence.dfy">
                     </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">¿Cómo analizamos cada regla sin dejar ningún caso al azar?</div>
-                        <h2 class="slide-title">Cuatro etapas continuas de verificación con respuesta inmediata</h2>
-                        <p class="slide-subtitle">Orden secuencial de comprobación P4 a P3, lemas deductivos asociados y emisión de testigos mínimos</p>
-                    </div>
-
-                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <div class="image-display" style="width: 100%; max-height: 580px; padding: 16px;">
-                            <img src="img/check_phases.svg" alt="Diagrama de Fases de Comprobación de Coherencia P4 a P3" style="width: 100%; height: 100%; object-fit: contain;">
-                        </div>
-                    </div>
-
-                    <div class="note-strip">
-                        <span class="note-text">Definición canónica: Coherent(R) = P1(R) ∧ P2(R) ∧ P3(R) ∧ P4(R) con emisión del primer testigo mínimo en orden secuencial.</span>
+                    <div class="summary-line">
+                        <strong>Orden determinista en <code>CheckCoherent</code>:</strong> evalúa secuencialmente P1 → P2 → P3 → P4 y retorna el primer testigo mínimo; <code>parseRule</code> valida sintaxis y esquema en la frontera TypeScript.
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Proceso Formal de Decisión en Dafny</div>
-                    <div class="footer-counter">06 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 7: NÚCLEO FORMAL EN DAFNY
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 9: NÚCLEO FORMAL EN DAFNY
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
+                <h1 class="tpl-title">Núcleo formal en Dafny</h1>
+                <div class="tpl-body">
+                    <div class="two-col" style="grid-template-columns: 1.05fr 0.95fr; align-items: start;">
+                        <div class="code-panel">
+                            <div class="code-panel-title">Transition.dfy — Guarda e invariante inductivo</div>
+<span class="kw">function</span> <span class="fn">TryAdd</span>(R: Ruleset, r: Rule, schema: Schema): AddResult {
+  <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
+  <span class="kw">if</span> w.NoWitness? <span class="kw">then</span> Accepted(R + [r])
+  <span class="kw">else</span> Rejected(w.wit)
+}
 
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">Garantía matemática de evolución: cada adición preserva el sistema</div>
-                        <h2 class="slide-title">El núcleo en Dafny: guardas atómicas y lemas de preservación</h2>
-                        <p class="slide-subtitle">Demostración matemática automatizada mediante los solucionadores SMT Z3 y cvc5</p>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="code-box">
-                            <div style="color: #94a3b8; font-size: 14px; margin-bottom: 14px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
-                                Transition.dfy — Operación Atómica y Demostración Inductiva
-                            </div>
-                            <span class="code-keyword">function</span> <span class="code-func">TryAdd</span>(R: Ruleset, r: Rule, s: Schema): AddResult {<br>
-                            &nbsp;&nbsp;<span class="code-keyword">var</span> w := <span class="code-func">CheckCoherent</span>(R + [r], s);<br>
-                            &nbsp;&nbsp;<span class="code-keyword">if</span> w.NoWitness? <span class="code-keyword">then</span> <span class="code-type">Accepted</span>(R + [r])<br>
-                            &nbsp;&nbsp;<span class="code-keyword">else</span> <span class="code-type">Rejected</span>(w.wit)<br>
-                            }<br><br>
-                            <span class="code-keyword">lemma</span> <span class="code-func">AddPreserves</span>(R: Ruleset, r: Rule, s: Schema)<br>
-                            &nbsp;&nbsp;<span class="code-keyword">ensures</span> <span class="code-keyword">match</span> <span class="code-func">TryAdd</span>(R, r, s)<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">case</span> <span class="code-type">Accepted</span>(rs) => <span class="code-func">Coherent</span>(rs, s)<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">case</span> <span class="code-type">Rejected</span>(_) => <span class="code-keyword">true</span><br>
-                            {<br>
-                            &nbsp;&nbsp;<span class="code-keyword">var</span> w := <span class="code-func">CheckCoherent</span>(R + [r], s);<br>
-                            &nbsp;&nbsp;<span class="code-keyword">if</span> w == NoWitness {<br>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-func">CheckCoherentSound</span>(R + [r], s);<br>
-                            &nbsp;&nbsp;}<br>
-                            }
-                        </div>
-
-                        <div class="panel">
-                            <h3 class="panel-title">Siete Lemas Deductivos Demostrados</h3>
-                            <div class="feature-list" style="margin-top: 16px;">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">EmptyCoherent</div>
-                                        <div class="feature-desc">El conjunto vacío de directivas es vacuamente coherente (caso base).</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">AddPreserves & UpdatePreserves</div>
-                                        <div class="feature-desc">Toda confirmación aceptada preserva la coherencia global por construcción.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">RemovePreservesCoherent</div>
-                                        <div class="feature-desc">La eliminación de directivas mantiene la coherencia por monotonicidad.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">WitnessSoundness & WitnessCompleteness</div>
-                                        <div class="feature-desc">Todo rechazo genera un testigo auténtico de la propiedad vulnerada.</div>
-                                    </div>
-                                </div>
-                            </div>
+<span class="kw">lemma</span> <span class="fn">AddPreserves</span>(R: Ruleset, r: Rule, schema: Schema)
+  <span class="kw">ensures match</span> TryAdd(R, r, schema)
+    <span class="kw">case</span> Accepted(rs) =&gt; Coherent(rs, schema)
+    <span class="kw">case</span> Rejected(_) =&gt; <span class="kw">true</span>
+{
+  <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
+  <span class="kw">if</span> w == NoWitness {
+    CheckCoherentSound(R + [r], schema);
+  }
+}</div>
+                        <div class="col-block">
+                            <h2 class="col-heading">7 lemas (114 metas, 0 errores)</h2>
+                            <ul class="tpl-list lvl4" style="gap: 10px;">
+                                <li><strong>EmptyCoherent:</strong> conjunto vacío vacuamente coherente.</li>
+                                <li><strong>AddPreserves y UpdatePreserves:</strong> toda confirmación vía <code>TryAdd</code> / <code>TryUpdate</code> preserva <code>Coherent</code>.</li>
+                                <li><strong>RemovePreservesCoherent:</strong> <code>TryRemove</code> preserva coherencia por monotonía.</li>
+                                <li><strong>EvaluateAgreesOnCoherent:</strong> en estados coherentes, <code>Conflict</code> es inalcanzable.</li>
+                                <li><strong>WitnessSoundness y Completeness:</strong> todo rechazo da testigo real y toda falla es rechazada.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Verificación Formal en Dafny 4</div>
-                    <div class="footer-counter">07 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 8: MODEL CHECKING EN UPPAAL
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 10: MODEL CHECKING EN UPPAAL
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">Verificando el protocolo del administrador ante eventos concurrentes</div>
-                        <h2 class="slide-title">Model checking en UPPAAL: ausencia de bloqueos e invariancia estricta</h2>
-                        <p class="slide-subtitle">Validación exhaustiva de 9 consultas en lógica TCTL sobre el autómata de transición del administrador</p>
-                    </div>
-
-                    <div class="grid-2-wide-img">
-                        <div style="display: flex; flex-direction: column; gap: 20px; height: 100%; justify-content: center;">
-                            <div class="image-display" style="max-height: 270px; padding: 10px;">
+                <h1 class="tpl-title">Model checking en UPPAAL</h1>
+                <div class="tpl-body">
+                    <div class="media-split-wide-img">
+                        <div style="display: flex; flex-direction: column; gap: 18px; height: 100%; justify-content: center;">
+                            <div class="img-frame" style="max-height: 360px; padding: 10px;">
                                 <img src="img/model_diagram.png" alt="Autómata Admin modelado en UPPAAL">
                             </div>
-                            <div class="image-display" style="max-height: 270px; padding: 10px;">
-                                <img src="img/checking_results.png" alt="9 consultas TCTL satisfechas en UPPAAL">
+                            <div class="img-frame" style="max-height: 360px; padding: 10px;">
+                                <img src="img/checking_results.png" alt="Panel de UPPAAL con 9 consultas TCTL satisfechas">
                             </div>
                         </div>
-
-                        <div class="panel">
-                            <h3 class="panel-title">Resultados de Comprobación Temporal</h3>
-                            <div class="feature-list" style="margin-top: 16px;">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Invariante Global: A[] coherent()</div>
-                                        <div class="feature-desc">Todo estado alcanzable en el protocolo de administración es matemáticamente coherente.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Ausencia de Interbloqueos: A[] !deadlock</div>
-                                        <div class="feature-desc">El autómata nunca queda atrapado en un estado sin transición válida disponible.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Alcanzabilidad de Rechazos</div>
-                                        <div class="feature-desc">Confirmación de alcanzabilidad de cada clase de rechazo diagnóstica (rejP1, rejP2, rejP3).</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-block">
+                            <h2 class="col-heading">9 consultas TCTL satisfechas</h2>
+                            <ul class="tpl-list lvl3">
+                                <li><strong>Modelo acotado:</strong> 16 solicitudes, 10 reglas candidatas (máx. 3), <strong>23 estados</strong> y <strong>529 transiciones</strong>.</li>
+                                <li><strong>Seguridad:</strong> <code>A[] coherent()</code> (16.7 s), <code>A[] !deadlock</code> (28.7 s) y preservación ante bajas <code>lastOp == 2</code>.</li>
+                                <li><strong>Alcanzabilidad:</strong> <code>cleanAccepted</code>, <code>E[] coherent()</code> y rechazos <code>rejP1</code>, <code>rejP2</code>, <code>rejP3</code> y <code>rejUnknownP4</code>.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Verificación de Sistemas Temporizados en UPPAAL 5.0</div>
-                    <div class="footer-counter">08 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 9: FRONTERA DEFENSIVA EN TYPESCRIPT
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 11: ENVOLTURAS EN TYPESCRIPT
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
+                <h1 class="tpl-title">Envolturas en TypeScript</h1>
+                <div class="tpl-body">
+                    <div class="media-split">
+                        <div class="img-frame">
+                            <img src="img/classes.png" alt="Diagrama de clases entre envolturas TypeScript y núcleo Dafny">
                         </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">Haciendo la verificación accesible para cualquier desarrollador</div>
-                        <h2 class="slide-title">Frontera defensiva en TypeScript: paquete npm</h2>
-                        <p class="slide-subtitle">Validación sintáctica estricta, adaptación de tipos y explicaciones comprensibles sin duplicar lógica formal</p>
-                    </div>
-
-                    <div class="grid-2-wide-img">
-                        <div class="image-display" style="padding: 16px; max-height: 580px;">
-                            <img src="img/classes.png" alt="Diagrama de Clases y Envolturas TypeScript">
-                        </div>
-
-                        <div class="panel">
-                            <h3 class="panel-title">Componentes de Integración</h3>
-                            <div class="feature-list" style="margin-top: 16px;">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Analizador Sintáctico (parser.ts)</div>
-                                        <div class="feature-desc">Verifica identificadores, operadores y literales directamente contra el esquema cargado antes de ingresar al núcleo.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Adaptadores Seguros (wrappers.ts)</div>
-                                        <div class="feature-desc">Mapea estructuras de alto nivel hacia funciones Dafny sin recalcular ninguna decisión lógica en TypeScript.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Explicaciones Legibles (explain.ts)</div>
-                                        <div class="feature-desc">Traduce la tupla mínima formal a diagnósticos en lenguaje natural para los administradores del sistema.</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-block">
+                            <h2 class="col-heading">Frontera modular (@grupo1/abac-verifier)</h2>
+                            <ul class="tpl-list lvl4">
+                                <li><strong><code>schema.ts</code>:</strong> carga segura (<code>loadSchema</code>), verificación de topes (<code>checkCaps</code>) y marshalling hacia Dafny.</li>
+                                <li><strong><code>parser.ts</code>:</strong> análisis sintáctico estricto con azúcar sintáctico (<code>in</code>, <code>between</code>).</li>
+                                <li><strong><code>wrappers.ts</code> y <code>batch.ts</code>:</strong> <code>tryAdd</code>, <code>tryUpdate</code>, <code>remove</code>, <code>checkCoherent</code>, <code>evaluate</code>, <code>tryAddMany</code> y <code>evaluateMany</code>.</li>
+                                <li><strong><code>explain.ts</code> y <code>errors.ts</code>:</strong> explicación legible del testigo sin decidir y 5 errores tipados (<code>TooLarge</code>, <code>SchemaError</code>, <code>ParseError</code>, <code>DomainError</code>, <code>InvariantViolation</code>).</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Módulo npm @grupo1/abac-verifier</div>
-                    <div class="footer-counter">09 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 10: DEMOSTRACIÓN PRÁCTICA
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 12: CASOS DE ESTUDIO Y VALIDACIÓN
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">El sistema en funcionamiento ante situaciones reales de uso</div>
-                        <h2 class="slide-title">Detección inmediata de conflictos y emisión de testigos mínimos</h2>
-                        <p class="slide-subtitle">Comportamiento en terminal ante directivas conflictivas e incorporación atómica en casos de urgencia</p>
-                    </div>
-
-                    <div class="grid-2-wide-img">
-                        <div style="display: flex; flex-direction: row; gap: 20px; height: 100%; align-items: center; justify-content: center;">
-                            <div class="image-display" style="flex: 1; height: 490px; padding: 12px;">
-                                <img src="img/status_log_1.png" alt="Registro de Rechazo con Testigo en Consola" style="object-fit: contain;">
-                            </div>
-                            <div class="image-display" style="flex: 1; height: 490px; padding: 12px;">
-                                <img src="img/status_log_2.png" alt="Registro de Consultas y Estado Coherente" style="object-fit: contain;">
-                            </div>
-                        </div>
-
-                        <div class="panel">
-                            <h3 class="panel-title">Evidencia de Ejecución Real</h3>
-                            <div class="feature-list" style="margin-top: 16px;">
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Estructura del Testigo Diagnóstico</div>
-                                        <div class="feature-desc">Ante una incoherencia, la guarda emite la solicitud exacta en disputa y los IDs de directivas en pugna, preservando el conjunto intacto.</div>
-                                    </div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-bullet"></div>
-                                    <div>
-                                        <div class="feature-title">Excepción de Emergencia Médica</div>
-                                        <div class="feature-desc">La incorporación de directivas clínicas para urgencias fuera de horario comercial es aceptada atómicamente tras certificar no-sombreado.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Veredictos y Emisión de Testigos Mínimos</div>
-                    <div class="footer-counter">10 / 12</div>
-                </footer>
-            </section>
-
-            <!-- ==========================================
-                 SLIDE 11: EVALUACIÓN Y REPRODUCIBILIDAD
-                 ========================================== -->
-            <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body">
-                    <div class="slide-headline">
-                        <div class="slide-kicker">Evidencia cuantitativa y evaluación en escenarios reales</div>
-                        <h2 class="slide-title">Validación experimental y banco de pruebas canónico</h2>
-                        <p class="slide-subtitle">Certificación sobre escenarios reales de uso y evaluación de desempeño instantáneo</p>
-                    </div>
-
-                    <div class="metrics-strip">
-                        <div class="metric-item">
-                            <div class="metric-num">7</div>
-                            <div class="metric-desc">Lemas Demostrados en Dafny</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-num">9 / 9</div>
-                            <div class="metric-desc">Consultas UPPAAL Satisfechas</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-num">0</div>
-                            <div class="metric-desc">Interbloqueos en el Protocolo</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-num">100%</div>
-                            <div class="metric-desc">Reproducción de Testigos</div>
-                        </div>
-                    </div>
-
-                    <div class="grid-2" style="margin-top: 36px;">
-                        <div class="panel panel-bordered">
-                            <h3 class="panel-title">Banco de Pruebas Canónico</h3>
-                            <p class="panel-text">
-                                Suite automatizada con escenarios estructurados: clean, contradictory, unsatisfiable, shadowed y emergency-override, certificando la fidelidad del compilado.
+                <h1 class="tpl-title">Casos de estudio y validación</h1>
+                <div class="tpl-body">
+                    <div class="two-col" style="grid-template-columns: 1.08fr 0.92fr;">
+                        <div class="terminal-panel">
+                            <div class="code-panel-title">Ejecución real sobre fixtures clínicos (<code>bun test</code>)</div>
+                            <p style="margin-bottom: 14px;">
+                                <strong>1. Conflicto en emergencia (<code>emergency-override.json</code>):</strong><br>
+                                <code>Permit where environment.emergency == true</code><br>
+                                <code>Deny where environment.hour &gt;= 18</code><br>
+                                <span class="st-err">→ Rejected (P1, reglas [1, 2]):</span> Permit rule #1 and Deny rule #2 both fire when …, environment.hour=18, environment.emergency=true.
+                            </p>
+                            <p>
+                                <strong>2. Política acotada coherente (<code>clean.json</code>):</strong><br>
+                                <span class="st-ok">→ Accepted (ids [1, 2, 3])</span> · <code>evaluate()</code>: 0.08 ms (costo lineal O(|R|), <code>{"decision":"Permit","firingRuleIds":[3]}</code>).
                             </p>
                         </div>
-
-                        <div class="panel panel-bordered">
-                            <h3 class="panel-title">Rendimiento Inmediato y Cero Sobrecosto</h3>
-                            <p class="panel-text">
-                                La compilación a JavaScript puro ejecuta la comprobación de coherencia en submilisegundos, permitiendo validar directivas dinámicas en pipelines de despliegue y servidores sin penalizar la latencia operativa.
-                            </p>
+                        <div class="col-block">
+                            <h2 class="col-heading">Métricas verificadas</h2>
+                            <ul class="tpl-list lvl4">
+                                <li><strong>Núcleo Dafny:</strong> 6 módulos (~48 KB), 7 lemas principales, 114 metas verificadas.</li>
+                                <li><strong>UPPAAL:</strong> 23 estados, 529 transiciones, 9/9 consultas TCTL, 0 interbloqueos.</li>
+                                <li><strong>Suite automatizada:</strong> <code>parser.test.ts</code>, <code>wrappers.test.ts</code> y <code>replay.test.ts</code> (27/27 pruebas, 86 aserciones).</li>
+                                <li><strong>5 fixtures JSON:</strong> <code>clean</code>, <code>contradictory</code> (P1), <code>unsatisfiable</code> (P2), <code>shadowed</code> (P3) y <code>emergency-override</code> (P1).</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">Validación Cuantitativa y Banco Canónico</div>
-                    <div class="footer-counter">11 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
-            <!-- ==========================================
-                 SLIDE 12: CONCLUSIONES Y CIERRE
-                 ========================================== -->
+            <!-- =========================================================
+                 SLIDE 13: ÚLTIMA PÁGINA (Plantilla slide10.xml)
+                 ========================================================= -->
             <section class="slide">
-                <header class="slide-header">
-                    <div class="header-brand-left">
-                        <img src="img/logo1.png" alt="Logo EPIS" class="header-logo-epis">
-                        <div class="header-titles">
-                            <span class="header-title-uni">Universidad Nacional de San Agustín de Arequipa</span>
-                            <span class="header-subtitle-school">Escuela Profesional de Ingeniería de Sistemas</span>
-                        </div>
-                    </div>
-                    <div class="header-brand-right">
-                        <img src="img/logo2.png" alt="Logo UNSA" class="header-logo-unsa">
-                    </div>
-                </header>
-
-                <div class="slide-body" style="justify-content: center; align-items: center; text-align: center;">
-                    <div style="max-width: 1280px;">
-                        <div class="cover-dept-kicker" style="margin-bottom: 20px;">Impacto y valor para la ingeniería de sistemas</div>
-                        
-                        <h2 style="font-size: 50px; font-weight: 800; color: var(--slate-900); line-height: 1.2; margin-bottom: 24px; letter-spacing: -0.5px;">
-                            Certeza matemática en sistemas de información reales
-                        </h2>
-
-                        <p style="font-size: 24px; color: var(--slate-600); line-height: 1.5; margin-bottom: 48px; max-width: 1100px; margin-left: auto; margin-right: auto;">
-                            Demostramos que los métodos formales rigurosos se integran armónicamente con la ingeniería web moderna: generamos un componente certificado que garantiza seguridad por construcción sin penalizaciones de latencia en producción.
-                        </p>
-
-                        <div style="display: inline-flex; gap: 40px; background: var(--slate-50); border: 1px solid var(--slate-200); border-top: 3px solid var(--unsa-guinda); padding: 24px 54px; border-radius: 8px;">
-                            <div style="text-align: left;">
-                                <span style="font-size: 14px; font-weight: 700; color: var(--unsa-guinda); text-transform: uppercase; display: block; margin-bottom: 4px;">Paquete npm Distribuido</span>
-                                <span style="font-size: 22px; font-weight: 700; font-family: var(--font-mono); color: var(--slate-900);">@grupo1/abac-verifier</span>
-                            </div>
-                            <div style="width: 1px; background: var(--slate-200);"></div>
-                            <div style="text-align: left;">
-                                <span style="font-size: 14px; font-weight: 700; color: var(--unsa-guinda); text-transform: uppercase; display: block; margin-bottom: 4px;">Repositorio de Código Abierto</span>
-                                <span style="font-size: 19px; font-weight: 600; color: var(--slate-700);">github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final</span>
-                            </div>
-                        </div>
-                    </div>
+                <h1 class="thanks-title">Gracias…</h1>
+                <div class="thanks-body">
+                    <ul class="tpl-list">
+                        <li>
+                            “Debemos construir software que sea correcto por construcción, y no software cuyo comportamiento sea incierto hasta después de la entrega.” — Anthony Hall y Roderick Chapman
+                        </li>
+                        <li style="font-size: 40px; margin-top: 24px;">
+                            Repositorio: https://github.com/microuni-unsa/afve-teo-turno-c-grupo-1-final
+                        </li>
+                    </ul>
                 </div>
-
-                <footer class="slide-footer">
-                    <div class="footer-left"><div class="footer-dot"></div><span>Feria Anual de Proyectos · EPIS UNSA</span></div>
-                    <div class="footer-center">EPIS UNSA · Año Académico 2026</div>
-                    <div class="footer-counter">12 / 12</div>
-                </footer>
+                <div class="tpl-footer-line"></div>
+                <img src="img/logo2.png" alt="Logo UNSA" class="tpl-footer-unsa">
+                <div class="tpl-footer-title">Verificación formal de coherencia en políticas ABAC</div>
+                <img src="img/logo1.png" alt="Logo EPIS" class="tpl-footer-epis">
             </section>
 
         </main>
     </div>
 
-    <!-- ===========================================
-         CONTROLADOR JS: ESCALADO 16:9 Y NAVEGACIÓN
-         =========================================== */ -->
+    <nav class="deck-controls" aria-label="Controles de diapositivas">
+        <button type="button" class="deck-btn" id="prevBtn" aria-label="Anterior">◀</button>
+        <span id="slideCounter">1 / 13</span>
+        <button type="button" class="deck-btn" id="nextBtn" aria-label="Siguiente">▶</button>
+    </nav>
+
     <script>
         class PresentationController {
             constructor() {
@@ -1461,26 +1060,21 @@
                 this.progressBar = document.getElementById('progressBar');
                 this.prevBtn = document.getElementById('prevBtn');
                 this.nextBtn = document.getElementById('nextBtn');
-                this.editToggle = document.getElementById('editToggle');
-                this.editHotzone = document.getElementById('editHotzone');
-                this.isEditMode = false;
-                this.hideTimeout = null;
+                this.slideCounter = document.getElementById('slideCounter');
 
                 this.initScale();
                 this.initNavigation();
-                this.initEditor();
 
-                // Soporte para deep-linking con hash (#1 a #12)
-                const initialHash = parseInt(window.location.hash.replace('#', ''), 10);
-                if (!isNaN(initialHash) && initialHash >= 1 && initialHash <= this.slides.length) {
+                const initialHash = Number.parseInt(window.location.hash.replace('#', ''), 10);
+                if (!Number.isNaN(initialHash) && initialHash >= 1 && initialHash <= this.slides.length) {
                     this.goToSlide(initialHash - 1);
                 } else {
                     this.goToSlide(0);
                 }
 
                 window.addEventListener('hashchange', () => {
-                    const h = parseInt(window.location.hash.replace('#', ''), 10);
-                    if (!isNaN(h) && h >= 1 && h <= this.slides.length && h - 1 !== this.current) {
+                    const h = Number.parseInt(window.location.hash.replace('#', ''), 10);
+                    if (!Number.isNaN(h) && h >= 1 && h <= this.slides.length && h - 1 !== this.current) {
                         this.goToSlide(h - 1);
                     }
                 });
@@ -1493,7 +1087,7 @@
                     const scaleFactor = Math.min(window.innerWidth / stageW, window.innerHeight / stageH);
                     const posX = (window.innerWidth - stageW * scaleFactor) / 2;
                     const posY = (window.innerHeight - stageH * scaleFactor) / 2;
-                    this.stage.style.transform = `translate(${posX}px, ${posY}px) scale(${scaleFactor})`;
+                    this.stage.style.setProperty('--stage-transform', `translate(${posX}px, ${posY}px) scale(${scaleFactor})`);
                 };
                 window.addEventListener('resize', resize);
                 resize();
@@ -1501,8 +1095,6 @@
 
             initNavigation() {
                 window.addEventListener('keydown', (e) => {
-                    if (this.isEditMode && e.target.getAttribute('contenteditable')) return;
-
                     switch (e.key) {
                         case 'ArrowRight':
                         case 'PageDown':
@@ -1523,10 +1115,6 @@
                             e.preventDefault();
                             this.goToSlide(this.slides.length - 1);
                             break;
-                        case 'e':
-                        case 'E':
-                            this.toggleEditMode();
-                            break;
                     }
                 });
 
@@ -1539,8 +1127,7 @@
                 }, { passive: true });
 
                 window.addEventListener('touchend', (e) => {
-                    const touchEndX = e.changedTouches[0].screenX;
-                    const diff = touchStartX - touchEndX;
+                    const diff = touchStartX - e.changedTouches[0].screenX;
                     if (Math.abs(diff) > 50) {
                         if (diff > 0) this.next();
                         else this.prev();
@@ -1548,57 +1135,17 @@
                 }, { passive: true });
             }
 
-            initEditor() {
-                this.editHotzone.addEventListener('mouseenter', () => {
-                    clearTimeout(this.hideTimeout);
-                    this.editToggle.classList.add('show');
-                });
-
-                this.editHotzone.addEventListener('mouseleave', () => {
-                    this.hideTimeout = setTimeout(() => {
-                        if (!this.isEditMode) this.editToggle.classList.remove('show');
-                    }, 400);
-                });
-
-                this.editToggle.addEventListener('mouseenter', () => {
-                    clearTimeout(this.hideTimeout);
-                });
-
-                this.editToggle.addEventListener('mouseleave', () => {
-                    this.hideTimeout = setTimeout(() => {
-                        if (!this.isEditMode) this.editToggle.classList.remove('show');
-                    }, 400);
-                });
-
-                this.editHotzone.addEventListener('click', () => this.toggleEditMode());
-                this.editToggle.addEventListener('click', () => this.toggleEditMode());
-            }
-
-            toggleEditMode() {
-                this.isEditMode = !this.isEditMode;
-                this.editToggle.classList.toggle('active', this.isEditMode);
-                this.editToggle.textContent = this.isEditMode ? 'SAV' : 'TXT';
-
-                const editableElements = document.querySelectorAll('.slide h1, .slide h2, .slide h3, .slide p, .slide span:not(.footer-counter)');
-                editableElements.forEach(el => {
-                    el.contentEditable = this.isEditMode ? 'true' : 'false';
-                    if (this.isEditMode) {
-                        el.style.outline = '1px dashed #cbd5e1';
-                    } else {
-                        el.style.outline = 'none';
-                    }
-                });
-            }
-
             goToSlide(index) {
                 if (index < 0 || index >= this.slides.length) return;
-                
                 this.slides[this.current].classList.remove('active', 'visible');
                 this.current = index;
                 this.slides[this.current].classList.add('active', 'visible');
 
                 const progressPct = ((this.current + 1) / this.slides.length) * 100;
                 this.progressBar.style.width = `${progressPct}%`;
+                if (this.slideCounter) {
+                    this.slideCounter.textContent = `${this.current + 1} / ${this.slides.length}`;
+                }
                 if (window.location.hash !== `#${index + 1}`) {
                     history.replaceState(null, '', `#${index + 1}`);
                 }
