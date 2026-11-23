@@ -279,13 +279,13 @@ El núcleo en Dafny está compuesto por seis módulos principales que reúnen ci
 
 La base de demostraciones articula siete teoremas de solidez, completitud y preservación inductiva respaldados por cincuenta y dos lemas auxiliares. La estructura AttrDecl define cada atributo con su familia, identificador, tipo y dominio. La estructura Request define una secuencia de valores alineada con las posiciones del esquema, lo que sitúa el razonamiento en la teoría de secuencias. El recorrido sobre el espacio de solicitudes opera por índices enteros directos, lo que evita crear particiones intermedias en memoria.
 
-La @fig:chequeos resume el proceso de comprobación de coherencia implementado en Dafny, detallando su algoritmo ejecutable, estructura de testigo, lemas asociados y complejidad asintótica.
+La @fig:chequeos resume el proceso de comprobación de coherencia implementado en Dafny mediante `CheckCoherent`, que evalúa secuencialmente de P1 a P4 y emite el primer testigo mínimo hallado (mientras el analizador en TypeScript valida sintaxis y esquema en la frontera de entrada, y `TryUpdate` rechaza con P4 todo identificador inexistente).
 
 #figure(
   placement: auto,
   scope: "parent",
   image("img/check_phases.png", width: 100%),
-  caption: [Etapas de comprobación de coherencia en el núcleo formal Dafny: orden de ejecución de propiedades P4 a P3, funciones ejecutables, lemas deductivos, testigos diagnósticos y costo computacional.],
+  caption: [Etapas de comprobación de coherencia en el núcleo formal Dafny: orden de ejecución de propiedades P1 a P4, funciones ejecutables, lemas deductivos, testigos diagnósticos y costo computacional.],
 ) <fig:chequeos>
 
 El siguiente bloque de código presenta la función de adición guardada TryAdd y su correspondiente lema deductivo de preservación AddPreserves verificado en Dafny:
@@ -366,8 +366,8 @@ Se estructuraron escenarios representativos en formato JSON:
 - clean.json: directivas válidas y coherentes sobre el esquema clínico schema-v1.json.
 - contradictory.json: conflicto por superposición entre permiso y denegación para una misma solicitud, correspondiente a una violación P1.
 - unsatisfiable.json: directiva con predicados contradictorios sobre rangos enteros, correspondiente a una violación P2.
-- shadowed.json: directiva redundante cubierta por directivas anteriores, correspondiente a una violación P3.
-- emergency-override.json: directiva clínica de excepción en urgencias médicas para habilitar accesos fuera de horario habitual.
+- shadowed.json: directiva redundante cubierta por directivas previas, correspondiente a una violación P3.
+- emergency-override.json: escenario clínico donde una excepción de urgencia médica colisiona con una restricción fuera de horario regular, provocando un rechazo P1 con testigo concreto (en contraste con clean.json, donde la excepción se acota para preservar coherencia).
 
 La suite de pruebas automatizadas, compuesta por test/parser.test.ts, test/wrappers.test.ts y test/replay.test.ts, comprueba el rechazo ante entradas malformadas, valida el desazucarado del analizador y confirma la reproducción exacta de los testigos generados.
 
