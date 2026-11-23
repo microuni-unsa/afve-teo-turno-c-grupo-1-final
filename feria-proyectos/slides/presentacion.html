@@ -290,9 +290,94 @@
         .two-col {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 56px;
-            height: 100%;
+            gap: 48px;
+            width: 100%;
             align-items: start;
+        }
+
+        .prop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            width: 100%;
+        }
+
+        .prop-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 6px solid var(--theme-navy);
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prop-card.accent {
+            border-left-color: var(--accent-orange);
+        }
+
+        .prop-card-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--theme-navy);
+            line-height: 1.15;
+        }
+
+        .prop-card-plain {
+            font-size: 29px;
+            line-height: 1.24;
+            color: var(--text-primary);
+        }
+
+        .prop-card-ex {
+            font-size: 25px;
+            line-height: 1.24;
+            color: var(--text-muted);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 7px 10px;
+        }
+
+        .prop-card-formal {
+            font-size: 23px;
+            line-height: 1.2;
+            color: #475569;
+        }
+
+        .legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 10px 18px;
+            font-size: 25px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .query-group {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--theme-navy);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-size: 25px;
+            line-height: 1.22;
+        }
+
+        .query-group.reach {
+            border-left-color: var(--accent-orange);
+        }
+
+        .query-group-title {
+            font-size: 29px;
+            font-weight: 700;
+            color: var(--theme-navy);
+            padding-bottom: 4px;
+            border-bottom: 1px solid #cbd5e1;
         }
 
         .col-block {
@@ -375,19 +460,6 @@
             background: #f8fafc;
         }
 
-        .tpl-table.compact {
-            font-size: 24px;
-            line-height: 1.14;
-        }
-
-        .tpl-table.compact tr th {
-            padding: 7px 10px;
-        }
-
-        .tpl-table.compact tr td {
-            padding: 6px 10px;
-        }
-
         .tpl-table tr.row-highlight td {
             background: #fff7ed;
             font-weight: 700;
@@ -431,6 +503,7 @@
 
         .kw { color: #1d4ed8; font-weight: 700; }
         .fn { color: #0f766e; font-weight: 700; }
+        .cm { color: #64748b; font-style: italic; font-weight: 400; }
         .st-ok { color: #15803d; font-weight: 700; }
         .st-err { color: #b91c1c; font-weight: 700; }
 
@@ -448,18 +521,18 @@
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-left: 5px solid var(--theme-navy);
-            padding: 14px 18px;
-            font-size: 31px;
-            line-height: 1.28;
+            padding: 12px 16px;
+            font-size: 27px;
+            line-height: 1.24;
             color: #000000;
         }
 
         .abac-card-title {
-            font-size: 34px;
+            font-size: 31px;
             font-weight: 700;
             color: var(--theme-navy);
-            margin-bottom: 8px;
-            padding-bottom: 6px;
+            margin-bottom: 6px;
+            padding-bottom: 5px;
             border-bottom: 1px solid #cbd5e1;
         }
 
@@ -467,9 +540,9 @@
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-left: 5px solid var(--accent-orange);
-            padding: 16px 20px;
-            font-size: 30px;
-            line-height: 1.28;
+            padding: 14px 18px;
+            font-size: 26px;
+            line-height: 1.25;
             color: #000000;
             display: flex;
             flex-direction: column;
@@ -489,7 +562,7 @@
             background: #fff7ed;
             border: 1px solid var(--accent-orange);
             padding: 10px 14px;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             text-align: center;
             color: var(--text-primary);
@@ -702,39 +775,38 @@
             <section class="slide">
                 <h1 class="tpl-title">¿Qué es ABAC y por qué falla manualmente?</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 0.96fr 1.04fr; gap: 44px;">
-                        <div class="col-block">
-                            <h2 class="col-heading">Modelo ABAC (NIST SP 800-162)</h2>
+                    <div class="two-col" style="grid-template-columns: 0.96fr 1.04fr; gap: 40px;">
+                        <div class="col-block" style="gap: 14px;">
+                            <h2 class="col-heading" style="font-size: 42px;">Así decide ABAC (NIST SP 800-162)</h2>
                             <div class="abac-card">
-                                <div class="abac-card-title">Solicitud concreta q (4 familias de atributos)</div>
+                                <div class="abac-card-title">1. Cada solicitud describe 4 dimensiones</div>
                                 <div><strong>Sujeto:</strong> <code>role=medic</code>, <code>dept=er</code>, <code>clearance=3</code></div>
                                 <div><strong>Recurso:</strong> <code>type=record</code>, <code>sensitivity=4</code></div>
-                                <div><strong>Acción:</strong> <code>name=read</code></div>
-                                <div><strong>Entorno:</strong> <code>hour=22</code>, <code>emergency=true</code></div>
+                                <div><strong>Acción:</strong> <code>name=read</code> &nbsp;|&nbsp; <strong>Entorno:</strong> <code>hour=22</code>, <code>emergency=true</code></div>
                             </div>
                             <div class="abac-card">
-                                <div class="abac-card-title">Directivas (Permit / Deny where condición)</div>
+                                <div class="abac-card-title">2. Las reglas aprueban o deniegan según atributos</div>
                                 <div><code>Permit where subject.role == medic &amp;&amp; subject.clearance &gt;= 4 &amp;&amp; resource.sensitivity &lt;= 3 &amp;&amp; action.name == read</code></div>
-                                <div style="margin-top: 8px;"><code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code></div>
+                                <div style="margin-top: 6px;"><code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code></div>
                             </div>
                         </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Tres escenarios reales de falla manual</h2>
-                            <ul class="tpl-list lvl4" style="gap: 16px;">
-                                <li>
-                                    <strong>1. Emergencia vs turno nocturno (Contradicción):</strong> una guardia permite <code>environment.emergency == true</code> mientras otra regla deniega <code>environment.hour &gt;= 18</code>; a las 22:00 en urgencias chocan.
+                        <div class="col-block" style="gap: 14px;">
+                            <h2 class="col-heading" style="font-size: 42px;">3 fallas reales al editarlas a mano</h2>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li style="font-size: 31px; line-height: 1.24;">
+                                    <strong>1. Emergencia vs horario (Contradicción):</strong> una regla da paso si <code>emergency == true</code> y otra bloquea si <code>hour &gt;= 18</code>; en urgencias nocturnas chocan.
                                 </li>
-                                <li>
-                                    <strong>2. Umbrales imposibles (Regla muerta):</strong> editar <code>subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code> sobre el rango <code>[1..5]</code> crea una regla que jamás se activa.
+                                <li style="font-size: 31px; line-height: 1.24;">
+                                    <strong>2. Umbral imposible (Regla muerta):</strong> exigir <code>clearance &gt; 5 &amp;&amp; clearance &lt; 2</code> sobre <code>[1..5]</code> crea una regla que jamás se cumple.
                                 </li>
-                                <li>
-                                    <strong>3. Directiva cubierta (Sombreado):</strong> agregar <code>role == medic &amp;&amp; dept == cardio</code> cuando ya existe <code>role == medic</code> vuelve nula la regla específica.
+                                <li style="font-size: 31px; line-height: 1.24;">
+                                    <strong>3. Regla tapada (Sombreado):</strong> agregar <code>role == medic &amp;&amp; dept == cardio</code> bajo <code>role == medic</code> vuelve inútil la regla específica.
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    <div class="summary-line">
-                        <strong>Problema central:</strong> en <code>schema-v1</code> existen <strong>64 800</strong> solicitudes posibles; el muestreo manual deja fallas ocultas hasta producción.
+                    <div class="summary-line" style="font-size: 33px;">
+                        <strong>El reto:</strong> en <code>schema-v1</code> hay <strong>64 800</strong> combinaciones posibles; probar casos sueltos deja conflictos ocultos hasta producción.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -747,28 +819,36 @@
                  SLIDE 3: PROPIEDADES FORMALES DE COHERENCIA (P1–P4)
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Propiedades formales de coherencia (P1–P4)</h1>
+                <h1 class="tpl-title">Propiedades de coherencia (P1–P4)</h1>
                 <div class="tpl-body">
-                    <ul class="tpl-list compact-l1" style="gap: 20px;">
-                        <li>
-                            <strong>P1 — Consistencia:</strong> ∀ q ∈ AllRequests · ¬(PermitApplies(q) ∧ DenyApplies(q)).<br>
-                            Ninguna solicitud válida activa permiso y denegación simultáneamente (evita choques como emergencia vs horario).
-                        </li>
-                        <li>
-                            <strong>P2 — Satisfacibilidad:</strong> ∀ r ∈ R · ∃ q ∈ AllRequests · Applies(q, r).<br>
-                            Toda regla dispara sobre al menos una solicitud válida (descarta reglas muertas o rangos imposibles).
-                        </li>
-                        <li>
-                            <strong>P3 — No sombreado:</strong> ∀ r ∈ R · ∃ q ∈ AllRequests · (Applies(q, r) ∧ ∀ r' ≠ r, ¬Applies(q, r')).<br>
-                            Cada directiva decide por sí sola al menos una consulta (detecta coberturas y duplicadas exactas).
-                        </li>
-                        <li>
-                            <strong>P4 — Validez de esquema:</strong> ∀ r ∈ R · ValidRule(r, Σ).<br>
-                            Solo atributos declarados, operadores compatibles con el tipo y literales dentro de dominio.
-                        </li>
-                    </ul>
-                    <div class="summary-line">
-                        <strong>Invariante de tesis:</strong> <code>Coherent(R) ≜ P1(R) ∧ P2(R) ∧ P3(R) ∧ P4(R)</code> se preserva inductivamente en cada transición guardada.
+                    <div class="prop-grid">
+                        <div class="prop-card accent">
+                            <div class="prop-card-title">P1 — Consistencia (sin contradicciones)</div>
+                            <div class="prop-card-plain">Ninguna solicitud puede activar una regla <strong>Permit</strong> y una <strong>Deny</strong> al mismo tiempo.</div>
+                            <div class="prop-card-ex">Evita choques: <code>Permit emergency==true</code> vs <code>Deny hour&gt;=18</code>.</div>
+                            <div class="prop-card-formal">Regla formal: para toda <code>q</code>, <code>¬(Permit(q) ∧ Deny(q))</code></div>
+                        </div>
+                        <div class="prop-card">
+                            <div class="prop-card-title">P2 — Satisfacibilidad (sin reglas muertas)</div>
+                            <div class="prop-card-plain">Toda regla debe poder aplicarse en al menos una solicitud válida del esquema.</div>
+                            <div class="prop-card-ex">Detecta imposibles: <code>clearance &gt; 5 &amp;&amp; clearance &lt; 2</code>.</div>
+                            <div class="prop-card-formal">Regla formal: para toda regla <code>r</code>, existe <code>q</code> donde dispara <code>r</code></div>
+                        </div>
+                        <div class="prop-card">
+                            <div class="prop-card-title">P3 — No sombreado (sin reglas tapadas)</div>
+                            <div class="prop-card-plain">Cada regla debe decidir al menos un caso por sí sola (detecta redundantes y duplicadas).</div>
+                            <div class="prop-card-ex">Detecta exceso: <code>medic &amp;&amp; cardio</code> tapada por <code>medic</code>.</div>
+                            <div class="prop-card-formal">Regla formal: para toda <code>r</code>, existe <code>q</code> decidida solo por <code>r</code></div>
+                        </div>
+                        <div class="prop-card accent">
+                            <div class="prop-card-title">P4 — Validez de esquema</div>
+                            <div class="prop-card-plain">Toda regla usa solo atributos declarados, operadores válidos y valores en rango.</div>
+                            <div class="prop-card-ex">Frena errores: atributos desconocidos o enteros fuera de cota.</div>
+                            <div class="prop-card-formal">Regla formal: para toda <code>r</code>, <code>ValidRule(r, Σ)</code></div>
+                        </div>
+                    </div>
+                    <div class="summary-line" style="font-size: 33px;">
+                        <strong>Política coherente:</strong> cumple <code>P1 ∧ P2 ∧ P3 ∧ P4</code> a la vez — propiedad que se garantiza tras cada cambio aceptado.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -784,22 +864,22 @@
                 <h1 class="tpl-title">Objetivos y alcance del proyecto</h1>
                 <div class="tpl-body">
                     <div class="two-col">
-                        <div class="col-block">
-                            <h2 class="col-heading">Objetivos formales</h2>
-                            <ul class="tpl-list lvl3" style="gap: 16px;">
-                                <li><strong>Objetivo general:</strong> diseñar y verificar formalmente un verificador ABAC con preservación de coherencia por construcción en Dafny y validación de estados en UPPAAL.</li>
-                                <li><strong>OE1 — Semántica y propiedades:</strong> formalizar la sintaxis ABAC, la evaluación determinista y las propiedades P1 a P4 sobre dominios finitos.</li>
-                                <li><strong>OE2 — Invariante inductivo:</strong> demostrar preservación de <code>Coherent(R)</code> en <code>TryAdd</code>, <code>TryUpdate</code> y <code>TryRemove</code> con testigos mínimos auténticos.</li>
-                                <li><strong>OE3 — Model checking:</strong> comprobar en UPPAAL ausencia de bloqueos y 9 consultas TCTL sobre un caso concreto acotado.</li>
+                        <div class="col-block" style="gap: 14px;">
+                            <h2 class="col-heading" style="font-size: 42px;">Objetivos del proyecto</h2>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>Meta general:</strong> construir un verificador ABAC demostrado en Dafny y validado en UPPAAL, ejecutable sin motores externos.</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>OE1 — Modelo formal:</strong> especificar reglas ABAC y las 4 propiedades P1–P4 sobre dominios finitos.</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>OE2 — Cambios seguros:</strong> probar que agregar, editar o borrar reglas nunca rompe la coherencia y muestra el testigo exacto al fallar.</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>OE3 — Protocolo validado:</strong> comprobar en UPPAAL ausencia de bloqueos y alcance de veredictos en un caso fijo.</li>
                             </ul>
                         </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Alcance y fragmento decidible</h2>
-                            <ul class="tpl-list lvl3" style="gap: 16px;">
-                                <li><strong>Modelo ABAC cubierto:</strong> atributos <code>Enum</code>, <code>Bool</code> y <code>BoundedInt</code> en las 4 familias NIST SP 800-162 con conectivos booleanos contra literales.</li>
-                                <li><strong>Operaciones del núcleo:</strong> adición (<code>TryAdd</code>), actualización (<code>TryUpdate</code>), baja (<code>TryRemove</code>), lotes atómicos y evaluación lineal <code>Evaluate</code>.</li>
-                                <li><strong>Extracción sin SMT:</strong> compilación del núcleo verificado hacia JavaScript ejecutable con frontera ligera de análisis y validación de dominios.</li>
-                                <li><strong>Delimitación por decidibilidad:</strong> esquemas discretos cerrados (sin PIP en vivo ni aritmética abierta) y cotas de protección configurables (<code>TooLarge</code>).</li>
+                        <div class="col-block" style="gap: 14px;">
+                            <h2 class="col-heading" style="font-size: 42px;">Alcance y fragmento decidible</h2>
+                            <ul class="tpl-list lvl4" style="gap: 14px;">
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>Atributos cubiertos:</strong> listas (<code>Enum</code>), booleanos y enteros acotados en las 4 familias NIST SP 800-162.</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>Operaciones:</strong> adición (<code>TryAdd</code>), edición (<code>TryUpdate</code>), baja (<code>TryRemove</code>), lotes y evaluación lineal (<code>Evaluate</code>).</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>Extracción sin SMT:</strong> el núcleo probado compila directo a JS detrás de una frontera mínima de entrada.</li>
+                                <li style="font-size: 32px; line-height: 1.24;"><strong>Delimitación por decidibilidad:</strong> esquemas discretos cerrados contra literales y cotas protectoras (<code>TooLarge</code>).</li>
                             </ul>
                         </div>
                     </div>
@@ -892,24 +972,24 @@
                 <h1 class="tpl-title">Metodología CbC y herramientas formales</h1>
                 <div class="tpl-body">
                     <div class="two-col">
-                        <div class="col-block">
-                            <h2 class="col-heading">Metodología CbC en 5 fases</h2>
-                            <ul class="tpl-list lvl4" style="gap: 14px;">
-                                <li><strong>Fase 1 — Modelado formal:</strong> sintaxis abstracta, semántica denotacional y enumeración <code>AllRequests</code> en Dafny.</li>
-                                <li><strong>Fase 2 — Prueba deductiva:</strong> propiedades P1–P4, teoremas de preservación/solidez/completitud y <code>BoundedCheck</code>.</li>
-                                <li><strong>Fase 3 — Model checking:</strong> autómata finito <code>Admin</code> sobre caso fijo y 9 consultas TCTL en UPPAAL.</li>
-                                <li><strong>Fase 4 — Extracción ejecutable:</strong> compilación directa Dafny → JS detrás de una frontera mínima de entrada.</li>
-                                <li><strong>Fase 5 — Evaluación guiada:</strong> trazado paso a paso de casos clínicos y conformidad en frontera.</li>
+                        <div class="col-block" style="gap: 12px;">
+                            <h2 class="col-heading" style="font-size: 42px;">Corrección por Construcción (5 fases)</h2>
+                            <ul class="tpl-list lvl4" style="gap: 12px;">
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Fase 1 — Modelado:</strong> definir reglas, significado y todas las solicitudes (<code>AllRequests</code>) en Dafny.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Fase 2 — Pruebas formales:</strong> demostrar P1–P4, preservación ante cambios y testigos reales.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Fase 3 — Model checking:</strong> explorar en UPPAAL todos los caminos sobre un caso fijo (9 consultas).</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Fase 4 — Extracción:</strong> compilar el núcleo probado a JavaScript detrás de una frontera mínima.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Fase 5 — Casos guiados:</strong> trazar paso a paso políticas clínicas y confirmar la frontera.</li>
                             </ul>
                         </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Herramientas formales y estándares</h2>
-                            <ul class="tpl-list lvl4" style="gap: 14px;">
-                                <li><strong>Dafny 4.11:</strong> especificación matemática, prueba de 114 obligaciones (59 lemas) y síntesis a JS.</li>
-                                <li><strong>Z3 (4.12+) y cvc5 (1.0+):</strong> solucionadores SMT usados únicamente en tiempo de diseño.</li>
-                                <li><strong>UPPAAL 5.0:</strong> exploración exhaustiva de estados y verificación de 9 propiedades TCTL.</li>
-                                <li><strong>Estándares ABAC:</strong> NIST SP 800-162, NIST SP 800-192 y referencia OASIS XACML 3.0.</li>
-                                <li><strong>Frontera anfitriona (TS / Node / Bun):</strong> análisis sintáctico de entrada y ejecución del núcleo extraído.</li>
+                        <div class="col-block" style="gap: 12px;">
+                            <h2 class="col-heading" style="font-size: 42px;">Herramientas formales y estándares</h2>
+                            <ul class="tpl-list lvl4" style="gap: 12px;">
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Dafny 4.11:</strong> especificación matemática, prueba de 114 metas y compilación directa a JS.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Z3 (4.12+) y cvc5 (1.0+):</strong> motores lógicos usados solo en tiempo de diseño.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>UPPAAL 5.0:</strong> exploración exhaustiva de estados y verificación de 9 consultas TCTL.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Estándares ABAC:</strong> NIST SP 800-162, NIST SP 800-192 y OASIS XACML 3.0.</li>
+                                <li style="font-size: 31px; line-height: 1.24;"><strong>Capa anfitriona (TS / Node / Bun):</strong> lectura de reglas y ejecución del módulo extraído.</li>
                             </ul>
                         </div>
                     </div>
@@ -931,15 +1011,15 @@
                             <img src="img/architecture.svg" alt="Arquitectura unidireccional entre Núcleo Dafny y Frontera de entrada">
                         </div>
                         <div class="col-block">
-                            <ul class="tpl-list lvl3" style="gap: 22px;">
-                                <li>
-                                    <strong>1. Núcleo formal (Dafny):</strong> los 5 módulos operacionales (<code>Schema</code>, <code>Syntax</code>, <code>Eval</code>, <code>Coherence</code>, <code>Transition</code>) compilan a JS; <code>BoundedCheck</code> queda como verificación finita en tiempo de prueba.
+                            <ul class="tpl-list lvl3" style="gap: 20px;">
+                                <li style="font-size: 35px; line-height: 1.24;">
+                                    <strong>1. Núcleo formal (Dafny):</strong> los 5 módulos operacionales (<code>Schema</code>, <code>Syntax</code>, <code>Eval</code>, <code>Coherence</code>, <code>Transition</code>) compilan a JS; <code>BoundedCheck</code> queda solo para verificación finita.
                                 </li>
-                                <li>
-                                    <strong>2. Frontera mínima de entrada:</strong> valida el esquema, desazucara <code>in</code> / <code>between</code> y formatea testigos (<code>explain</code>). <strong>No reimplementa ninguna decisión lógica.</strong>
+                                <li style="font-size: 35px; line-height: 1.24;">
+                                    <strong>2. Frontera mínima de entrada:</strong> valida el esquema, traduce texto a reglas y formatea testigos (<code>explain</code>). <strong>Nunca decide coherencia.</strong>
                                 </li>
-                                <li>
-                                    <strong>3. Ejecución sin SMT externo:</strong> toda evaluación y guarda en producción ejecuta directamente el código extraído desde las pruebas en Dafny.
+                                <li style="font-size: 35px; line-height: 1.24;">
+                                    <strong>3. Ejecución sin SMT externo:</strong> toda decisión en producción proviene directo del código verificado en Dafny.
                                 </li>
                             </ul>
                         </div>
@@ -957,11 +1037,11 @@
             <section class="slide">
                 <h1 class="tpl-title">Fases de verificación (P1 a P4)</h1>
                 <div class="tpl-body">
-                    <div class="img-frame" style="max-height: 620px; margin-bottom: 18px;">
+                    <div class="img-frame" style="max-height: 570px; margin-bottom: 16px;">
                         <img src="img/check_phases.svg" alt="Etapas secuenciales de verificación P1 a P4 en Coherence.dfy">
                     </div>
-                    <div class="summary-line">
-                        <strong>Orden determinista en <code>CheckCoherent</code>:</strong> evalúa secuencialmente P1 → P2 → P3 → P4 y retorna el primer testigo mínimo; <code>parseRule</code> y <code>TryUpdate</code> aseguran validez P4.
+                    <div class="summary-line" style="font-size: 34px;">
+                        <strong>Orden en <code>CheckCoherent</code>:</strong> revisa en secuencia P1 → P2 → P3 → P4 y se detiene al hallar el primer contraejemplo mínimo.
                     </div>
                 </div>
                 <div class="tpl-footer-line"></div>
@@ -974,35 +1054,33 @@
                  SLIDE 9: VERIFICACIÓN DEDUCTIVA EN DAFNY
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Verificación deductiva en Dafny</h1>
+                <h1 class="tpl-title">¿Cómo garantiza Dafny la corrección?</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 1.02fr 0.98fr; align-items: start;">
-                        <div class="code-panel">
-                            <div class="code-panel-title">Transition.dfy — Guarda e invariante inductivo</div>
+                    <div class="two-col" style="grid-template-columns: 0.96fr 1.04fr; gap: 38px; align-items: start;">
+                        <div class="code-panel" style="font-size: 25px; line-height: 1.18;">
+                            <div class="code-panel-title" style="font-size: 30px;">Transition.dfy — Guarda y demostración</div>
 <span class="kw">function</span> <span class="fn">TryAdd</span>(R: Ruleset, r: Rule, schema: Schema): AddResult {
   <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
-  <span class="kw">if</span> w.NoWitness? <span class="kw">then</span> Accepted(R + [r])
+  <span class="kw">if</span> w.NoWitness? <span class="kw">then</span> Accepted(R + [r]) <span class="cm">// 1. Solo entra si pasa P1..P4</span>
   <span class="kw">else</span> Rejected(w.wit)
 }
 
 <span class="kw">lemma</span> <span class="fn">AddPreserves</span>(R: Ruleset, r: Rule, schema: Schema)
   <span class="kw">ensures match</span> TryAdd(R, r, schema)
-    <span class="kw">case</span> Accepted(rs) =&gt; Coherent(rs, schema)
+    <span class="kw">case</span> Accepted(rs) =&gt; Coherent(rs, schema) <span class="cm">// 2. Garantía probada</span>
     <span class="kw">case</span> Rejected(_) =&gt; <span class="kw">true</span>
 {
   <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
-  <span class="kw">if</span> w == NoWitness {
-    CheckCoherentSound(R + [r], schema);
-  }
+  <span class="kw">if</span> w == NoWitness { CheckCoherentSound(R + [r], schema); }
 }</div>
-                        <div class="col-block">
-                            <h2 class="col-heading">114 obligaciones verificadas (0 errores)</h2>
+                        <div class="col-block" style="gap: 12px;">
+                            <h2 class="col-heading" style="font-size: 38px;">Lo que prueban las 114 metas (0 errores)</h2>
                             <ul class="tpl-list lvl4" style="gap: 12px;">
-                                <li><strong>Invariante de estado:</strong> <code>EmptyCoherent</code> (caso base) y <code>AddPreserves</code> / <code>UpdatePreserves</code> aseguran <code>Coherent(R)</code> en toda aceptación.</li>
-                                <li><strong>Monotonía ante bajas:</strong> <code>RemovePreservesCoherent</code> demuestra que retirar una regla nunca rompe P1–P4.</li>
-                                <li><strong>Ausencia de conflicto:</strong> <code>EvaluateAgreesOnCoherent</code> prueba que <code>Decision.Conflict</code> es inalcanzable vía interfaz guardada.</li>
-                                <li><strong>Testigos auténticos:</strong> <code>WitnessSoundness</code> y <code>WitnessCompleteness</code> ligan rechazo y violación real.</li>
-                                <li><strong>Comprobación finita:</strong> <code>BoundedCheck.dfy</code> verifica exhaustivamente <strong>259</strong> conjuntos (hasta longitud 3).</li>
+                                <li style="font-size: 29px; line-height: 1.22;"><strong>1. Todo cambio aceptado es válido:</strong> si entra una regla o edición, el conjunto sigue coherente (<code>EmptyCoherent</code>, <code>AddPreserves</code>, <code>UpdatePreserves</code>).</li>
+                                <li style="font-size: 29px; line-height: 1.22;"><strong>2. Borrar reglas siempre es seguro:</strong> retirar directivas nunca crea conflictos nuevos (<code>RemovePreservesCoherent</code>).</li>
+                                <li style="font-size: 29px; line-height: 1.22;"><strong>3. Decisiones sin ambigüedad:</strong> al evaluar una política aceptada, es imposible un choque <code>Permit</code>/<code>Deny</code> (<code>EvaluateAgreesOnCoherent</code>).</li>
+                                <li style="font-size: 29px; line-height: 1.22;"><strong>4. Testigos fieles:</strong> todo rechazo exhibe un fallo auténtico y ningún error se escapa (<code>WitnessSoundness</code>, <code>Completeness</code>).</li>
+                                <li style="font-size: 29px; line-height: 1.22;"><strong>5. Chequeo finito exhaustivo:</strong> verifica los <strong>259</strong> escenarios de hasta 3 reglas (<code>BoundedCheck</code>).</li>
                             </ul>
                         </div>
                     </div>
@@ -1020,21 +1098,21 @@
                 <h1 class="tpl-title">Model checking en UPPAAL: modelo y caso fijo</h1>
                 <div class="tpl-body">
                     <div class="media-split-wide-img">
-                        <div style="display: flex; flex-direction: column; gap: 14px; height: 100%; justify-content: center;">
-                            <div class="img-frame" style="max-height: 620px; padding: 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center;">
+                            <div class="img-frame" style="max-height: 560px; padding: 10px;">
                                 <img src="img/model_diagram.png" alt="Autómata Admin modelado en UPPAAL">
                             </div>
-                            <div class="metric-chip">
-                                Exploración exhaustiva: 23 nodos estables · 470 evaluaciones · 529 transiciones · 0 bloqueos
+                            <div class="metric-chip" style="font-size: 25px;">
+                                Exploración exhaustiva: 23 estados estables · 470 evaluaciones · 529 transiciones · 0 bloqueos
                             </div>
                         </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Validación de caso concreto en Admin</h2>
+                        <div class="col-block" style="gap: 12px;">
+                            <h2 class="col-heading" style="font-size: 38px;">Validación exhaustiva de un caso fijo</h2>
                             <ul class="tpl-list lvl4" style="gap: 12px;">
-                                <li><strong>Propósito:</strong> complementar los lemas de Dafny validando exhaustivamente el protocolo dinámico sobre una <strong>instancia fija y concreta</strong> (autómata discreto sin relojes ni canales).</li>
-                                <li><strong>Microuniverso (NREQ = 16):</strong> 2 roles × 2 acciones × 2 horas <code>{8, 18}</code> × 2 emergencias (máx. 3 reglas activas).</li>
-                                <li><strong>Repertorio fijo (r0..r9):</strong> <code>r0..r2</code> codifican la política limpia; <code>r3</code> y <code>r7+r8</code> fuerzan choques P1; <code>r6</code> prueba regla muerta P2; <code>r4..r5</code> sombreado P3; <code>r9</code> invalidez P4.</li>
-                                <li><strong>Estados comprometidos (<code>Trying*</code>):</strong> evalúan <code>coherentC()</code> y confirman o rechazan atómicamente sin alterar <code>committed</code>.</li>
+                                <li style="font-size: 29px; line-height: 1.24;"><strong>¿Por qué UPPAAL?</strong> Dafny prueba propiedades generales; UPPAAL recorre <strong>todos los caminos posibles</strong> del flujo de administración sobre un caso real acotado.</li>
+                                <li style="font-size: 29px; line-height: 1.24;"><strong>Escenario fijo (16 solicitudes):</strong> combina 2 roles, 2 acciones, 2 horarios (08:00 y 18:00) y 2 estados de emergencia (máx. 3 reglas activas).</li>
+                                <li style="font-size: 29px; line-height: 1.24;"><strong>Repertorio de prueba (<code>r0..r9</code>):</strong> 3 reglas válidas limpias (<code>r0..r2</code>) más reglas con choques P1, muerta P2, tapadas P3 e inválida P4.</li>
+                                <li style="font-size: 29px; line-height: 1.24;"><strong>Pasos atómicos (<code>C</code>):</strong> los estados <code>Trying*</code> evalúan antes de guardar, evitando cambios parciales (autómata discreto sin relojes).</li>
                             </ul>
                         </div>
                     </div>
@@ -1051,72 +1129,34 @@
             <section class="slide">
                 <h1 class="tpl-title">Model checking en UPPAAL: 9 consultas TCTL</h1>
                 <div class="tpl-body">
-                    <div class="media-split" style="grid-template-columns: 1.38fr 0.62fr; gap: 28px; align-items: start;">
-                        <table class="tpl-table compact">
-                            <thead>
-                                <tr>
-                                    <th>Consulta TCTL</th>
-                                    <th>Clase</th>
-                                    <th>Qué valida y por qué es necesaria</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><code>A[] coherent()</code></td>
-                                    <td>Seguridad</td>
-                                    <td>Todo estado alcanzable (incluidos <code>Trying*</code>) mantiene <code>committed</code> coherente; impide mutación parcial.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>A[] !deadlock</code></td>
-                                    <td>Seguridad</td>
-                                    <td>Las guardas complementarias y transiciones de frontera aseguran que el autómata jamás queda atrapado.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>A[] (lastOp != 2 || coherent())</code></td>
-                                    <td>Seguridad</td>
-                                    <td>Aísla la operación <code>doRemoveC</code> para probar en el modelo que retirar reglas sin re-chequear preserva coherencia.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E&lt;&gt; cleanAccepted</code></td>
-                                    <td>Alcance</td>
-                                    <td>Prueba de no vacuidad: valida que el caso fijo limpio <code>{r0, r1, r2}</code> sí es alcanzable y aceptado.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E&lt;&gt; rejP1</code></td>
-                                    <td>Alcance</td>
-                                    <td>Confirma detección de contradicción P1 frente a pares incompatibles (<code>r0/r3</code> y <code>r7/r8</code>).</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E&lt;&gt; rejP2</code></td>
-                                    <td>Alcance</td>
-                                    <td>Confirma detección de regla insatisfacible P2 cuando se propone <code>r6</code> (<code>cl &gt; 5 &amp;&amp; cl &lt; 2</code>).</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E&lt;&gt; rejP3</code></td>
-                                    <td>Alcance</td>
-                                    <td>Confirma detección de sombreado P3 cuando <code>r4</code> o <code>r5</code> cubren a <code>r0</code> pasando P1 y P2.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E&lt;&gt; rejUnknownP4</code></td>
-                                    <td>Alcance</td>
-                                    <td>Verifica que actualizar un identificador inexistente dispara rechazo P4 en <code>Empty</code> y <code>Coherent</code>.</td>
-                                </tr>
-                                <tr>
-                                    <td><code>E[] coherent()</code></td>
-                                    <td>Alcance</td>
-                                    <td>Asegura la existencia de una traza infinita siempre coherente de evolución continua.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div style="display: flex; flex-direction: column; gap: 14px;">
-                            <div class="img-frame" style="max-height: 290px; padding: 8px;">
-                                <img src="img/query_list.png" alt="Lista de 9 consultas TCTL satisfechas en UPPAAL">
+                    <div class="legend-bar">
+                        <span><strong><code>A[]</code> ("Siempre en todo camino"):</strong> seguridad — nada malo ocurre.</span>
+                        <span><strong><code>E&lt;&gt;</code> ("Existe un camino que llega"):</strong> alcance — casos reales posibles.</span>
+                        <span><strong><code>E[]</code> ("Existe un camino siempre"):</strong> continuidad.</span>
+                    </div>
+                    <div class="two-col" style="grid-template-columns: 1.28fr 0.72fr; gap: 28px; align-items: start;">
+                        <div class="col-block" style="gap: 12px;">
+                            <div class="query-group">
+                                <div class="query-group-title">Seguridad — ¿Puede fallar el protocolo? (3 / 3 ✓)</div>
+                                <div><strong>1. <code>A[] coherent()</code>:</strong> nunca hay un estado con política inválida (ni en pasos intermedios).</div>
+                                <div><strong>2. <code>A[] !deadlock</code>:</strong> el flujo jamás queda atrapado sin una transición disponible.</div>
+                                <div><strong>3. <code>A[] (lastOp != 2 || coherent())</code>:</strong> borrar una regla sin re-chequear siempre mantiene coherencia.</div>
                             </div>
-                            <div class="img-frame" style="max-height: 330px; padding: 8px;">
-                                <img src="img/status_log_1.png" alt="Resultados de verificación UPPAAL">
+                            <div class="query-group reach">
+                                <div class="query-group-title">Alcance — ¿Funciona en casos concretos? (6 / 6 ✓)</div>
+                                <div><strong>4. <code>E&lt;&gt; cleanAccepted</code>:</strong> la política clínica limpia <code>{r0, r1, r2}</code> sí logra aprobarse (prueba de no vacuidad).</div>
+                                <div><strong>5–7. <code>E&lt;&gt; rejP1</code>, <code>rejP2</code>, <code>rejP3</code>:</strong> existen rutas reales que atrapan choques (P1), regla muerta (P2) y sombreado (P3).</div>
+                                <div><strong>8. <code>E&lt;&gt; rejUnknownP4</code>:</strong> intentar actualizar un ID inexistente dispara rechazo P4 sin dañar el estado.</div>
+                                <div><strong>9. <code>E[] coherent()</code>:</strong> existe una evolución continua e infinita siempre coherente.</div>
                             </div>
-                            <div class="metric-chip" style="font-size: 26px;">
-                                9 / 9 propiedades satisfechas (16.7 s en <code>A[] coherent()</code>, 28.7 s en <code>A[] !deadlock</code>)
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="img-frame" style="max-height: 445px; padding: 8px;">
+                                <img src="img/checking_results.png" alt="Panel de UPPAAL con 9 consultas TCTL satisfechas">
+                            </div>
+                            <div class="metric-chip" style="font-size: 24px; line-height: 1.25;">
+                                9 / 9 consultas satisfechas en UPPAAL<br>
+                                <code>A[] coherent()</code>: 16.7 s · <code>A[] !deadlock</code>: 28.7 s
                             </div>
                         </div>
                     </div>
@@ -1133,20 +1173,20 @@
             <section class="slide">
                 <h1 class="tpl-title">Evaluación guiada (I): conflicto y corrección</h1>
                 <div class="tpl-body">
-                    <div class="two-col">
+                    <div class="two-col" style="gap: 36px;">
                         <div class="trace-panel">
-                            <div class="code-panel-title">Caso 1: Conflicto en emergencia (<code>emergency-override.json</code>)</div>
-                            <div class="trace-step"><strong>1. Estado inicial R₀ = []:</strong> coherente por <code>EmptyCoherent</code>.</div>
-                            <div class="trace-step"><strong>2. TryAdd(R₀, r₁):</strong> <code>Permit where environment.emergency == true</code>.<br>Supera P1–P4 (dispara en índice 0 de <code>AllRequests</code>) → <span class="st-ok">Accepted([r₁]), id=1</span>.</div>
-                            <div class="trace-step"><strong>3. TryAdd(R₁, r₂):</strong> <code>Deny where environment.hour &gt;= 18</code>.<br><code>CheckP1From</code> recorre <code>AllRequests</code> hasta hallar la primera solicitud con <code>hour=18</code> y <code>emergency=true</code>:<br><code>(medic, cardio, 1, record, 1, read, 18, true)</code> donde disparan <code>r₁</code> y <code>r₂</code>.</div>
-                            <div class="trace-step"><strong>4. Veredicto:</strong> <span class="st-err">Rejected(P1, [1, 2])</span>. Por <code>AddPreserves</code>, <strong>R₁ queda inalterado</strong>.</div>
+                            <div class="code-panel-title" style="font-size: 31px;">Caso 1: Choque en urgencias (<code>emergency-override.json</code>)</div>
+                            <div class="trace-step"><strong>1. Inicio (R₀ = []):</strong> política vacía, coherente por construcción.</div>
+                            <div class="trace-step"><strong>2. Entra r₁:</strong> <code>Permit where environment.emergency == true</code>.<br>Supera P1–P4 (dispara en índice 0) → <span class="st-ok">Aceptada (#1)</span>.</div>
+                            <div class="trace-step"><strong>3. Se intenta r₂:</strong> <code>Deny where environment.hour &gt;= 18</code>.<br><code>CheckP1From</code> recorre <code>AllRequests</code> y halla el primer choque a las <strong>18:00 en emergencia</strong>: <code>(medic, cardio, clr=1, record, sens=1, read, 18h, emerg=true)</code>.</div>
+                            <div class="trace-step"><strong>4. Resultado:</strong> <span class="st-err">Rechazada (P1: #1 vs #2)</span> — <strong>R₁ queda intacto</strong>.</div>
                         </div>
                         <div class="trace-panel navy">
-                            <div class="code-panel-title">Caso 2: Remediación coherente (<code>clean.json</code>) y <code>Evaluate</code></div>
-                            <div class="trace-step"><strong>1. r₁':</strong> <code>Permit where subject.role == medic &amp;&amp; action.name == read</code> → <span class="st-ok">Accepted([1])</span>.</div>
-                            <div class="trace-step"><strong>2. r₂':</strong> <code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code> → acción disjunta (<code>write</code> vs <code>read</code>) → <span class="st-ok">Accepted([1, 2])</span>.</div>
-                            <div class="trace-step"><strong>3. r₃':</strong> <code>Permit where environment.emergency == true &amp;&amp; action.name == read</code>.<br>Coincide con <code>r₁'</code> solo en <code>Permit</code> (P1 OK) y decide en solitario urgencias de <code>nurse</code>/<code>admin</code> (P3 OK) → <span class="st-ok">Accepted([1, 2, 3])</span>.</div>
-                            <div class="trace-step"><strong>4. Evaluate:</strong> <code>(nurse, er, 5, record, 1, read, 3, true)</code> → <span class="st-ok">Permit (regla #3)</span>, sin <code>Conflict</code> posible.</div>
+                            <div class="code-panel-title" style="font-size: 31px;">Caso 2: Política corregida (<code>clean.json</code>) y consulta</div>
+                            <div class="trace-step"><strong>1. r₁':</strong> <code>Permit where subject.role == medic &amp;&amp; action.name == read</code> → <span class="st-ok">Aceptada (#1)</span>.</div>
+                            <div class="trace-step"><strong>2. r₂':</strong> <code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code> → acción distinta → <span class="st-ok">Aceptada (#2)</span>.</div>
+                            <div class="trace-step"><strong>3. r₃':</strong> <code>Permit where environment.emergency == true &amp;&amp; action.name == read</code> → ambas <code>Permit</code> (P1 OK) y decide urgencias de <code>nurse</code>/<code>admin</code> (P3 OK) → <span class="st-ok">Aceptada (#3)</span>.</div>
+                            <div class="trace-step"><strong>4. Al consultar:</strong> enfermera leyendo en emergencia (03:00) → <span class="st-ok">Permit (#3)</span>.</div>
                         </div>
                     </div>
                 </div>
@@ -1157,33 +1197,35 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 13: EVALUACIÓN GUIADA (II): TRAZAS P2–P4 Y SÍNTESIS
+                 SLIDE 13: EVALUACIÓN GUIADA (II): P2–P4 Y SÍNTESIS FORMAL
                  ========================================================= -->
             <section class="slide">
                 <h1 class="tpl-title">Evaluación guiada (II): P2–P4 y síntesis formal</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 1.06fr 0.94fr;">
+                    <div class="two-col" style="grid-template-columns: 1.04fr 0.96fr; gap: 36px;">
                         <div class="trace-panel">
-                            <div class="code-panel-title">Trazas guiadas de anomalías P2, P3 y P4</div>
+                            <div class="code-panel-title" style="font-size: 31px;">Otros fallos detectados paso a paso (P2, P3 y P4)</div>
                             <div class="trace-step">
-                                <strong>• P2 — <code>unsatisfiable.json</code>:</strong> <code>Permit where subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code>.<br>
-                                P1 pasa (sin <code>Deny</code>); <code>RuleFiresOnSome</code> agota <code>[1..5]</code> en las 64 800 solicitudes con 0 disparos → <span class="st-err">Rejected(P2, [1])</span>.
+                                <strong>• P2 — Regla muerta (<code>unsatisfiable.json</code>):</strong><br>
+                                <code>Permit where subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code>.<br>
+                                Rango <code>[1..5]</code> → 0 disparos en 64 800 solicitudes → <span class="st-err">Rechazada (P2)</span>.
                             </div>
                             <div class="trace-step">
-                                <strong>• P3 — <code>shadowed.json</code>:</strong> <code>r₁: Permit where subject.role == medic</code> (aceptada) → <code>TryAdd(r₂: role == medic &amp;&amp; dept == cardio)</code>.<br>
-                                P1 y P2 pasan, pero <code>RuleHasSoleWitness</code> detecta que <code>r₁</code> siempre dispara junto a <code>r₂</code> → <span class="st-err">Rejected(P3, [2, 1])</span> en <code>medic/cardio</code>.
+                                <strong>• P3 — Regla tapada (<code>shadowed.json</code>):</strong><br>
+                                Con <code>role == medic</code> activa, agregar <code>role == medic &amp;&amp; dept == cardio</code> nunca decide un caso propio → <span class="st-err">Rechazada (P3: #2 bajo #1)</span>.
                             </div>
                             <div class="trace-step">
-                                <strong>• P4 — Esquema / ID ausente:</strong> <code>TryUpdate(R, 99, r)</code> rechaza directamente con <span class="st-err">Witness([], [99], "P4")</span> sin mutar <code>R</code>; <code>parseRule</code> rechaza literales fuera de rango.
+                                <strong>• P4 — ID ausente o fuera de esquema:</strong><br>
+                                <code>TryUpdate(R, 99, r)</code> rechaza directo con <span class="st-err">P4</span> sin alterar <code>R</code>; el parser frena valores fuera de dominio en la entrada.
                             </div>
                         </div>
-                        <div class="col-block">
-                            <h2 class="col-heading">Síntesis de garantías formales</h2>
+                        <div class="col-block" style="gap: 14px;">
+                            <h2 class="col-heading" style="font-size: 38px;">Resumen de garantías formales</h2>
                             <ul class="tpl-list lvl4" style="gap: 14px;">
-                                <li><strong>Autoridad en Dafny:</strong> <code>114</code> obligaciones verificadas (<code>0</code> errores), <code>7</code> teoremas centrales de preservación/solidez/completitud y <code>259</code> conjuntos en <code>BoundedCheck</code>.</li>
-                                <li><strong>Autoridad en UPPAAL:</strong> <code>23</code> nodos estables, <code>529</code> transiciones, <code>9/9</code> consultas TCTL satisfechas, <code>0</code> bloqueos.</li>
-                                <li><strong>Complejidad decidible:</strong> P1/P2 en <code>O(|AllRequests| · |R|)</code>, P3 en <code>O(|AllRequests| · |R|²)</code> y <code>Evaluate</code> en <code>O(|R|)</code>.</li>
-                                <li><strong>Conformidad en frontera:</strong> las pruebas de replay sobre los 5 fixtures confirman que el JS compilado reproduce los testigos formales (sin sustituir la prueba matemática).</li>
+                                <li style="font-size: 30px; line-height: 1.24;"><strong>Certeza deductiva (Dafny):</strong> <code>114</code> metas probadas (<code>0</code> errores) y <code>259</code> escenarios en <code>BoundedCheck</code> garantizan coherencia en todo cambio.</li>
+                                <li style="font-size: 30px; line-height: 1.24;"><strong>Certeza de protocolo (UPPAAL):</strong> <code>23</code> estados estables y <code>529</code> transiciones sin bloqueos (<code>9/9</code> consultas TCTL).</li>
+                                <li style="font-size: 30px; line-height: 1.24;"><strong>Costo predecible:</strong> verificación completa sobre <code>64 800</code> solicitudes (<code>schema-v1</code>) y evaluación lineal <code>O(|R|)</code> sin SMT en producción.</li>
+                                <li style="font-size: 30px; line-height: 1.24;"><strong>Frontera por replay:</strong> las pruebas de regresión confirman que el JS compilado repite los testigos formales (la prueba matemática es Dafny + UPPAAL).</li>
                             </ul>
                         </div>
                     </div>
