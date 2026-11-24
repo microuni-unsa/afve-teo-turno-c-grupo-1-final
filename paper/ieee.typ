@@ -18,6 +18,8 @@
   // How figures are referred to from within the text.
   // Use "Figure" instead of "Fig." for computer-related publications.
   figure-supplement: [Fig.],
+  // Optional appendix content rendered after the bibliography.
+  appendix: none,
   // The paper's content.
   body,
 ) = {
@@ -240,4 +242,9 @@
 
   // Display bibliography.
   bibliography
+
+  // Display optional appendix after the bibliography.
+  if appendix != none {
+    appendix
+  }
 }

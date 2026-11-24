@@ -1,11 +1,79 @@
-En organizaciones críticas como hospitales, universidades y entidades públicas, el control de acceso decide quién puede consultar o modificar información sensible y bajo qué contexto. Frente a esquemas rígidos basados solo en roles, el control de acceso basado en atributos, o ABAC (estandarizado en NIST SP 800-162 y NIST SP 800-192), evalúa atributos de cuatro familias: sujeto, recurso, acción y entorno. Por ejemplo, una regla clínica autoriza a un médico con acreditación suficiente a leer historias clínicas de sensibilidad moderada, expresando condiciones como `subject.role == medic && subject.clearance >= 4 && resource.sensitivity <= 3 && action.name == read`.
+# Guion de Presentación — Feria de Proyectos UNSA 2026
 
-El problema surge cuando estas directivas cambian a diario por rotaciones de guardia, convenios o emergencias y se editan manualmente sin verificación formal. Veamos tres fallas reales frecuentes: primero, una regla que permite acceso en emergencia (`environment.emergency == true`) choca con una restricción nocturna que deniega operaciones desde las dieciocho horas (`environment.hour >= 18`); segundo, un ajuste erróneo de umbrales (`clearance > 5 && clearance < 2`) crea una regla muerta que jamás se activa; y tercero, agregar una regla específica para cardiología bajo una regla general de médicos la vuelve sombreada y redundante. Mi nombre es Mariel Jara, y en nuestro esquema clínico de evaluación existen sesenta y cuatro mil ochocientas solicitudes posibles, por lo que las pruebas por muestreo dejan anomalías ocultas hasta producción. Por ello formalizamos cuatro propiedades de coherencia: consistencia P1 (sin choques entre permiso y denegación), satisfacibilidad P2 (sin reglas muertas), no sombreado P3 (cada regla decide al menos un caso en solitario) y validez de esquema P4, unificadas en el invariante `Coherent(R)`.
+- **Duración máxima:** 7 minutos (~420 s)
+- **Equipo:** 4 integrantes
+- **Presentación:** 14 láminas (`feria-proyectos/slides/presentacion.html`)
 
-Para resolver este problema de raíz bajo el paradigma de corrección por construcción, nuestro proyecto persigue un objetivo claro: diseñar y verificar formalmente en Dafny un verificador ABAC con preservación inductiva de coherencia, validado exhaustivamente en UPPAAL y compilado directamente a JavaScript sin invocar solucionadores SMT en producción. Mi nombre es Luis Sequeiros, y nuestro alcance cubre las cuatro familias NIST con conectivos booleanos y comparaciones contra literales, operaciones guardadas de adición, actualización y baja, adición atómica por lotes y evaluación lineal determinista. Al acotar el lenguaje a dominios discretos cerrados —con topes configurables `TooLarge` que detallamos en el análisis de validez—, garantizamos decidibilidad completa frente a trabajos previos: a diferencia de analizadores sobre XACML o herramientas en la nube como AWS Zelkova que dependen de motores Z3 en ejecución, o lenguajes como Cedar sin guardas inductivas de conjunto, nuestro decisor compila directamente desde pruebas formales. Metodológicamente aplicamos cinco fases usando Dafny 4.11, Z3, cvc5 y UPPAAL 5.0 bajo estándares NIST y XACML, separando en la arquitectura los cinco módulos operacionales compilados de `BoundedCheck` (exclusivo de verificación) y rodeándolos de una frontera mínima de análisis que jamás reimplementa decisiones lógicas.
+---
 
-En tiempo de decisión, la función `CheckCoherent` encadena las fases de P1 a P4 en orden determinista y se detiene al hallar el primer testigo mínimo. Mi nombre es Yenaro Noa, y la certeza matemática del verificador descansa en ciento catorce obligaciones verificadas sin errores a lo largo de cincuenta y nueve lemas en Dafny: `EmptyCoherent` establece la base vacía; `AddPreserves`, `UpdatePreserves` y `RemovePreservesCoherent` prueban inductivamente que ninguna mutación aceptada rompe la coherencia; `EvaluateAgreesOnCoherent` demuestra que el estado de conflicto es inalcanzable; `WitnessSoundness` y `WitnessCompleteness` certifican la autenticidad de cada testigo; y `BoundedCheck` comprueba exhaustivamente doscientos cincuenta y nueve conjuntos finitos.
+## Segmento 1 — Mariel Alisson Jara Mamani (Slides 1–3)
 
-Complementamos estas pruebas deductivas con model checking en UPPAAL 5.0 para validar la dinámica del protocolo `Admin` sobre una instancia fija y concreta: dieciséis solicitudes y un repertorio de diez reglas (`r0` a `r9`, hasta tres activas) que codifican tanto la política clínica limpia como violaciones de P1 a P4, utilizando estados comprometidos `TryingAddE`, `TryingAddC` y `TryingUpdC` para garantizar transiciones atómicas sin relojes ni canales externos. Explorando veintitrés nodos estables, cuatrocientas setenta evaluaciones y quinientas veintinueve transiciones, las nueve consultas TCTL fueron satisfechas: en seguridad, `A[] coherent()` descarta mutaciones parciales, `A[] !deadlock` garantiza ausencia de bloqueos y `A[] (lastOp != 2 || coherent())` aísla la preservación en bajas; en alcanzabilidad, `E<> cleanAccepted` evita vacuidad aceptando `{r0, r1, r2}`, `E<> rejP1`, `rejP2`, `rejP3` y `rejUnknownP4` prueban que toda ruta diagnóstica es alcanzable, y `E[] coherent()` confirma evolución continua siempre coherente.
+### Slide 1 — Portada
 
-Para ver cómo opera el sistema sobre casos reales, recorramos paso a paso nuestras evaluaciones guiadas en `schema-v1`. Mi nombre es Christian Mestas, y comenzamos con `emergency-override.json`: partiendo de un conjunto vacío coherente, `TryAdd` acepta la regla uno (`Permit where environment.emergency == true`). Al intentar añadir la regla dos (`Deny where environment.hour >= 18`), `CheckP1From` barre `AllRequests` hasta hallar la primera solicitud conflictiva con `hour = 18` y `emergency = true`, deteniéndose con `Rejected(P1, [1, 2])` mientras `AddPreserves` mantiene la política anterior inalterada. Al remediarla en `clean.json` acotando acciones y sensibilidad, las reglas de lectura médica y emergencia solo coinciden en efecto `Permit` (cumpliendo P1) y la regla de emergencia decide en solitario lecturas de enfermería (cumpliendo P3), permitiendo que `Evaluate` conceda acceso por la regla tres sin riesgo de conflicto. De forma análoga, trazamos paso a paso el rechazo P2 en `unsatisfiable.json` al agotar el rango de acreditación `[1..5]`, el rechazo P3 en `shadowed.json` por falta de testigo solitario frente a la regla general médica, y el rechazo P4 al actualizar un identificador inexistente. Las pruebas de regresión sobre la frontera confirman únicamente que el código JavaScript compilado reproduce estos testigos formales, pues la autoridad de corrección reside plenamente en Dafny y UPPAAL. Así, desde la Universidad Nacional de San Agustín, entregamos un verificador formalmente demostrado y listo para sistemas críticos.
+Buenos días, miembros del jurado. Soy Mariel Jara y, junto con Luis Sequeiros, Yenaro Noa y Christian Mestas, asesorados por la profesora Maribel Molina Barriga de Ingeniería de Sistemas de la Universidad Nacional de San Agustín, presentamos: Verificación formal de coherencia en políticas ABAC.
+
+### Slide 2 — ¿Qué es ABAC y por qué falla manualmente?
+
+En hospitales, universidades y entidades públicas, el control de acceso decide quién consulta o modifica información sensible. El modelo basado en atributos, o ABAC (estandarizado en NIST 800-162 y 800-192), evalúa 4 aspectos por solicitud: sujeto, recurso, acción y entorno. Por ejemplo, autoriza a un médico de nivel 4 o más a leer historias de sensibilidad 3 o menor, y bloquea la escritura sensible para niveles 2 o menores.
+
+El problema aparece al editar reglas a mano cada día y surgen 3 fallas silenciosas: una regla de emergencia choca con un bloqueo nocturno desde las 18:00; exigir nivel mayor a 5 y menor a 2 en una escala de 1 a 5 crea una regla muerta; y añadir cardiología bajo una regla general médica deja la nueva regla tapada. Con 64 800 combinaciones posibles, probar casos sueltos oculta conflictos hasta producción.
+
+### Slide 3 — Propiedades de coherencia (P1–P4)
+
+Por eso exigimos 4 propiedades conjuntas tras cada cambio: consistencia, para que ninguna solicitud active permiso y denegación a la vez; satisfacibilidad, para que toda regla sirva al menos en un caso válido; no sombreado, para que cada regla decida al menos una solicitud por sí sola; y validez de esquema, para aceptar solo atributos declarados, operadores válidos y valores en rango.
+
+---
+
+## Segmento 2 — Luis Gustavo Sequeiros Condori (Slides 4–7)
+
+### Slide 4 — Objetivos y alcance del proyecto
+
+Gracias, Mariel. Soy Luis Sequeiros. Nuestro objetivo es construir un verificador ABAC demostrado en Dafny y validado en UPPAAL que opere sin motores lógicos externos en producción. Cubrimos listas cerradas, booleanos y enteros acotados en los 4 aspectos del estándar NIST, con operaciones seguras para agregar, editar, borrar, cargar lotes y evaluar solicitudes, fijando límites máximos de tamaño para garantizar respuestas exactas y predecibles.
+
+### Slide 5 — Comparativa con trabajo previo
+
+Frente a trabajos previos —como analizadores sobre XACML, Mohawk o AWS Zelkova, que requieren motores externos activos en cada revisión, o Cedar, que no verifica automáticamente la coherencia global tras cada cambio—, aplicamos corrección por construcción: demostramos la seguridad antes de compilar, ejecutamos sin motores externos y entregamos el ejemplo exacto cuando una regla falla.
+
+### Slide 6 — Metodología CbC y herramientas formales
+
+Metodológicamente seguimos 5 fases de corrección por construcción: modelar reglas y solicitudes, demostrar las 4 propiedades y la preservación ante cambios, explorar rutas sobre un caso fijo, compilar el núcleo a JavaScript y trazar casos guiados. Usamos Dafny 4.11 con Z3 y cvc5 solo en diseño, UPPAAL 5.0, estándares NIST y XACML 3.0, y TypeScript.
+
+### Slide 7 — Arquitectura y frontera de ejecución
+
+En la arquitectura separamos estrictamente el núcleo matemático de la capa externa. Los 5 módulos operacionales de Dafny compilan a JavaScript, dejando el chequeo finito solo para pruebas. Afuera, una capa mínima en TypeScript valida formatos, traduce reglas y redacta mensajes claros de error, sin tomar jamás decisiones lógicas propias.
+
+---
+
+## Segmento 3 — Yenaro Joel Noa Camino (Slides 8–11)
+
+### Slide 8 — Fases de verificación (P1 a P4)
+
+Gracias, Luis. Soy Yenaro Noa. Al verificar una política, el sistema revisa las 4 propiedades en orden fijo: consistencia, satisfacibilidad, no sombreado y validez de esquema. Apenas halla un fallo en cualquier etapa, se detiene de inmediato y devuelve el primer caso concreto que lo demuestra.
+
+### Slide 9 — ¿Cómo garantiza Dafny la corrección?
+
+Dafny respalda esto con 114 objetivos demostrados sin errores en 59 teoremas, probando 5 garantías prácticas: toda regla agregada o editada que entra mantiene la coherencia desde una política vacía válida; borrar reglas siempre es seguro; al evaluar solicitudes jamás chocan permiso y denegación; todo rechazo muestra un fallo real sin omitir errores; y un chequeo exhaustivo verifica las 259 combinaciones finitas de hasta 3 reglas.
+
+### Slide 10 — UPPAAL: modelo y caso fijo
+
+Complementamos Dafny con UPPAAL 5.0 para recorrer todas las rutas del flujo administrativo sobre un caso clínico fijo: 16 solicitudes —combinando 2 roles, 2 acciones, horarios de 08:00 y 18:00, y 2 estados de emergencia— frente a 10 reglas, hasta 3 activas, con casos limpios y fallos. Evaluando cambios de forma atómica antes de guardar, sin temporizadores externos, exploró 23 estados estables, 470 evaluaciones y 529 transiciones sin bloqueos.
+
+### Slide 11 — UPPAAL: las 9 consultas TCTL
+
+Comprobamos 9 consultas temporales en UPPAAL, todas cumplidas. En seguridad, 3 de 3 probaron que la política siempre sigue válida, sin bloqueos ni daños al borrar reglas, tardando 16.7 segundos en coherencia y 28.7 en ausencia de bloqueos. En alcance, 6 de 6 confirmaron que la política limpia de 3 reglas se aprueba, que todo rechazo es alcanzable y que el sistema evoluciona continuamente.
+
+---
+
+## Segmento 4 — Christian Raul Mestas Zegarra (Slides 12–14)
+
+### Slide 12 — Caso guiado I: choque y solución
+
+Gracias, Yenaro. Soy Christian Mestas, y veamos 2 casos clínicos paso a paso. Primero, partiendo de una política vacía, aceptamos la regla #1 que permite acceso en emergencia. Al intentar añadir la regla #2 que deniega desde las 18:00, el verificador halla un choque exacto —un médico leyendo a las 18:00 en emergencia— y la rechaza dejando intacta la #1. Luego corregimos el diseño en 3 reglas: #1 permite leer a médicos, #2 bloquea escritura sensible con nivel 2 o menor, y #3 permite leer en emergencia. Así, una enfermera leyendo a las 03:00 en emergencia recibe permiso por la #3.
+
+### Slide 13 — Casos guiados II: fallos y garantías
+
+También bloqueamos otros 3 fallos reales antes de guardar: una regla muerta con nivel mayor a 5 y menor a 2, imposible en las 64 800 solicitudes de 1 a 5; una regla sombreada para cardiología bajo la general de médicos; y editar una regla #99 inexistente o con datos fuera de esquema. Así, Dafny garantiza la coherencia matemática, UPPAAL valida el flujo administrativo, producción evalúa directo sin motores externos, y las pruebas de repetición confirman que la interfaz reproduce fielmente los mismos ejemplos de fallo.
+
+### Slide 14 — Cierre: Gracias…
+
+Cerramos con la frase de Anthony Hall y Roderick Chapman: debemos construir software correcto por construcción, y no software incierto hasta después de entregarlo. Desde la UNSA entregamos un verificador demostrado, abierto en nuestro repositorio y listo para sistemas críticos. Muchas gracias.
