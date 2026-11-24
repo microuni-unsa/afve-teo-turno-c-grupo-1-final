@@ -45,10 +45,10 @@ Este documento sintetiza los requerimientos normativos de las bases del concurso
 7. **Arquitectura y frontera de ejecución** — 5 módulos compilados vs `BoundedCheck` solo en verificación, frontera delgada TS sin lógica propia (Slide 7)
 8. **Fases de verificación (`P1 → P2 → P3 → P4`)** (Slide 8)
 9. **¿Cómo garantiza Dafny la corrección?** — `TryAdd` / `AddPreserves` anotado, 5 garantías prácticas detrás de 114 metas y `BoundedCheck` (259 conjuntos) (Slide 9)
-10. **Model checking en UPPAAL: modelo y caso fijo** — `Admin`, 16 solicitudes, repertorio `r0..r9`, estados comprometidos, 23 nodos / 529 transiciones (Slide 10)
-11. **Model checking en UPPAAL: las 9 consultas TCTL** — Significado y justificación de cada fórmula (Slide 11)
-12. **Evaluación guiada (I): conflicto en emergencia (`emergency-override.json`) y corrección (`clean.json`)** (Slide 12)
-13. **Evaluación guiada (II): trazas P2–P4 (`unsatisfiable`, `shadowed`, P4) y síntesis de garantías formales** (Slide 13)
+10. **UPPAAL: modelo y caso fijo** — `Admin`, 16 solicitudes, repertorio `r0..r9`, pasos atómicos, 23 estados / 529 transiciones (Slide 10)
+11. **UPPAAL: las 9 consultas TCTL** — Leyenda simple + Seguridad (3) y Alcance (6) con resultados (Slide 11)
+12. **Caso guiado I: choque y solución (`emergency-override.json` → `clean.json`)** (Slide 12)
+13. **Casos guiados II: fallos y garantías (P2–P4 + síntesis del sistema)** (Slide 13)
 14. **Cierre `Gracias…`** — Cita de Hall & Chapman y repositorio (Slide 14)
 
 ---

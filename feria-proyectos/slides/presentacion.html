@@ -568,6 +568,130 @@
             color: var(--text-primary);
         }
 
+        /* Tarjetas guiadas por pasos para casos concretos (Slides 12 y 13) */
+        .col-banner {
+            background: var(--theme-navy);
+            color: #ffffff;
+            border-left: 7px solid var(--accent-orange);
+            padding: 11px 18px;
+            font-size: 29px;
+            font-weight: 700;
+            line-height: 1.18;
+        }
+
+        .col-banner.alt {
+            border-left-color: var(--theme-blue);
+        }
+
+        .step-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .step-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid var(--theme-navy);
+            padding: 13px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 25px;
+            line-height: 1.24;
+            color: #000000;
+        }
+
+        .step-card.warn {
+            border-left-color: var(--accent-orange);
+        }
+
+        .step-card.danger {
+            background: #fef2f2;
+            border-color: #fecaca;
+            border-left-color: #b91c1c;
+        }
+
+        .step-card.success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            border-left-color: #15803d;
+        }
+
+        .step-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 27px;
+            font-weight: 700;
+            color: var(--theme-navy);
+        }
+
+        .badge-ok,
+        .badge-err,
+        .badge-tag {
+            padding: 3px 11px;
+            font-size: 22px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-ok {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .badge-err {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .badge-tag {
+            background: #e2e8f0;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+
+        .req-strip {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 9px 12px;
+            font-size: 22px;
+        }
+
+        .req-chip {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 2px 9px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .rule-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            font-size: 24px;
+            line-height: 1.22;
+        }
+
+        .rule-note {
+            font-size: 21px;
+            color: #475569;
+        }
+
         /* =====================================================================
            PIE DE PÁGINA OFICIAL DE LA PLANTILLA (slide2.xml .. slide10.xml)
            ===================================================================== */
@@ -1056,22 +1180,26 @@
             <section class="slide">
                 <h1 class="tpl-title">¿Cómo garantiza Dafny la corrección?</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 0.96fr 1.04fr; gap: 38px; align-items: start;">
-                        <div class="code-panel" style="font-size: 25px; line-height: 1.18;">
+                    <div class="two-col" style="grid-template-columns: 1.02fr 0.98fr; gap: 36px; align-items: start;">
+                        <div class="code-panel" style="font-size: 23px; line-height: 1.18; padding: 14px 16px;">
                             <div class="code-panel-title" style="font-size: 30px;">Transition.dfy — Guarda y demostración</div>
 <span class="kw">function</span> <span class="fn">TryAdd</span>(R: Ruleset, r: Rule, schema: Schema): AddResult {
   <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
-  <span class="kw">if</span> w.NoWitness? <span class="kw">then</span> Accepted(R + [r]) <span class="cm">// 1. Solo entra si pasa P1..P4</span>
+  <span class="cm">// 1. Entra solo si P1..P4 no hallan testigos</span>
+  <span class="kw">if</span> w.NoWitness? <span class="kw">then</span> Accepted(R + [r])
   <span class="kw">else</span> Rejected(w.wit)
 }
 
 <span class="kw">lemma</span> <span class="fn">AddPreserves</span>(R: Ruleset, r: Rule, schema: Schema)
   <span class="kw">ensures match</span> TryAdd(R, r, schema)
-    <span class="kw">case</span> Accepted(rs) =&gt; Coherent(rs, schema) <span class="cm">// 2. Garantía probada</span>
+    <span class="cm">// 2. Garantía: lo aceptado es coherente</span>
+    <span class="kw">case</span> Accepted(rs) =&gt; Coherent(rs, schema)
     <span class="kw">case</span> Rejected(_) =&gt; <span class="kw">true</span>
 {
   <span class="kw">var</span> w := CheckCoherent(R + [r], schema);
-  <span class="kw">if</span> w == NoWitness { CheckCoherentSound(R + [r], schema); }
+  <span class="kw">if</span> w == NoWitness {
+    CheckCoherentSound(R + [r], schema);
+  }
 }</div>
                         <div class="col-block" style="gap: 12px;">
                             <h2 class="col-heading" style="font-size: 38px;">Lo que prueban las 114 metas (0 errores)</h2>
@@ -1095,7 +1223,7 @@
                  SLIDE 10: MODEL CHECKING EN UPPAAL: MODELO Y CASO FIJO
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Model checking en UPPAAL: modelo y caso fijo</h1>
+                <h1 class="tpl-title">UPPAAL: modelo y caso fijo</h1>
                 <div class="tpl-body">
                     <div class="media-split-wide-img">
                         <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center;">
@@ -1127,7 +1255,7 @@
                  SLIDE 11: MODEL CHECKING EN UPPAAL: 9 CONSULTAS TCTL
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Model checking en UPPAAL: 9 consultas TCTL</h1>
+                <h1 class="tpl-title">UPPAAL: las 9 consultas TCTL</h1>
                 <div class="tpl-body">
                     <div class="legend-bar">
                         <span><strong><code>A[]</code> ("Siempre en todo camino"):</strong> seguridad — nada malo ocurre.</span>
@@ -1168,25 +1296,94 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 12: EVALUACIÓN GUIADA (I): CONFLICTO Y CORRECCIÓN
+                 SLIDE 12: CASO GUIADO I: CHOQUE Y SOLUCIÓN
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Evaluación guiada (I): conflicto y corrección</h1>
+                <h1 class="tpl-title">Caso guiado I: choque y solución</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="gap: 36px;">
-                        <div class="trace-panel">
-                            <div class="code-panel-title" style="font-size: 31px;">Caso 1: Choque en urgencias (<code>emergency-override.json</code>)</div>
-                            <div class="trace-step"><strong>1. Inicio (R₀ = []):</strong> política vacía, coherente por construcción.</div>
-                            <div class="trace-step"><strong>2. Entra r₁:</strong> <code>Permit where environment.emergency == true</code>.<br>Supera P1–P4 (dispara en índice 0) → <span class="st-ok">Aceptada (#1)</span>.</div>
-                            <div class="trace-step"><strong>3. Se intenta r₂:</strong> <code>Deny where environment.hour &gt;= 18</code>.<br><code>CheckP1From</code> recorre <code>AllRequests</code> y halla el primer choque a las <strong>18:00 en emergencia</strong>: <code>(medic, cardio, clr=1, record, sens=1, read, 18h, emerg=true)</code>.</div>
-                            <div class="trace-step"><strong>4. Resultado:</strong> <span class="st-err">Rechazada (P1: #1 vs #2)</span> — <strong>R₁ queda intacto</strong>.</div>
+                    <div class="two-col" style="gap: 34px; align-items: start;">
+                        <div class="step-stack">
+                            <div class="col-banner">Caso 1 · Cuando dos reglas chocan en urgencias</div>
+                            <div class="step-card" style="padding: 11px 18px; gap: 5px;">
+                                <div class="step-card-head">
+                                    <span>Paso 1 · Base inicial vacía</span>
+                                    <span class="badge-ok">✓ Política [ ]</span>
+                                </div>
+                                <div>Sin reglas activas no hay conflictos; el sistema parte desde un estado coherente válido.</div>
+                            </div>
+                            <div class="step-card" style="padding: 11px 18px; gap: 5px;">
+                                <div class="step-card-head">
+                                    <span>Paso 2 · Entra Regla #1 (<code>Permit</code>)</span>
+                                    <span class="badge-ok">✓ Aceptada [#1]</span>
+                                </div>
+                                <div><em>«Permitir acceso si hay emergencia activa»</em> — no choca con nadie y cubre casos reales.</div>
+                            </div>
+                            <div class="step-card warn" style="padding: 12px 18px; gap: 8px;">
+                                <div class="step-card-head">
+                                    <span>Paso 3 · Intento de Regla #2 (<code>Deny</code>)</span>
+                                    <span class="badge-tag">Analizando…</span>
+                                </div>
+                                <div><em>«Denegar todo acceso desde las 18:00»</em> — al buscar combinaciones, el verificador halla un testigo donde ambas disparan:</div>
+                                <div class="req-strip">
+                                    <span>Testigo:</span>
+                                    <span class="req-chip">Rol: médico</span>
+                                    <span class="req-chip">Acción: leer</span>
+                                    <span class="req-chip">Hora: 18:00</span>
+                                    <span class="req-chip">Emergencia: sí</span>
+                                </div>
+                                <div><span class="st-ok">#1 dice PERMITIR</span> (emergencia) &nbsp;↔&nbsp; <span class="st-err">#2 dice DENEGAR</span> (son las 18:00)</div>
+                            </div>
+                            <div class="step-card danger" style="padding: 11px 18px; gap: 5px;">
+                                <div class="step-card-head">
+                                    <span>Paso 4 · Contradicción P1 (#1 vs #2)</span>
+                                    <span class="badge-err">✗ Rechazada</span>
+                                </div>
+                                <div>La Regla #2 no entra; la política previa con <code>[#1]</code> sigue intacta sin ambigüedades.</div>
+                            </div>
                         </div>
-                        <div class="trace-panel navy">
-                            <div class="code-panel-title" style="font-size: 31px;">Caso 2: Política corregida (<code>clean.json</code>) y consulta</div>
-                            <div class="trace-step"><strong>1. r₁':</strong> <code>Permit where subject.role == medic &amp;&amp; action.name == read</code> → <span class="st-ok">Aceptada (#1)</span>.</div>
-                            <div class="trace-step"><strong>2. r₂':</strong> <code>Deny where action.name == write &amp;&amp; resource.sensitivity &gt;= 4 &amp;&amp; subject.clearance &lt;= 2</code> → acción distinta → <span class="st-ok">Aceptada (#2)</span>.</div>
-                            <div class="trace-step"><strong>3. r₃':</strong> <code>Permit where environment.emergency == true &amp;&amp; action.name == read</code> → ambas <code>Permit</code> (P1 OK) y decide urgencias de <code>nurse</code>/<code>admin</code> (P3 OK) → <span class="st-ok">Aceptada (#3)</span>.</div>
-                            <div class="trace-step"><strong>4. Al consultar:</strong> enfermera leyendo en emergencia (03:00) → <span class="st-ok">Permit (#3)</span>.</div>
+
+                        <div class="step-stack">
+                            <div class="col-banner alt">Caso 2 · Solución: separar lectura y escritura</div>
+                            <div class="step-card" style="padding: 14px 18px; gap: 10px;">
+                                <div class="step-card-head">
+                                    <span>Política coherente de 3 reglas</span>
+                                    <span class="badge-ok">✓ [#1, #2, #3]</span>
+                                </div>
+                                <div class="rule-row">
+                                    <div><strong>#1 <code>Permit</code>:</strong> Médicos pueden <strong>leer</strong> cualquier historial.</div>
+                                    <span class="badge-ok">✓</span>
+                                </div>
+                                <div class="rule-row">
+                                    <div>
+                                        <strong>#2 <code>Deny</code>:</strong> Bloquear <strong>escritura</strong> muy sensible si nivel ≤ 2.<br>
+                                        <span class="rule-note">Solo aplica al escribir: jamás compite con #1 (lectura).</span>
+                                    </div>
+                                    <span class="badge-ok">✓</span>
+                                </div>
+                                <div class="rule-row">
+                                    <div>
+                                        <strong>#3 <code>Permit</code>:</strong> En <strong>emergencia</strong>, permitir <strong>lectura</strong>.<br>
+                                        <span class="rule-note">Aporta un caso nuevo: cubre enfermería en turnos de urgencia.</span>
+                                    </div>
+                                    <span class="badge-ok">✓</span>
+                                </div>
+                            </div>
+                            <div class="step-card success" style="padding: 14px 18px; gap: 9px;">
+                                <div class="step-card-head">
+                                    <span>Evaluación en vivo · Solicitud real</span>
+                                    <span class="badge-ok">⇒ PERMITIR</span>
+                                </div>
+                                <div class="req-strip">
+                                    <span class="req-chip">Enfermera</span>
+                                    <span class="req-chip">Urgencias</span>
+                                    <span class="req-chip">Acción: leer</span>
+                                    <span class="req-chip">03:00</span>
+                                    <span class="req-chip">Emergencia: sí</span>
+                                </div>
+                                <div>• <strong>Regla #1:</strong> exige ser médico → <em>no aplica</em></div>
+                                <div>• <strong>Regla #2:</strong> exige escribir → <em>no aplica</em></div>
+                                <div>• <strong>Regla #3:</strong> emergencia + lectura → <strong class="st-ok">se activa (#3) ⇒ PERMITIR</strong></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1197,36 +1394,70 @@
             </section>
 
             <!-- =========================================================
-                 SLIDE 13: EVALUACIÓN GUIADA (II): P2–P4 Y SÍNTESIS FORMAL
+                 SLIDE 13: CASOS GUIADOS II: FALLOS Y GARANTÍAS
                  ========================================================= -->
             <section class="slide">
-                <h1 class="tpl-title">Evaluación guiada (II): P2–P4 y síntesis formal</h1>
+                <h1 class="tpl-title">Casos guiados II: fallos y garantías</h1>
                 <div class="tpl-body">
-                    <div class="two-col" style="grid-template-columns: 1.04fr 0.96fr; gap: 36px;">
-                        <div class="trace-panel">
-                            <div class="code-panel-title" style="font-size: 31px;">Otros fallos detectados paso a paso (P2, P3 y P4)</div>
-                            <div class="trace-step">
-                                <strong>• P2 — Regla muerta (<code>unsatisfiable.json</code>):</strong><br>
-                                <code>Permit where subject.clearance &gt; 5 &amp;&amp; subject.clearance &lt; 2</code>.<br>
-                                Rango <code>[1..5]</code> → 0 disparos en 64 800 solicitudes → <span class="st-err">Rechazada (P2)</span>.
+                    <div class="two-col" style="grid-template-columns: 1.04fr 0.96fr; gap: 34px; align-items: start;">
+                        <div class="step-stack">
+                            <div class="col-banner">Otros 3 fallos reales bloqueados antes de guardar</div>
+                            <div class="step-card warn" style="padding: 14px 18px; gap: 7px;">
+                                <div class="step-card-head">
+                                    <span>P2 · Regla imposible ("regla muerta")</span>
+                                    <span class="badge-err">✗ Rechazada</span>
+                                </div>
+                                <div><strong>Intento:</strong> <code>Permit</code> si <em>nivel &gt; 5 y nivel &lt; 2</em>.</div>
+                                <div><strong>Por qué falla:</strong> Los niveles válidos van de <code>1</code> a <code>5</code>; ninguna de las <strong>64 800</strong> solicitudes posibles la activa jamás. Impide guardar reglas inútiles que dan falsa seguridad.</div>
                             </div>
-                            <div class="trace-step">
-                                <strong>• P3 — Regla tapada (<code>shadowed.json</code>):</strong><br>
-                                Con <code>role == medic</code> activa, agregar <code>role == medic &amp;&amp; dept == cardio</code> nunca decide un caso propio → <span class="st-err">Rechazada (P3: #2 bajo #1)</span>.
+                            <div class="step-card warn" style="padding: 14px 18px; gap: 7px;">
+                                <div class="step-card-head">
+                                    <span>P3 · Regla redundante (sombreada)</span>
+                                    <span class="badge-err">✗ Rechazada</span>
+                                </div>
+                                <div><strong>Intento:</strong> Ya existe <em>«Todo médico entra»</em> y se añade <em>«Médico de cardiología entra»</em>.</div>
+                                <div><strong>Por qué falla:</strong> Todo cardiólogo ya pasa por la regla general #1; la nueva regla <strong>nunca decide un caso por sí sola</strong> y confunde auditorías futuras.</div>
                             </div>
-                            <div class="trace-step">
-                                <strong>• P4 — ID ausente o fuera de esquema:</strong><br>
-                                <code>TryUpdate(R, 99, r)</code> rechaza directo con <span class="st-err">P4</span> sin alterar <code>R</code>; el parser frena valores fuera de dominio en la entrada.
+                            <div class="step-card warn" style="padding: 14px 18px; gap: 7px;">
+                                <div class="step-card-head">
+                                    <span>P4 · ID inexistente o dato inválido</span>
+                                    <span class="badge-err">✗ Rechazada</span>
+                                </div>
+                                <div><strong>Intento:</strong> Editar la regla <code>#99</code> (no existe) o usar atributos fuera del esquema.</div>
+                                <div><strong>Por qué falla:</strong> La guarda valida identificador y rango antes de tocar la política activa, evitando cambios parciales o corruptos.</div>
                             </div>
                         </div>
-                        <div class="col-block" style="gap: 14px;">
-                            <h2 class="col-heading" style="font-size: 38px;">Resumen de garantías formales</h2>
-                            <ul class="tpl-list lvl4" style="gap: 14px;">
-                                <li style="font-size: 30px; line-height: 1.24;"><strong>Certeza deductiva (Dafny):</strong> <code>114</code> metas probadas (<code>0</code> errores) y <code>259</code> escenarios en <code>BoundedCheck</code> garantizan coherencia en todo cambio.</li>
-                                <li style="font-size: 30px; line-height: 1.24;"><strong>Certeza de protocolo (UPPAAL):</strong> <code>23</code> estados estables y <code>529</code> transiciones sin bloqueos (<code>9/9</code> consultas TCTL).</li>
-                                <li style="font-size: 30px; line-height: 1.24;"><strong>Costo predecible:</strong> verificación completa sobre <code>64 800</code> solicitudes (<code>schema-v1</code>) y evaluación lineal <code>O(|R|)</code> sin SMT en producción.</li>
-                                <li style="font-size: 30px; line-height: 1.24;"><strong>Frontera por replay:</strong> las pruebas de regresión confirman que el JS compilado repite los testigos formales (la prueba matemática es Dafny + UPPAAL).</li>
-                            </ul>
+
+                        <div class="step-stack" style="gap: 14px;">
+                            <div class="col-banner alt">¿Cómo se complementan las capas del sistema?</div>
+                            <div class="step-card" style="padding: 13px 18px; gap: 6px;">
+                                <div class="step-card-head">
+                                    <span>1. Dafny · Garantía matemática universal</span>
+                                    <span class="badge-tag">Diseño</span>
+                                </div>
+                                <div>Demuestra que toda regla o edición aceptada mantiene P1–P4 válidas para cualquier política futura posible.</div>
+                            </div>
+                            <div class="step-card" style="padding: 13px 18px; gap: 6px;">
+                                <div class="step-card-head">
+                                    <span>2. UPPAAL · Seguridad del flujo administrativo</span>
+                                    <span class="badge-tag">Modelo</span>
+                                </div>
+                                <div>Explora todas las rutas posibles de un caso clínico fijo para asegurar que el ciclo nunca se atasca ni guarda estados inválidos.</div>
+                            </div>
+                            <div class="step-card success" style="padding: 13px 18px; gap: 6px;">
+                                <div class="step-card-head">
+                                    <span>3. Producción · Respuesta directa en línea</span>
+                                    <span class="badge-ok">Runtime</span>
+                                </div>
+                                <div>Cada petición de usuario se evalúa recorriendo solo la política ya validada, sin depender de un verificador externo.</div>
+                            </div>
+                            <div class="step-card" style="padding: 13px 18px; gap: 6px;">
+                                <div class="step-card-head">
+                                    <span>4. Pruebas de replay · Frontera JSON fiel</span>
+                                    <span class="badge-tag">Frontera</span>
+                                </div>
+                                <div>Confirman que la interfaz traducida reproduce los mismos testigos; la certeza formal proviene de Dafny y UPPAAL.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
